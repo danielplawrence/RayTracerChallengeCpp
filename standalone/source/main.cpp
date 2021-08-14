@@ -7,24 +7,11 @@
 #include <unordered_map>
 
 auto main(int argc, char** argv) -> int {
-  const std::unordered_map<std::string, raytracerchallenge::LanguageCode> languages{
-      {"en", raytracerchallenge::LanguageCode::EN},
-      {"de", raytracerchallenge::LanguageCode::DE},
-      {"es", raytracerchallenge::LanguageCode::ES},
-      {"fr", raytracerchallenge::LanguageCode::FR},
-  };
-
-  cxxopts::Options options(*argv, "A program to welcome the world!");
-
-  std::string language;
-  std::string name;
-
+  cxxopts::Options options(*argv, "Welcome to RayTracerChallenge");
   // clang-format off
   options.add_options()
     ("h,help", "Show help")
     ("v,version", "Print the current version number")
-    ("n,name", "Name to greet", cxxopts::value(name)->default_value("World"))
-    ("l,lang", "Language code to use", cxxopts::value(language)->default_value("en"))
   ;
   // clang-format on
 
@@ -39,15 +26,6 @@ auto main(int argc, char** argv) -> int {
     std::cout << "RayTracerChallenge, version " << RAYTRACERCHALLENGE_VERSION << std::endl;
     return 0;
   }
-
-  auto langIt = languages.find(language);
-  if (langIt == languages.end()) {
-    std::cerr << "unknown language code: " << language << std::endl;
-    return 1;
-  }
-
-  raytracerchallenge::RayTracerChallenge raytracerchallenge(name);
-  std::cout << raytracerchallenge.greet(langIt->second) << std::endl;
 
   return 0;
 }

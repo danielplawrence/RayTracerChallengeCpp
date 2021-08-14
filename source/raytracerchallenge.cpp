@@ -3,18 +3,21 @@
 
 using namespace raytracerchallenge;
 
-RayTracerChallenge::RayTracerChallenge(std::string _name) : name(std::move(_name)) {}
-
-std::string RayTracerChallenge::greet(LanguageCode lang) const {
-  switch (lang) {
-    default:
-    case LanguageCode::EN:
-      return fmt::format("Hello, {}!", name);
-    case LanguageCode::DE:
-      return fmt::format("Hallo {}!", name);
-    case LanguageCode::ES:
-      return fmt::format("¡Hola {}!", name);
-    case LanguageCode::FR:
-      return fmt::format("Bonjour {}!", name);
-  }
+RayTracerChallenge::Tuple::Tuple(float x, float y, float z, float w) {
+  this->x = x;
+  this->y = y;
+  this->z = z;
+  this->w = w;
+};
+bool RayTracerChallenge::Tuple::isVector() const { return w == 0; }
+bool RayTracerChallenge::Tuple::operator==(const RayTracerChallenge::Tuple &t) const {
+  return floatEquals(t.x, this->x) && floatEquals(t.y, this->y) && floatEquals(t.z, this->z)
+         && floatEquals(t.w, this->w);
 }
+RayTracerChallenge::Tuple RayTracerChallenge::Tuple::point(float x, float y, float z) {
+  return {x, y, z, 1.0};
+}
+RayTracerChallenge::Tuple RayTracerChallenge::Tuple::vector(float x, float y, float z) {
+  return {x, y, z, 0.0};
+}
+bool RayTracerChallenge::Tuple::floatEquals(float x, float y) { return abs(x - y) < 0.00001; }
