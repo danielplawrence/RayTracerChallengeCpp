@@ -28,7 +28,9 @@ endif()
 
 file(GLOB sources CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
 add_executable(RayTracerChallengeTests ${sources})
-target_link_libraries(RayTracerChallengeTests doctest::doctest RayTracerChallenge::RayTracerChallenge)
+target_link_libraries(
+  RayTracerChallengeTests doctest::doctest RayTracerChallenge::RayTracerChallenge
+)
 set_target_properties(RayTracerChallengeTests PROPERTIES CXX_STANDARD 17)
 
 # enable compiler warnings
@@ -46,7 +48,8 @@ endif()
 enable_testing()
 
 # Note: doctest and similar testing frameworks can automatically configure CMake tests. For other
-# testing frameworks add the tests target instead: add_test(NAME rayTracerChallengeTests COMMAND RayTracerChallengeTests)
+# testing frameworks add the tests target instead: add_test(NAME rayTracerChallengeTests COMMAND
+# RayTracerChallengeTests)
 
 include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
 doctest_discover_tests(RayTracerChallengeTests)

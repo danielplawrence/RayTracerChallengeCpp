@@ -54,7 +54,7 @@ target_link_libraries(RayTracerChallenge PRIVATE fmt::fmt)
 
 target_include_directories(
   RayTracerChallenge PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-                 $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
+                            $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
 )
 
 # ---- Create an installable target ----

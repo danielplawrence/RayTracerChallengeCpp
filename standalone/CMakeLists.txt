@@ -24,6 +24,8 @@ file(GLOB sources CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
 
 add_executable(RayTracerChallengeStandalone ${sources})
 
-set_target_properties(RayTracerChallengeStandalone PROPERTIES CXX_STANDARD 17 OUTPUT_NAME "RayTracerChallenge")
+set_target_properties(
+  RayTracerChallengeStandalone PROPERTIES CXX_STANDARD 17 OUTPUT_NAME "RayTracerChallenge"
+)
 
 target_link_libraries(RayTracerChallengeStandalone RayTracerChallenge::RayTracerChallenge cxxopts)
