@@ -4,10 +4,9 @@
 
 namespace raytracerchallenge {
   /**
-   * @brief A class for saying hello in multiple languages
+   * @brief A 3D renderer
    */
   class RayTracerChallenge {
-    std::string name;
 
   public:
     /**
@@ -22,7 +21,7 @@ namespace raytracerchallenge {
       [[nodiscard]] bool isVector() const;
       [[nodiscard]] float magnitude() const;
       /**
-       * @brief create a new tuple
+       * @brief create a new Tuple
        * @param x position on the x axis
        * @param y position on the y axis
        * @param z position on the z axis
@@ -52,7 +51,7 @@ namespace raytracerchallenge {
       /**
        * @brief addition operator
        * @param t target for addition
-       * @return sum of the operannds
+       * @return sum of the operands
        */
       Tuple operator+(const Tuple &t) const;
       /**
@@ -73,25 +72,25 @@ namespace raytracerchallenge {
       Tuple operator*(float f) const;
       /**
        * @brief scalar division operator
-       * @param f
+       * @param f divisor
        * @return a new Tuple divided by f
        */
       Tuple operator/(float f) const;
       /**
-       * @brief normalize the tuple
-       * @return normalized tuple
+       * @brief normalize the Tuple
+       * @return normalized Tuple
        */
       [[nodiscard]] Tuple normalize() const;
       /**
-       * @brief the dot product of this tuple and another
-       * @param t tuple to compute dot product with
+       * @brief the dot product of this Tuple and another
+       * @param t Tuple to compute dot product with
        * @return scalar value representing the dot product of the two tuples
        */
       [[nodiscard]] float dot(const Tuple &t) const;
       /**
-       * @brief the cross product of this tuple and another
-       * @param t tuple to compute cross product with
-       * @return new tuple representing the cross product of this tuple and another
+       * @brief the cross product of this Tuple and another
+       * @param t Tuple to compute cross product with
+       * @return new Tuple representing the cross product of this tuple and another
        */
       [[nodiscard]] Tuple cross(const Tuple &t) const;
 
