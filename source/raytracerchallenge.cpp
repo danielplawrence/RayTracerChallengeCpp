@@ -8,10 +8,10 @@ RayTracerChallenge::Tuple::Tuple(float x, float y, float z, float w) {
   this->y = y;
   this->z = z;
   this->w = w;
-};
+}
 bool RayTracerChallenge::Tuple::isVector() const { return w == 0; }
 float RayTracerChallenge::Tuple::magnitude() const {
-  return sqrtf(pow(this->x, 2) + pow(this->y, 2) + pow(this->z, 2) + pow(this->w, 2));
+  return sqrtf(powf(this->x, 2) + powf(this->y, 2) + powf(this->z, 2) + powf(this->w, 2));
 }
 RayTracerChallenge::Tuple RayTracerChallenge::Tuple::normalize() const {
   return {this->x / this->magnitude(), this->y / this->magnitude(), this->z / this->magnitude(),
