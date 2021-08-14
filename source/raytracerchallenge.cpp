@@ -1,11 +1,11 @@
 #include <fmt/format.h>
-#include <greeter/greeter.h>
+#include <raytracerchallenge/raytracerchallenge.h>
 
-using namespace greeter;
+using namespace raytracerchallenge;
 
-Greeter::Greeter(std::string _name) : name(std::move(_name)) {}
+RayTracerChallenge::RayTracerChallenge(std::string _name) : name(std::move(_name)) {}
 
-std::string Greeter::greet(LanguageCode lang) const {
+std::string RayTracerChallenge::greet(LanguageCode lang) const {
   switch (lang) {
     default:
     case LanguageCode::EN:

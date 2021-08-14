@@ -2,3 +2,7 @@
 /.vscode
 /cpm_modules
 .DS_Store
+/cmake-build-debug
+test/cmake-build-debug
+.history
+.idea
