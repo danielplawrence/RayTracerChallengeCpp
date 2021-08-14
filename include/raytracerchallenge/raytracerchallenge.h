@@ -20,6 +20,7 @@ namespace raytracerchallenge {
       float z{};
       float w{};
       [[nodiscard]] bool isVector() const;
+      [[nodiscard]] float magnitude() const;
       /**
        * @brief create a new tuple
        * @param x position on the x axis
@@ -48,6 +49,51 @@ namespace raytracerchallenge {
        * @return true if the tuples have the same x, y and x values
        */
       bool operator==(const Tuple &t) const;
+      /**
+       * @brief addition operator
+       * @param t target for addition
+       * @return sum of the operannds
+       */
+      Tuple operator+(const Tuple &t);
+      /**
+       * @brief binary subtraction operator
+       * @param t target for subtraction
+       * @return difference of the operands
+       */
+      Tuple operator-(const Tuple &t);
+      /**
+       * @brief unary subtraction operator
+       * @return inverse of the operand
+       */
+      Tuple operator-();
+      /**
+       * @brief scalar multiplication operator
+       * @return a new Tuple multiplied by f
+       */
+      Tuple operator*(float f);
+      /**
+       * @brief scalar division operator
+       * @param f
+       * @return a new Tuple divided by f
+       */
+      Tuple operator/(float f);
+      /**
+       * @brief normalize the tuple
+       * @return normalized tuple
+       */
+      [[nodiscard]] Tuple normalize() const;
+      /**
+       * @brief the dot product of this tuple and another
+       * @param t tuple to compute dot product with
+       * @return scalar value representing the dot product of the two tuples
+       */
+      [[nodiscard]] float dot(const Tuple &t) const;
+      /**
+       * @brief the cross product of this tuple and another
+       * @param t tuple to compute cross product with
+       * @return new tuple representing the cross product of this tuple and another
+       */
+      [[nodiscard]] Tuple cross(const Tuple &t) const;
 
     private:
       static bool floatEquals(float x, float y);
