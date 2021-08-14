@@ -29,10 +29,12 @@ RayTracerChallenge::Tuple RayTracerChallenge::Tuple::cross(
   return RayTracerChallenge::Tuple::vector(
       this->y * t.z - this->z * t.y, this->z * t.x - this->x * t.z, this->x * t.y - this->y * t.x);
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Tuple::operator+(const RayTracerChallenge::Tuple &t) const {
+RayTracerChallenge::Tuple RayTracerChallenge::Tuple::operator+(
+    const RayTracerChallenge::Tuple &t) const {
   return {t.x + this->x, t.y + this->y, t.z + this->z, t.w + this->w};
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Tuple::operator-(const RayTracerChallenge::Tuple &t) const {
+RayTracerChallenge::Tuple RayTracerChallenge::Tuple::operator-(
+    const RayTracerChallenge::Tuple &t) const {
   return {this->x - t.x, this->y - t.y, this->z - t.z, this->w - t.w};
 }
 RayTracerChallenge::Tuple RayTracerChallenge::Tuple::operator-() const {
