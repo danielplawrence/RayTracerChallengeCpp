@@ -6,7 +6,7 @@
 TEST_CASE("Tuples") {
   using namespace raytracerchallenge;
   SUBCASE("A tuple with w=0.1 is a point") {
-    RayTracerChallenge::Tuple tuple = RayTracerChallenge::Tuple(4.3, -4.2, 3.1, 1.0);
+    RayTracerChallenge::Tuple tuple = RayTracerChallenge::Tuple(4.3, -4.2, 3.1, 1);
     CHECK(tuple.x == 4.3f);
     CHECK(tuple.y == -4.2f);
     CHECK(tuple.z == 3.1f);
@@ -14,7 +14,7 @@ TEST_CASE("Tuples") {
     CHECK(tuple.isVector() == false);
   }
   SUBCASE("A tuple with w=0.0 is a vector") {
-    RayTracerChallenge::Tuple tuple = RayTracerChallenge::Tuple(4.3, -4.2, 3.1, 0.0);
+    RayTracerChallenge::Tuple tuple = RayTracerChallenge::Tuple(4.3, -4.2, 3.1, 0);
     CHECK(tuple.x == 4.3f);
     CHECK(tuple.y == -4.2f);
     CHECK(tuple.z == 3.1f);
@@ -86,11 +86,11 @@ TEST_CASE("Tuples") {
   }
   SUBCASE("Computing the magnitude of a vector(1, 2, 3)") {
     RayTracerChallenge::Tuple v = RayTracerChallenge::Tuple::vector(1, 2, 3);
-    CHECK(abs(v.magnitude() - sqrt(14)) < 0.000001);
+    CHECK(abs(v.magnitude() - sqrtf(14)) < 0.000001);
   }
   SUBCASE("Computing the magnitude of a vector(-1, -2, -3)") {
     RayTracerChallenge::Tuple v = RayTracerChallenge::Tuple::vector(1, 2, 3);
-    CHECK(abs(v.magnitude() - sqrt(14)) < 0.000001);
+    CHECK(abs(v.magnitude() - sqrtf(14)) < 0.000001);
   }
   SUBCASE("Normalizing vector(4, 0, 0) gives (1, 0, 0)") {
     RayTracerChallenge::Tuple v = RayTracerChallenge::Tuple::vector(4, 0, 0);
@@ -99,7 +99,7 @@ TEST_CASE("Tuples") {
   SUBCASE("Normalizing vector(1, 2, 3)") {
     RayTracerChallenge::Tuple v = RayTracerChallenge::Tuple::vector(1, 2, 3);
     CHECK(v.normalize()
-          == RayTracerChallenge::Tuple::vector(1 / sqrt(14), 2 / sqrt(14), 3 / sqrt(14)));
+          == RayTracerChallenge::Tuple::vector(1 / sqrtf(14), 2 / sqrtf(14), 3 / sqrtf(14)));
   }
   SUBCASE("The magnitude of a normalized vector") {
     RayTracerChallenge::Tuple v = RayTracerChallenge::Tuple::vector(1, 2, 3);
