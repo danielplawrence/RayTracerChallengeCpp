@@ -6,7 +6,7 @@
 TEST_CASE("Tuples") {
   using namespace raytracerchallenge;
   SUBCASE("A tuple with w=0.1 is a point") {
-    RayTracerChallenge::Tuple tuple = RayTracerChallenge::Tuple(4.3, -4.2, 3.1, 1);
+    RayTracerChallenge::Tuple tuple = RayTracerChallenge::Tuple(4.3f, -4.2f, 3.1f, 1.0f);
     CHECK(tuple.x == 4.3f);
     CHECK(tuple.y == -4.2f);
     CHECK(tuple.z == 3.1f);
@@ -14,7 +14,7 @@ TEST_CASE("Tuples") {
     CHECK(tuple.isVector() == false);
   }
   SUBCASE("A tuple with w=0.0 is a vector") {
-    RayTracerChallenge::Tuple tuple = RayTracerChallenge::Tuple(4.3, -4.2, 3.1, 0);
+    RayTracerChallenge::Tuple tuple = RayTracerChallenge::Tuple(4.3f, -4.2f, 3.1f, 0.0f);
     CHECK(tuple.x == 4.3f);
     CHECK(tuple.y == -4.2f);
     CHECK(tuple.z == 3.1f);
