@@ -54,29 +54,29 @@ namespace raytracerchallenge {
        * @param t target for addition
        * @return sum of the operannds
        */
-      Tuple operator+(const Tuple &t);
+      Tuple operator+(const Tuple &t) const;
       /**
        * @brief binary subtraction operator
        * @param t target for subtraction
        * @return difference of the operands
        */
-      Tuple operator-(const Tuple &t);
+      Tuple operator-(const Tuple &t) const;
       /**
        * @brief unary subtraction operator
        * @return inverse of the operand
        */
-      Tuple operator-();
+      Tuple operator-() const;
       /**
        * @brief scalar multiplication operator
        * @return a new Tuple multiplied by f
        */
-      Tuple operator*(float f);
+      Tuple operator*(float f) const;
       /**
        * @brief scalar division operator
        * @param f
        * @return a new Tuple divided by f
        */
-      Tuple operator/(float f);
+      Tuple operator/(float f) const;
       /**
        * @brief normalize the tuple
        * @return normalized tuple
