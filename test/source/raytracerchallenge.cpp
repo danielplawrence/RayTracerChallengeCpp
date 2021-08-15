@@ -137,6 +137,10 @@ TEST_CASE("Colors") {
     RayTracerChallenge::Color c2 = RayTracerChallenge::Color(0.7f, 0.1f, 0.25f);
     CHECK(c1 - c2 == RayTracerChallenge::Color(0.2f, 0.5f, 0.5f));
   }
+  SUBCASE("Multiplying a color by a scalar") {
+    RayTracerChallenge::Color c = RayTracerChallenge::Color(0.2f, 0.3f, 0.4f);
+    CHECK(c * 2 == RayTracerChallenge::Color(0.4f, 0.6f, 0.8f));
+  }
   SUBCASE("Multiplying colors") {
     RayTracerChallenge::Color c1 = RayTracerChallenge::Color(1.0f, 0.2f, 0.4f);
     RayTracerChallenge::Color c2 = RayTracerChallenge::Color(0.9f, 1.0f, 0.1f);
