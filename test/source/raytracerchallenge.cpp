@@ -118,3 +118,28 @@ TEST_CASE("Tuples") {
     CHECK(b.cross(a) == RayTracerChallenge::Tuple::vector(1, -2, 1));
   }
 }
+
+TEST_CASE("Colors") {
+  using namespace raytracerchallenge;
+  SUBCASE("Colors are (red, green, blue) tuples") {
+    RayTracerChallenge::Color c = RayTracerChallenge::Color(-0.5f, 0.4f, 1.7f);
+    CHECK(c.red == -0.5);
+    CHECK(c.green == 0.4f);
+    CHECK(c.blue == 1.7f);
+  }
+  SUBCASE("Adding colors") {
+    RayTracerChallenge::Color c1 = RayTracerChallenge::Color(0.9f, 0.6f, 0.75f);
+    RayTracerChallenge::Color c2 = RayTracerChallenge::Color(0.7f, 0.1f, 0.25f);
+    CHECK(c1 + c2 == RayTracerChallenge::Color(1.6f, 0.7f, 1.0f));
+  }
+  SUBCASE("Subtracting colors") {
+    RayTracerChallenge::Color c1 = RayTracerChallenge::Color(0.9f, 0.6f, 0.75f);
+    RayTracerChallenge::Color c2 = RayTracerChallenge::Color(0.7f, 0.1f, 0.25f);
+    CHECK(c1 - c2 == RayTracerChallenge::Color(0.2f, 0.5f, 0.5f));
+  }
+  SUBCASE("Multiplying colors") {
+    RayTracerChallenge::Color c1 = RayTracerChallenge::Color(1.0f, 0.2f, 0.4f);
+    RayTracerChallenge::Color c2 = RayTracerChallenge::Color(0.9f, 1.0f, 0.1f);
+    CHECK(c1 * c2 == RayTracerChallenge::Color(0.9f, 0.2f, 0.04f));
+  }
+}

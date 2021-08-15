@@ -53,3 +53,36 @@ RayTracerChallenge::Tuple RayTracerChallenge::Tuple::vector(float x, float y, fl
   return {x, y, z, 0.0};
 }
 bool RayTracerChallenge::Tuple::floatEquals(float x, float y) { return abs(x - y) < 0.00001; }
+
+RayTracerChallenge::Color::Color(float red, float green, float blue) {
+  this->red = red;
+  this->green = green;
+  this->blue = blue;
+}
+RayTracerChallenge::Color RayTracerChallenge::Color::operator*(float f) const {
+  Tuple t = Tuple(this->red, this->green, this->blue, 0) * f;
+  return {t.x, t.y, t.z};
+}
+RayTracerChallenge::Color RayTracerChallenge::Color::operator-(
+    const RayTracerChallenge::Color &c) const {
+  Tuple t1 = Tuple(this->red, this->green, this->blue, 0);
+  Tuple t2 = Tuple(c.red, c.green, c.blue, 0);
+  Tuple t3 = t1 - t2;
+  return {t3.x, t3.y, t3.z};
+}
+RayTracerChallenge::Color RayTracerChallenge::Color::operator+(
+    const RayTracerChallenge::Color &c) const {
+  Tuple t1 = Tuple(this->red, this->green, this->blue, 0);
+  Tuple t2 = Tuple(c.red, c.green, c.blue, 0);
+  Tuple t3 = t1 + t2;
+  return {t3.x, t3.y, t3.z};
+}
+RayTracerChallenge::Color RayTracerChallenge::Color::operator*(
+    const RayTracerChallenge::Color &c) const {
+  return {this->red * c.red, this->green * c.green, this->blue * c.blue};
+}
+bool RayTracerChallenge::Color::operator==(const RayTracerChallenge::Color &c) const {
+  Tuple t1 = Tuple(this->red, this->green, this->blue, 0);
+  Tuple t2 = Tuple(c.red, c.green, c.blue, 0);
+  return t1 == t2;
+}

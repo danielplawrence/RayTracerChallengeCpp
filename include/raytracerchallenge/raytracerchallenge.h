@@ -7,7 +7,6 @@ namespace raytracerchallenge {
    * @brief A 3D renderer
    */
   class RayTracerChallenge {
-
   public:
     /**
      * @brief A class representing a tuple (x, y, z, w)
@@ -96,6 +95,52 @@ namespace raytracerchallenge {
 
     private:
       static bool floatEquals(float x, float y);
+    };
+    /**
+     * Represents an RGB Color
+     */
+    class Color {
+    public:
+      float red{};
+      float green{};
+      float blue{};
+      /**
+       * Constructor for a Color
+       * @param red red value
+       * @param green green value
+       * @param blue value
+       */
+      Color(float red, float green, float blue);
+      /**
+       * @brief binary subtraction operator
+       * @param c target for subtraction
+       * @return difference of the operands
+       */
+      Color operator-(const Color &c) const;
+      /**
+       * @brief binary addition operator
+       * @param c target for addition
+       * @return sum of the operands
+       */
+      Color operator+(const Color &c) const;
+      /**
+       * @brief binary multiplication operator
+       * @param c target for multiplication
+       * @return product of the operands
+       */
+      Color operator*(const Color &c) const;
+      /**
+       * @brief scalar multiplication operator
+       * @param f target for multiplication
+       * @return a new Color multiplied by f
+       */
+      Color operator*(float f) const;
+      /**
+       * @brief equality operator
+       * @param c target for comparison
+       * @return true if the colors have the same red, green and blue values
+       */
+      bool operator==(const Color &c) const;
     };
   };
 }  // namespace raytracerchallenge
