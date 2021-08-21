@@ -7,6 +7,13 @@
 
 TEST_CASE("Tuples") {
   using namespace raytracerchallenge;
+  SUBCASE("The default tuple initializes with all values set to zero") {
+    RayTracerChallenge::Tuple tuple;
+    CHECK(tuple.x == 0.0f);
+    CHECK(tuple.y == 0.0f);
+    CHECK(tuple.z == 0.0f);
+    CHECK(tuple.w == 0.0f);
+  }
   SUBCASE("A tuple with w=0.1 is a point") {
     RayTracerChallenge::Tuple tuple = RayTracerChallenge::Tuple(4.3f, -4.2f, 3.1f, 1.0f);
     CHECK(tuple.x == 4.3f);
