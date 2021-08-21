@@ -54,6 +54,11 @@ RayTracerChallenge::Tuple RayTracerChallenge::Tuple::vector(float x, float y, fl
 }
 bool RayTracerChallenge::Tuple::floatEquals(float x, float y) { return abs(x - y) < 0.00001; }
 
+RayTracerChallenge::Color::Color() {
+  this->red = 0.0f;
+  this->green = 0.0f;
+  this->blue = 0.0f;
+}
 RayTracerChallenge::Color::Color(float red, float green, float blue) {
   this->red = red;
   this->green = green;
@@ -85,4 +90,41 @@ bool RayTracerChallenge::Color::operator==(const RayTracerChallenge::Color &c) c
   Tuple t1 = Tuple(this->red, this->green, this->blue, 0);
   Tuple t2 = Tuple(c.red, c.green, c.blue, 0);
   return t1 == t2;
+}
+RayTracerChallenge::Canvas::Canvas(int width, int height) {
+  this->width = width;
+  this->height = height;
+  this->pixels = std::vector<std::vector<Color>>(width);
+  for (int x = 0; x < width; x++) {
+    this->pixels[x] = std::vector<Color>(height);
+  }
+}
+void RayTracerChallenge::Canvas::writePixel(int x, int y, RayTracerChallenge::Color &c) {
+  this->pixels[x][y] = c;
+}
+RayTracerChallenge::Color RayTracerChallenge::Canvas::pixelAt(int x, int y) {
+  return this->pixels[x][y];
+}
+
+std::string RayTracerChallenge::Canvas::toPortablePixmap() {
+  std::string header("P3\n5 3\n255\n");
+  for (int y = 0; y < this->height; y++) {
+    std::string line;
+    for (int x = 0; x < this->width; x++) {
+      Color c = this->pixels[x][y];
+      std::vector<float> colorVals{c.red, c.green, c.blue};
+      std::for_each(colorVals.begin(), colorVals.end(), [&line, &header](float f) {
+        std::string val = fmt::to_string(std::ceil(std::clamp(f * 255.0f, 0.0f, 255.0f)));
+        if (line.size() + val.size() > 70) {
+          line.pop_back();
+          header += line + "\n";
+          line = "";
+        }
+        line += val + " ";
+      });
+    }
+    line.pop_back();
+    header += line + "\n";
+  }
+  return header;
 }

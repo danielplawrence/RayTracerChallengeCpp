@@ -2,6 +2,8 @@
 #include <raytracerchallenge/raytracerchallenge.h>
 
 #include <cmath>
+#include <sstream>
+#include <string>
 
 TEST_CASE("Tuples") {
   using namespace raytracerchallenge;
@@ -127,6 +129,12 @@ TEST_CASE("Colors") {
     CHECK(c.green == 0.4f);
     CHECK(c.blue == 1.7f);
   }
+  SUBCASE("Default Color is black") {
+    RayTracerChallenge::Color c = RayTracerChallenge::Color();
+    CHECK(c.red == 0.0f);
+    CHECK(c.green == 0.0f);
+    CHECK(c.blue == 0.0f);
+  }
   SUBCASE("Adding colors") {
     RayTracerChallenge::Color c1 = RayTracerChallenge::Color(0.9f, 0.6f, 0.75f);
     RayTracerChallenge::Color c2 = RayTracerChallenge::Color(0.7f, 0.1f, 0.25f);
@@ -145,5 +153,82 @@ TEST_CASE("Colors") {
     RayTracerChallenge::Color c1 = RayTracerChallenge::Color(1.0f, 0.2f, 0.4f);
     RayTracerChallenge::Color c2 = RayTracerChallenge::Color(0.9f, 1.0f, 0.1f);
     CHECK(c1 * c2 == RayTracerChallenge::Color(0.9f, 0.2f, 0.04f));
+  }
+}
+
+TEST_CASE("Canvas") {
+  using namespace raytracerchallenge;
+  SUBCASE("Creating a canvas") {
+    RayTracerChallenge::Canvas c = RayTracerChallenge::Canvas(10, 20);
+    CHECK(c.width == 10);
+    CHECK(c.height == 20);
+    for (int x = 0; x < 10; x++) {
+      for (int y = 0; y < 20; y++) {
+        CHECK(c.pixelAt(x, y) == RayTracerChallenge::Color(0.0f, 0.0f, 0.0f));
+      }
+    }
+  }
+  SUBCASE("Writing pixels to a Canvas") {
+    RayTracerChallenge::Canvas c = RayTracerChallenge::Canvas(10, 20);
+    RayTracerChallenge::Color red = RayTracerChallenge::Color(1.0f, 0.0f, 0.0f);
+    c.writePixel(2, 3, red);
+    CHECK(c.pixelAt(2, 3) == red);
+  }
+  SUBCASE("Constructing the PPM header") {
+    RayTracerChallenge::Canvas c = RayTracerChallenge::Canvas(5, 3);
+    std::string ppm = c.toPortablePixmap();
+    std::istringstream stream(ppm);
+    std::string line;
+    std::vector<std::string> items;
+    while (std::getline(stream, line)) {
+      items.push_back(line);
+    }
+    CHECK(items[0] == "P3");
+    CHECK(items[1] == "5 3");
+    CHECK(items[2] == "255");
+  }
+  SUBCASE("Constructing the PPM pixel data") {
+    RayTracerChallenge::Canvas c = RayTracerChallenge::Canvas(5, 3);
+    RayTracerChallenge::Color c1(1.5f, 0.0f, 0.0f);
+    RayTracerChallenge::Color c2(0.0f, 0.5f, 0.0f);
+    RayTracerChallenge::Color c3(-0.5f, 0.0f, 1.0f);
+    c.writePixel(0, 0, c1);
+    c.writePixel(2, 1, c2);
+    c.writePixel(4, 2, c3);
+    std::string ppm = c.toPortablePixmap();
+    std::istringstream stream(ppm);
+    std::string line;
+    std::vector<std::string> items;
+    while (std::getline(stream, line)) {
+      items.push_back(line);
+    }
+    CHECK(items[3] == "255 0 0 0 0 0 0 0 0 0 0 0 0 0 0");
+    CHECK(items[4] == "0 0 0 0 0 0 0 128 0 0 0 0 0 0 0");
+    CHECK(items[5] == "0 0 0 0 0 0 0 0 0 0 0 0 0 0 255");
+  }
+  SUBCASE("Splitting long lines in PPM files") {
+    RayTracerChallenge::Canvas c = RayTracerChallenge::Canvas(10, 2);
+    RayTracerChallenge::Color c1(1.0f, 0.8f, 0.6f);
+    for (int y = 0; y < c.height; y++) {
+      for (int x = 0; x < c.width; x++) {
+        c.writePixel(x, y, c1);
+      }
+    }
+    std::string ppm = c.toPortablePixmap();
+    std::istringstream stream(ppm);
+    std::string line;
+    std::vector<std::string> items;
+    while (std::getline(stream, line)) {
+      items.push_back(line);
+    }
+    CHECK(items[3] == "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204");
+    CHECK(items[4] == "153 255 204 153 255 204 153 255 204 153 255 204 153");
+    CHECK(items[5] == "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204");
+    CHECK(items[6] == "153 255 204 153 255 204 153 255 204 153 255 204 153");
+  }
+  SUBCASE("PPM files are terminated by a newline character") {
+    RayTracerChallenge::Canvas c = RayTracerChallenge::Canvas(5, 3);
+    std::string ppm = c.toPortablePixmap();
+    CHECK(ppm.back() == '\n');
   }
 }
