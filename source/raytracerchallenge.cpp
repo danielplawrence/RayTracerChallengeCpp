@@ -3,6 +3,12 @@
 
 using namespace raytracerchallenge;
 
+RayTracerChallenge::Tuple::Tuple() {
+  this->x = 0;
+  this->y = 0;
+  this->z = 0;
+  this->w = 0;
+}
 RayTracerChallenge::Tuple::Tuple(float x, float y, float z, float w) {
   this->x = x;
   this->y = y;
@@ -99,7 +105,7 @@ RayTracerChallenge::Canvas::Canvas(int width, int height) {
     this->pixels[x] = std::vector<Color>(height);
   }
 }
-void RayTracerChallenge::Canvas::writePixel(int x, int y, RayTracerChallenge::Color &c) {
+void RayTracerChallenge::Canvas::writePixel(int x, int y, RayTracerChallenge::Color c) {
   this->pixels[x][y] = c;
 }
 RayTracerChallenge::Color RayTracerChallenge::Canvas::pixelAt(int x, int y) {
@@ -107,7 +113,10 @@ RayTracerChallenge::Color RayTracerChallenge::Canvas::pixelAt(int x, int y) {
 }
 
 std::string RayTracerChallenge::Canvas::toPortablePixmap() {
-  std::string header("P3\n5 3\n255\n");
+  std::string ppmVariant("P3");
+  std::string maxColorValue("255");
+  std::string header(ppmVariant + "\n" + fmt::to_string(this->width) + " "
+                     + fmt::to_string(this->height) + "\n" + maxColorValue + "\n");
   for (int y = 0; y < this->height; y++) {
     std::string line;
     for (int x = 0; x < this->width; x++) {

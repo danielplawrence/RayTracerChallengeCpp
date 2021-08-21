@@ -21,6 +21,10 @@ namespace raytracerchallenge {
       [[nodiscard]] bool isVector() const;
       [[nodiscard]] float magnitude() const;
       /**
+       * Default constructor
+       */
+      Tuple();
+      /**
        * @brief create a new Tuple
        * @param x position on the x axis
        * @param y position on the y axis
@@ -164,7 +168,7 @@ namespace raytracerchallenge {
        * @param y y coordinate
        * @param c color
        */
-      void writePixel(int x, int y, Color &c);
+      void writePixel(int x, int y, Color c);
       /**
        * @brief Return a pointer to the color at coordinates x and y
        * @param x x coordinate
