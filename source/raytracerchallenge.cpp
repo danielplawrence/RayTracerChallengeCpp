@@ -267,3 +267,11 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::translation(float x, floa
   res.m[2][3] = z;
   return res;
 }
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::scaling(float x, float y, float z) {
+  RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
+  res.m[0][0] = x;
+  res.m[1][1] = y;
+  res.m[2][2] = z;
+  res.m[3][3] = 1;
+  return res;
+}

@@ -514,4 +514,24 @@ TEST_CASE("Matrix transformations") {
     RayTracerChallenge::Tuple vector = RayTracerChallenge::Tuple::vector(-3.0f, 4.0f, 5.0f);
     CHECK(transform * vector == vector);
   }
+  SUBCASE("A scaling matrix applied to a point") {
+    RayTracerChallenge::Matrix transform = RayTracerChallenge::Matrix::scaling(2.0f, 3.0f, 4.0f);
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(-4.0f, 6.0f, 8.0f);
+    CHECK(transform * point == RayTracerChallenge::Tuple::point(-8.0f, 18.0f, 32.0f));
+  }
+  SUBCASE("A scaling matrix applied to a vector") {
+    RayTracerChallenge::Matrix transform = RayTracerChallenge::Matrix::scaling(2.0f, 3.0f, 4.0f);
+    RayTracerChallenge::Tuple vector = RayTracerChallenge::Tuple::vector(-4.0f, 6.0f, 8.0f);
+    CHECK(transform * vector == RayTracerChallenge::Tuple::vector(-8.0f, 18.0f, 32.0f));
+  }
+  SUBCASE("Multiplying by the inverse of a scaling matrix") {
+    RayTracerChallenge::Matrix transform = RayTracerChallenge::Matrix::scaling(2.0f, 3.0f, 4.0f);
+    RayTracerChallenge::Tuple vector = RayTracerChallenge::Tuple::vector(-4.0f, 6.0f, 8.0f);
+    CHECK(transform.inverse() * vector == RayTracerChallenge::Tuple::vector(-2.0f, 2.0f, 2.0f));
+  }
+  SUBCASE("Reflection is scaling by a negative value") {
+    RayTracerChallenge::Matrix transform = RayTracerChallenge::Matrix::scaling(-1.0f, 1.0f, 1.0f);
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(2.0f, 3.0f, 4.0f);
+    CHECK(transform * point == RayTracerChallenge::Tuple::point(-2.0f, 3.0f, 4.0f));
+  }
 }

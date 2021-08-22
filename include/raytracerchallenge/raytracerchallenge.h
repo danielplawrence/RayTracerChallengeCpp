@@ -302,6 +302,14 @@ namespace raytracerchallenge {
        * @return translation matrix
        */
       static Matrix translation(float x, float y, float z);
+      /**
+       * Return a scaling matrix for the provided x, y, z values
+       * @param x value for x
+       * @param y value for y
+       * @param z value for z
+       * @return scaling matrix
+       */
+      static Matrix scaling(float x, float y, float z);
 
     private:
       static bool floatEquals(float x, float y);
