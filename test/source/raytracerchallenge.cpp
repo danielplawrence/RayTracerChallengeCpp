@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include <doctest/doctest.h>
 #include <raytracerchallenge/raytracerchallenge.h>
 

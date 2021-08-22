@@ -338,4 +338,3 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::sheared(float xy, float x
   RayTracerChallenge::Matrix t = shearing(xy, xz, yx, yz, zx, zy);
   return t * *this;
 }
-RayTracerChallenge::Matrix::Matrix() = default;
