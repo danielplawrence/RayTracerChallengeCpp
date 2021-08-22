@@ -8,7 +8,7 @@
 TEST_CASE("Tuples") {
   using namespace raytracerchallenge;
   SUBCASE("The default tuple initializes with all values set to zero") {
-    RayTracerChallenge::Tuple tuple(0, 0, 0, 0);
+    RayTracerChallenge::Tuple tuple;
     CHECK(tuple.x == 0.0f);
     CHECK(tuple.y == 0.0f);
     CHECK(tuple.z == 0.0f);
@@ -285,7 +285,7 @@ TEST_CASE("Matrices") {
                                           {5.0f, 4.0f, 3.0f, 2.0f}};
     RayTracerChallenge::Matrix matrix1(4, 4, vect1);
     RayTracerChallenge::Matrix matrix2(4, 4, vect2);
-    CHECK(matrix2 == matrix1);
+    CHECK((matrix2 == matrix1) == true);
   }
   SUBCASE("Matrix equality with different matrices") {
     std::vector<std::vector<float>> vect1{{1.0f, 2.0f, 3.0f, 4.0f},
@@ -298,7 +298,7 @@ TEST_CASE("Matrices") {
                                           {4.0f, 3.0f, 2.0f, 1.0f}};
     RayTracerChallenge::Matrix matrix1(4, 4, vect1);
     RayTracerChallenge::Matrix matrix2(4, 4, vect2);
-    CHECK(matrix2 != matrix1);
+    CHECK((matrix2 == matrix1) == false);
   }
   SUBCASE("Multiplying two matrices") {
     std::vector<std::vector<float>> vect1{{1.0f, 2.0f, 3.0f, 4.0f},
