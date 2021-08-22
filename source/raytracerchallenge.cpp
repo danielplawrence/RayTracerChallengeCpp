@@ -148,6 +148,7 @@ RayTracerChallenge::Matrix::Matrix(unsigned int x, unsigned int y,
   this->m.resize(x, std::vector<float>(y, false));
   this->m = std::move(m);
 }
+RayTracerChallenge::Matrix::Matrix() = default;
 RayTracerChallenge::Matrix::Row RayTracerChallenge::Matrix::operator[](const unsigned int x) const {
   return RayTracerChallenge::Matrix::Row(m.at(x));
 }
