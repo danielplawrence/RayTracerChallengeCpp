@@ -1,5 +1,8 @@
+#define _USE_MATH_DEFINES
 #include <fmt/format.h>
 #include <raytracerchallenge/raytracerchallenge.h>
+
+#include <cmath>
 
 using namespace raytracerchallenge;
 
@@ -335,3 +338,4 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::sheared(float xy, float x
   RayTracerChallenge::Matrix t = shearing(xy, xz, yx, yz, zx, zy);
   return t * *this;
 }
+RayTracerChallenge::Matrix::Matrix() = default;

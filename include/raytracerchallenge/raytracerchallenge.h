@@ -210,6 +210,10 @@ namespace raytracerchallenge {
         explicit Row(std::vector<float> r);
       };
       /**
+       * Default constructor
+       */
+      Matrix();
+      /**
        * @brief Construct a Matrix given a 2D vector and its dimensions
        * @param x height of the input vector
        * @param width of the input vector
