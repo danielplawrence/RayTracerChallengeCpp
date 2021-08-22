@@ -635,7 +635,7 @@ TEST_CASE("Matrix transformations") {
   SUBCASE("Fluent transformations") {
     RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(1.0f, 0.0f, 1.0f);
     RayTracerChallenge::Matrix transform = RayTracerChallenge::Matrix::identity(4)
-                                               .rotatedX(M_PI / 2.0f)
+                                               .rotatedX(float(M_PI) / 2.0f)
                                                .scaled(5.0f, 5.0f, 5.0f)
                                                .translated(10.0f, 5.0f, 7.0f);
     CHECK(transform * point == RayTracerChallenge::Tuple::point(15.0f, 0.0f, 7.0f));
