@@ -260,3 +260,10 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::inverse() {
   }
   return {static_cast<unsigned int>(res.size()), static_cast<unsigned int>(res.size()), res};
 }
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::translation(float x, float y, float z) {
+  RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
+  res.m[0][3] = x;
+  res.m[1][3] = y;
+  res.m[2][3] = z;
+  return res;
+}

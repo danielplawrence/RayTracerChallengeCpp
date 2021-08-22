@@ -494,3 +494,24 @@ TEST_CASE("Matrices") {
     CHECK(product * matrix2.inverse() == matrix1);
   }
 }
+TEST_CASE("Matrix transformations") {
+  using namespace raytracerchallenge;
+  SUBCASE("Multiplying by a transformation matrix") {
+    RayTracerChallenge::Matrix transform
+        = RayTracerChallenge::Matrix::translation(5.0f, -3.0f, 2.0f);
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(-3.0f, 4.0f, 5.0f);
+    CHECK(transform * point == RayTracerChallenge::Tuple::point(2.0f, 1.0f, 7.0f));
+  }
+  SUBCASE("Multiplying by the inverse of a transformation matrix") {
+    RayTracerChallenge::Matrix transform
+        = RayTracerChallenge::Matrix::translation(5.0f, -3.0f, 2.0f);
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(-3.0f, 4.0f, 5.0f);
+    CHECK(transform.inverse() * point == RayTracerChallenge::Tuple::point(-8.0f, 7.0f, 3.0f));
+  }
+  SUBCASE("Translation does not affect vectors") {
+    RayTracerChallenge::Matrix transform
+        = RayTracerChallenge::Matrix::translation(5.0f, -3.0f, 2.0f);
+    RayTracerChallenge::Tuple vector = RayTracerChallenge::Tuple::vector(-3.0f, 4.0f, 5.0f);
+    CHECK(transform * vector == vector);
+  }
+}
