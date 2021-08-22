@@ -295,7 +295,52 @@ namespace raytracerchallenge {
        */
       Matrix inverse();
       /**
-       * Return a translation matrix for the provided x, y, z values
+       * @brief Translate this matrix using the provided x, y, z values
+       * @param x value for x
+       * @param y value for y
+       * @param z value for z
+       * @return translated matrix
+       */
+      Matrix translated(float x, float y, float z) const;
+      /**
+       * @brief Scale this matrix using the provided x, y, z values
+       * @param x value for x
+       * @param y value for y
+       * @param z value for z
+       * @return scaled matrix
+       */
+      Matrix scaled(float x, float y, float z) const;
+      /**
+       * @brief Rotate this matrix for the provided radians on the X axis
+       * @param radians
+       * @return X-rotated matrix
+       */
+      Matrix rotatedX(float radians) const;
+      /**
+       * @brief Rotate this matrix for the provided radians on the Y axis
+       * @param radians
+       * @return Y-rotated matrix
+       */
+      Matrix rotatedY(float radians) const;
+      /**
+       * @brief Rotate this matrix for the provided radians on the Z axis
+       * @param radians
+       * @return Z-rotated matrix
+       */
+      Matrix rotatedZ(float radians) const;
+      /**
+       * @brief Shear this matrix using the provided params
+       * @param xy scaling of x relative to y
+       * @param xz scaling of x relative to z
+       * @param yx scaling of y relative to x
+       * @param yz scaling of y relative to z
+       * @param zx scaling of z relative to x
+       * @param zy scaling of z relative to y
+       * @return sheared matrix
+       */
+      Matrix sheared(float xy, float xz, float yx, float yz, float zx, float zy) const;
+      /**
+       * @brief Return a translation matrix for the provided x, y, z values
        * @param x value for x
        * @param y value for y
        * @param z value for z
@@ -303,13 +348,42 @@ namespace raytracerchallenge {
        */
       static Matrix translation(float x, float y, float z);
       /**
-       * Return a scaling matrix for the provided x, y, z values
+       * @brief Return a scaling matrix for the provided x, y, z values
        * @param x value for x
        * @param y value for y
        * @param z value for z
        * @return scaling matrix
        */
       static Matrix scaling(float x, float y, float z);
+      /**
+       * @brief Return an X-rotation matrix for the provided radians
+       * @param radians
+       * @return X-rotation matrix
+       */
+      static Matrix rotationX(float radians);
+      /**
+       * @brief Return a Y-rotation matrix for the provided radians
+       * @param radians
+       * @return Y-rotation matrix
+       */
+      static Matrix rotationY(float radians);
+      /**
+       * @brief Return a Z-rotation matrix for the provided radians
+       * @param radians
+       * @return Z-rotation matrix
+       */
+      static Matrix rotationZ(float radians);
+      /**
+       * @brief Return a shearing matrix for the provided params
+       * @param xy scaling of x relative to y
+       * @param xz scaling of x relative to z
+       * @param yx scaling of y relative to x
+       * @param yz scaling of y relative to z
+       * @param zx scaling of z relative to x
+       * @param zy scaling of z relative to y
+       * @return shearing matrix
+       */
+      static Matrix shearing(float xy, float xz, float yx, float yz, float zx, float zy);
 
     private:
       static bool floatEquals(float x, float y);

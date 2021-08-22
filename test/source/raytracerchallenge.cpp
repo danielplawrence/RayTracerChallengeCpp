@@ -534,4 +534,97 @@ TEST_CASE("Matrix transformations") {
     RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(2.0f, 3.0f, 4.0f);
     CHECK(transform * point == RayTracerChallenge::Tuple::point(-2.0f, 3.0f, 4.0f));
   }
+  SUBCASE("Rotating a point around the x axis") {
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(0.0f, 1.0f, 0.0f);
+    RayTracerChallenge::Matrix halfQuarter = RayTracerChallenge::Matrix::rotationX(M_PI / 4);
+    RayTracerChallenge::Matrix fullQuarter = RayTracerChallenge::Matrix::rotationX(M_PI / 2);
+    CHECK(halfQuarter * point == RayTracerChallenge::Tuple::point(0.0f, sqrt(2) / 2, sqrt(2) / 2));
+    CHECK(fullQuarter * point == RayTracerChallenge::Tuple::point(0.0f, 0.0f, 1.0f));
+  }
+  SUBCASE("The inverse of an x-rotation rotates in the opposite direction") {
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(0.0f, 1.0f, 0.0f);
+    RayTracerChallenge::Matrix halfQuarter = RayTracerChallenge::Matrix::rotationX(M_PI / 4);
+    CHECK(halfQuarter.inverse() * point
+          == RayTracerChallenge::Tuple::point(0.0f, sqrt(2) / 2, -sqrt(2) / 2));
+  }
+  SUBCASE("Rotating a point around the y axis") {
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 1.0f);
+    RayTracerChallenge::Matrix halfQuarter = RayTracerChallenge::Matrix::rotationY(M_PI / 4);
+    RayTracerChallenge::Matrix fullQuarter = RayTracerChallenge::Matrix::rotationY(M_PI / 2);
+    CHECK(halfQuarter * point == RayTracerChallenge::Tuple::point(sqrt(2) / 2, 0.0f, sqrt(2) / 2));
+    CHECK(fullQuarter * point == RayTracerChallenge::Tuple::point(1.0f, 0.0f, 0.0f));
+  }
+  SUBCASE("Rotating a point around the z axis") {
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(0.0f, 1.0f, 0.0f);
+    RayTracerChallenge::Matrix halfQuarter = RayTracerChallenge::Matrix::rotationZ(M_PI / 4);
+    RayTracerChallenge::Matrix fullQuarter = RayTracerChallenge::Matrix::rotationZ(M_PI / 2);
+    CHECK(halfQuarter * point == RayTracerChallenge::Tuple::point(-sqrt(2) / 2, sqrt(2) / 2, 0.0f));
+    CHECK(fullQuarter * point == RayTracerChallenge::Tuple::point(-1.0f, 0.0f, 0.0f));
+  }
+  SUBCASE("A shearing transformation moves x in proportion to y") {
+    RayTracerChallenge::Matrix transform
+        = RayTracerChallenge::Matrix::shearing(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(2.0f, 3.0f, 4.0f);
+    CHECK(transform * point == RayTracerChallenge::Tuple::point(5.0f, 3.0f, 4.0f));
+  }
+  SUBCASE("A shearing transformation moves x in proportion to z") {
+    RayTracerChallenge::Matrix transform
+        = RayTracerChallenge::Matrix::shearing(0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(2.0f, 3.0f, 4.0f);
+    CHECK(transform * point == RayTracerChallenge::Tuple::point(6.0f, 3.0f, 4.0f));
+  }
+  SUBCASE("A shearing transformation moves y in proportion to x") {
+    RayTracerChallenge::Matrix transform
+        = RayTracerChallenge::Matrix::shearing(0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f);
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(2.0f, 3.0f, 4.0f);
+    CHECK(transform * point == RayTracerChallenge::Tuple::point(2.0f, 5.0f, 4.0f));
+  }
+  SUBCASE("A shearing transformation moves y in proportion to z") {
+    RayTracerChallenge::Matrix transform
+        = RayTracerChallenge::Matrix::shearing(0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(2.0f, 3.0f, 4.0f);
+    CHECK(transform * point == RayTracerChallenge::Tuple::point(2.0f, 7.0f, 4.0f));
+  }
+  SUBCASE("A shearing transformation moves z in proportion to x") {
+    RayTracerChallenge::Matrix transform
+        = RayTracerChallenge::Matrix::shearing(0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(2.0f, 3.0f, 4.0f);
+    CHECK(transform * point == RayTracerChallenge::Tuple::point(2.0f, 3.0f, 6.0f));
+  }
+  SUBCASE("A shearing transformation moves z in proportion to y") {
+    RayTracerChallenge::Matrix transform
+        = RayTracerChallenge::Matrix::shearing(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(2.0f, 3.0f, 4.0f);
+    CHECK(transform * point == RayTracerChallenge::Tuple::point(2.0f, 3.0f, 7.0f));
+  }
+  SUBCASE("Individual transformations are applied in sequence") {
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(1.0f, 0.0f, 1.0f);
+    RayTracerChallenge::Matrix transformA = RayTracerChallenge::Matrix::rotationX(M_PI / 2);
+    RayTracerChallenge::Matrix transformB = RayTracerChallenge::Matrix::scaling(5.0f, 5.0f, 5.0f);
+    RayTracerChallenge::Matrix transformC
+        = RayTracerChallenge::Matrix::translation(10.0f, 5.0f, 7.0f);
+    RayTracerChallenge::Tuple point2 = transformA * point;
+    CHECK(point2 == RayTracerChallenge::Tuple::point(1.0f, -1.0f, 0.0f));
+    RayTracerChallenge::Tuple point3 = transformB * point2;
+    CHECK(point3 == RayTracerChallenge::Tuple::point(5.0f, -5.0f, 0.0f));
+    RayTracerChallenge::Tuple point4 = transformC * point3;
+    CHECK(point4 == RayTracerChallenge::Tuple::point(15.0f, 0.0f, 7.0f));
+  }
+  SUBCASE("Chained transformations must be applied in reverse order") {
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(1.0f, 0.0f, 1.0f);
+    RayTracerChallenge::Matrix transformA = RayTracerChallenge::Matrix::rotationX(M_PI / 2);
+    RayTracerChallenge::Matrix transformB = RayTracerChallenge::Matrix::scaling(5.0f, 5.0f, 5.0f);
+    RayTracerChallenge::Matrix transformC
+        = RayTracerChallenge::Matrix::translation(10.0f, 5.0f, 7.0f);
+    RayTracerChallenge::Matrix transforms = transformC * transformB * transformA;
+    CHECK(transforms * point == RayTracerChallenge::Tuple::point(15.0f, 0.0f, 7.0f));
+  }
+  SUBCASE("Fluent transformations") {
+    RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(1.0f, 0.0f, 1.0f);
+    RayTracerChallenge::Matrix transform = RayTracerChallenge::Matrix::identity(4)
+                                               .rotatedX(M_PI / 2)
+                                               .scaled(5.0f, 5.0f, 5.0f)
+                                               .translated(10.0f, 5.0f, 7.0f);
+    CHECK(transform * point == RayTracerChallenge::Tuple::point(15.0f, 0.0f, 7.0f));
+  }
 }

@@ -275,3 +275,63 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::scaling(float x, float y,
   res.m[3][3] = 1;
   return res;
 }
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotationX(float radians) {
+  RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
+  res.m[1][1] = cos(radians);
+  res.m[1][2] = -sin(radians);
+  res.m[2][1] = sin(radians);
+  res.m[2][2] = cos(radians);
+  return res;
+}
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotationY(float radians) {
+  RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
+  res.m[0][0] = cos(radians);
+  res.m[0][2] = sin(radians);
+  res.m[2][0] = -sin(radians);
+  res.m[2][2] = cos(radians);
+  return res;
+}
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotationZ(float radians) {
+  RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
+  res.m[0][0] = cos(radians);
+  res.m[0][1] = -sin(radians);
+  res.m[1][0] = sin(radians);
+  res.m[1][1] = cos(radians);
+  return res;
+}
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::shearing(float xy, float xz, float yx,
+                                                                float yz, float zx, float zy) {
+  RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
+  res.m[0][1] = xy;
+  res.m[0][2] = xz;
+  res.m[1][0] = yx;
+  res.m[1][2] = yz;
+  res.m[2][0] = zx;
+  res.m[2][1] = zy;
+  return res;
+}
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::translated(float x, float y, float z) const {
+  RayTracerChallenge::Matrix t = translation(x, y, z);
+  return t * *this;
+}
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::scaled(float x, float y, float z) const {
+  RayTracerChallenge::Matrix t = scaling(x, y, z);
+  return t * *this;
+}
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotatedX(float radians) const {
+  RayTracerChallenge::Matrix t = rotationX(radians);
+  return t * *this;
+}
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotatedY(float radians) const {
+  RayTracerChallenge::Matrix t = rotationY(radians);
+  return t * *this;
+}
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotatedZ(float radians) const {
+  RayTracerChallenge::Matrix t = rotationZ(radians);
+  return t * *this;
+}
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::sheared(float xy, float xz, float yx,
+                                                               float yz, float zx, float zy) const {
+  RayTracerChallenge::Matrix t = shearing(xy, xz, yx, yz, zx, zy);
+  return t * *this;
+}
