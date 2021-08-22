@@ -21,7 +21,7 @@ namespace raytracerchallenge {
       [[nodiscard]] bool isVector() const;
       [[nodiscard]] float magnitude() const;
       /**
-       * Default constructor
+       * @brief default constructor for Tuples
        */
       Tuple();
       /**
@@ -184,6 +184,119 @@ namespace raytracerchallenge {
 
     private:
       std::vector<std::vector<Color>> pixels;
+    };
+    /**
+     * @brief Represents a matrix of floating-point numbers
+     */
+    class Matrix {
+      std::vector<std::vector<float>> m;
+
+    public:
+      /**
+       * @brief The row of a Matrix
+       */
+      class Row {
+        std::vector<float> row;
+
+      public:
+        /**
+         * @brief Row index
+         */
+        float operator[](unsigned int y);
+        /**
+         * @brief Construct a row from a vector of floating-point numbers
+         * @param r Vector to create this row from
+         */
+        explicit Row(std::vector<float> r);
+      };
+      /**
+       * @brief Construct a Matrix given a 2D vector and its dimensions
+       * @param x height of the input vector
+       * @param width of the input vector
+       * @param m a 2D vector providing initial values for the Matrix
+       */
+      Matrix(unsigned int x, unsigned int y, std::vector<std::vector<float>> m);
+      /**
+       * @brief return a Row of the Matrix at index x
+       * @param x row index
+       * @return Row
+       */
+      Row operator[](unsigned int x) const;
+      /**
+       * @brief Matrix equality operator
+       * @param matrix Matrix for comparison
+       * @return True if the elements of both Matrices are equal
+       */
+      bool operator==(const Matrix &matrix) const;
+      /**
+       * @brief Matrix inequality operator
+       * @param matrix Matrix for comparison
+       * @return True if the elements of both Matrices are not equal
+       */
+      bool operator!=(const Matrix &matrix) const;
+      /**
+       * @brief Matrix multiplication
+       * @param matrix Matrix to be multiplied with this one
+       * @return product of the two Matrices
+       */
+      Matrix operator*(const Matrix &matrix) const;
+      /**
+       * @brief Matrix/Tuple multiplication
+       * @param tuple Tuple to be multiplied with this Matrix
+       * @return Tuple representing the multiplication result
+       */
+      Tuple operator*(const Tuple &tuple) const;
+      /**
+       * @brief Identity Matrix
+       * @param size size for the Matrix
+       * @return a square identity Matrix
+       */
+      static Matrix identity(unsigned int size);
+      /**
+       * @brief Return the transpose of this Matrix
+       * @return Transpose of this Matrix
+       */
+      Matrix transposed();
+      /**
+       * @brief Return the determinant of this Matrix
+       * @return the determinant
+       */
+      float determinant();
+      /**
+       * @brief Return the submatrix which results fromm removing
+       * the column at index xy
+       * @param x row to remove
+       * @param y column to remove
+       * @return this Matrix with row x and column y removed
+       */
+      Matrix submatrix(unsigned int x, unsigned int y);
+      /**
+       * @brief Return the minor of the element at index x,y
+       * @param x x index
+       * @param y index
+       * @return the minor of the element at index x,y
+       */
+      float minor(unsigned int x, unsigned int y);
+      /**
+       * @brief Return the cofactor of the element at index x,y
+       * @param x x index
+       * @param y index
+       * @return the cofactor of the element at index x,y
+       */
+      float cofactor(unsigned int x, unsigned int y);
+      /**
+       * @brief Return true if the Matrix is invertible
+       * @return true if the Matrix is invertible
+       */
+      bool invertible();
+      /**
+       * @brief Return the inverse of this Matrix
+       * @return the inverse of this Matrix
+       */
+      Matrix inverse();
+
+    private:
+      static bool floatEquals(float x, float y);
     };
   };
 }  // namespace raytracerchallenge

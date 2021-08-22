@@ -8,7 +8,7 @@
 TEST_CASE("Tuples") {
   using namespace raytracerchallenge;
   SUBCASE("The default tuple initializes with all values set to zero") {
-    RayTracerChallenge::Tuple tuple;
+    RayTracerChallenge::Tuple tuple(0, 0, 0, 0);
     CHECK(tuple.x == 0.0f);
     CHECK(tuple.y == 0.0f);
     CHECK(tuple.z == 0.0f);
@@ -237,5 +237,260 @@ TEST_CASE("Canvas") {
     RayTracerChallenge::Canvas c = RayTracerChallenge::Canvas(5, 3);
     std::string ppm = c.toPortablePixmap();
     CHECK(ppm.back() == '\n');
+  }
+}
+
+TEST_CASE("Matrices") {
+  using namespace raytracerchallenge;
+  SUBCASE("Constructing and inspecting a 4x4 matrix") {
+    std::vector<std::vector<float>> vect{
+        {1.0f, 2.0f, 3.0f, 4.0f},
+        {5.5f, 6.5f, 7.5f, 8.5f},
+        {9.0f, 10.0f, 11.0f, 12.0f},
+        {13.5f, 14.5f, 15.5f, 16.5f},
+    };
+    RayTracerChallenge::Matrix matrix(4, 4, vect);
+    CHECK(matrix[0][0] == 1.0f);
+    CHECK(matrix[0][3] == 4.0f);
+    CHECK(matrix[1][0] == 5.5f);
+    CHECK(matrix[1][2] == 7.5f);
+    CHECK(matrix[2][2] == 11.0f);
+    CHECK(matrix[3][0] == 13.5f);
+    CHECK(matrix[3][2] == 15.5f);
+  }
+  SUBCASE("A 2x2 matrix ought to be representable") {
+    std::vector<std::vector<float>> vect{{-3.0f, 5.0f}, {1.0f, -2.0f}};
+    RayTracerChallenge::Matrix matrix(2, 2, vect);
+    CHECK(matrix[0][0] == -3.0f);
+    CHECK(matrix[0][1] == 5.0f);
+    CHECK(matrix[1][0] == 1.0f);
+    CHECK(matrix[1][1] == -2.0f);
+  }
+  SUBCASE("A 3x3 matrix ought to be representable") {
+    std::vector<std::vector<float>> vect{
+        {-3.0f, 5.0f, 0.0f}, {1.0f, -2.0f, -7.0f}, {0.0f, 1.0f, 1.0f}};
+    RayTracerChallenge::Matrix matrix(3, 3, vect);
+    CHECK(matrix[0][0] == -3.0f);
+    CHECK(matrix[1][1] == -2.0f);
+    CHECK(matrix[2][2] == 1.0f);
+  }
+  SUBCASE("Matrix equality with identical matrices") {
+    std::vector<std::vector<float>> vect1{{1.0f, 2.0f, 3.0f, 4.0f},
+                                          {5.0f, 6.0f, 7.0f, 8.0f},
+                                          {9.0f, 8.0f, 7.0f, 6.0f},
+                                          {5.0f, 4.0f, 3.0f, 2.0f}};
+    std::vector<std::vector<float>> vect2{{1.0f, 2.0f, 3.0f, 4.0f},
+                                          {5.0f, 6.0f, 7.0f, 8.0f},
+                                          {9.0f, 8.0f, 7.0f, 6.0f},
+                                          {5.0f, 4.0f, 3.0f, 2.0f}};
+    RayTracerChallenge::Matrix matrix1(4, 4, vect1);
+    RayTracerChallenge::Matrix matrix2(4, 4, vect2);
+    CHECK(matrix2 == matrix1);
+  }
+  SUBCASE("Matrix equality with different matrices") {
+    std::vector<std::vector<float>> vect1{{1.0f, 2.0f, 3.0f, 4.0f},
+                                          {5.5f, 6.0f, 7.0f, 8.0f},
+                                          {9.0f, 8.0f, 7.0f, 6.0f},
+                                          {5.0f, 4.0f, 3.0f, 2.0f}};
+    std::vector<std::vector<float>> vect2{{2.0f, 3.0f, 4.0f, 5.0f},
+                                          {6.0f, 7.0f, 8.0f, 9.0f},
+                                          {8.0f, 7.0f, 6.0f, 5.0f},
+                                          {4.0f, 3.0f, 2.0f, 1.0f}};
+    RayTracerChallenge::Matrix matrix1(4, 4, vect1);
+    RayTracerChallenge::Matrix matrix2(4, 4, vect2);
+    CHECK(matrix2 != matrix1);
+  }
+  SUBCASE("Multiplying two matrices") {
+    std::vector<std::vector<float>> vect1{{1.0f, 2.0f, 3.0f, 4.0f},
+                                          {5.0f, 6.0f, 7.0f, 8.0f},
+                                          {9.0f, 8.0f, 7.0f, 6.0f},
+                                          {5.0f, 4.0f, 3.0f, 2.0f}};
+    std::vector<std::vector<float>> vect2{{-2.0f, 1.0f, 2.0f, 3.0f},
+                                          {3.0f, 2.0f, 1.0f, -1.0f},
+                                          {4.0f, 3.0f, 6.0f, 5.0f},
+                                          {1.0f, 2.0f, 7.0f, 8.0f}};
+    std::vector<std::vector<float>> vect3{{20.0f, 22.0f, 50.0f, 48.0f},
+                                          {44.0f, 54.0f, 114.0f, 108.0f},
+                                          {40.0f, 58.0f, 110.0f, 102.0f},
+                                          {16.0f, 26.0f, 46.0f, 42.0f}};
+    RayTracerChallenge::Matrix matrix1(4, 4, vect1);
+    RayTracerChallenge::Matrix matrix2(4, 4, vect2);
+    RayTracerChallenge::Matrix matrix3(4, 4, vect3);
+    CHECK(matrix1 * matrix2 == matrix3);
+  }
+  SUBCASE("A matrix multiplied by a tuple") {
+    std::vector<std::vector<float>> vect1{{1.0f, 2.0f, 3.0f, 4.0f},
+                                          {2.0f, 4.0f, 4.0f, 2.0f},
+                                          {8.0f, 6.0f, 4.0f, 1.0f},
+                                          {0.0f, 0.0f, 0.0f, 1.0f}};
+    RayTracerChallenge::Matrix matrix1(4, 4, vect1);
+    RayTracerChallenge::Tuple tuple(1, 2, 3, 1);
+    CHECK(matrix1 * tuple == RayTracerChallenge::Tuple(18, 24, 33, 1));
+  }
+  SUBCASE("The identity matrix") {
+    std::vector<std::vector<float>> identity{{1.0f, 0.0f, 0.0f, 0.0f},
+                                             {0.0f, 1.0f, 0.0f, 0.0f},
+                                             {0.0f, 0.0f, 1.0f, 0.0f},
+                                             {0.0f, 0.0f, 0.0f, 1.0f}};
+    RayTracerChallenge::Matrix matrix1(4, 4, identity);
+    RayTracerChallenge::Matrix matrix2 = RayTracerChallenge::Matrix::identity(4);
+    CHECK(matrix2 == matrix1);
+  }
+  SUBCASE("Multiplying a matrix by the identity matrix") {
+    std::vector<std::vector<float>> vect1{{0.0f, 0.0f, 2.0f, 4.0f},
+                                          {1.0f, 2.0f, 4.0f, 8.0f},
+                                          {2.0f, 4.0f, 8.0f, 16.0f},
+                                          {4.0f, 8.0f, 16.0f, 32.0f}};
+    RayTracerChallenge::Matrix matrix1(4, 4, vect1);
+    RayTracerChallenge::Matrix matrix2 = RayTracerChallenge::Matrix::identity(4);
+    CHECK(matrix1 * matrix2 == matrix1);
+  }
+  SUBCASE("Transposing a matrix") {
+    std::vector<std::vector<float>> vect1{{0.0f, 9.0f, 3.0f, 0.0f},
+                                          {9.0f, 8.0f, 0.0f, 8.0f},
+                                          {1.0f, 8.0f, 5.0f, 3.0f},
+                                          {0.0f, 0.0f, 5.0f, 8.0f}};
+    std::vector<std::vector<float>> vect2{{0.0f, 9.0f, 1.0f, 0.0f},
+                                          {9.0f, 8.0f, 8.0f, 0.0f},
+                                          {3.0f, 0.0f, 5.0f, 5.0f},
+                                          {0.0f, 8.0f, 3.0f, 8.0f}};
+    RayTracerChallenge::Matrix matrix1(4, 4, vect1);
+    RayTracerChallenge::Matrix matrix2(4, 4, vect2);
+    CHECK(matrix1.transposed() == matrix2);
+  }
+  SUBCASE("Transposing the identity matrix") {
+    RayTracerChallenge::Matrix matrix1 = RayTracerChallenge::Matrix::identity(4);
+    CHECK(matrix1.transposed() == matrix1);
+  }
+  SUBCASE("Calculating the determinant of a 2x2 matrix") {
+    std::vector<std::vector<float>> vect1{
+        {1.0f, 5.0f},
+        {-3.0f, 2.0f},
+    };
+    RayTracerChallenge::Matrix matrix1(2, 2, vect1);
+    CHECK(matrix1.determinant() == 17.0f);
+  }
+  SUBCASE("A submatrix of a 3x3 matrix is a 2x2 matrix") {
+    std::vector<std::vector<float>> vect1{
+        {1.0f, 5.0f, 0.0f}, {-3.0f, 2.0f, 7.0f}, {0.0f, 6.0f, -3.0f}};
+    std::vector<std::vector<float>> vect2{{-3.0f, 2.0f}, {0.0f, 6.0f}};
+    RayTracerChallenge::Matrix matrix1(3, 3, vect1);
+    RayTracerChallenge::Matrix matrix2(2, 2, vect2);
+    CHECK(matrix1.submatrix(0, 2) == matrix2);
+  }
+  SUBCASE("A submatrix of a 4x4 matrix is a 3x3 matrix") {
+    std::vector<std::vector<float>> vect1{{-6.0f, 1.0f, 1.0f, 6.0f},
+                                          {-8.0f, 5.0f, 8.0f, 6.0f},
+                                          {-1.0f, 0.0f, 8.0f, 2.0f},
+                                          {-7.0f, 1.0f, -1.0f, 1.0f}};
+    std::vector<std::vector<float>> vect2{
+        {-6.0f, 1.0f, 6.0f}, {-8.0f, 8.0f, 6.0f}, {-7.0f, -1.0f, 1.0f}};
+    RayTracerChallenge::Matrix matrix1(4, 4, vect1);
+    RayTracerChallenge::Matrix matrix2(3, 3, vect2);
+    CHECK(matrix1.submatrix(2, 1) == matrix2);
+  }
+  SUBCASE("Calculating the minor of a 3x3 matrix") {
+    std::vector<std::vector<float>> vect{
+        {-3.0f, 5.0f, 0.0f}, {2.0f, -1.0f, -7.0f}, {6.0f, -1.0f, 5.0f}};
+    RayTracerChallenge::Matrix matrix(3, 3, vect);
+    CHECK(matrix.minor(1, 0) == 25);
+    CHECK(matrix.minor(1, 0) == matrix.submatrix(1, 0).determinant());
+  }
+  SUBCASE("Calculating the cofactor of a 3x3 matrix") {
+    std::vector<std::vector<float>> vect{
+        {-3.0f, 5.0f, 0.0f}, {2.0f, -1.0f, -7.0f}, {6.0f, -1.0f, 5.0f}};
+    RayTracerChallenge::Matrix matrix(3, 3, vect);
+    CHECK(matrix.cofactor(0, 0) == -12.0f);
+    CHECK(matrix.cofactor(1, 0) == -25.0f);
+  }
+  SUBCASE("Calculating the determinant of a 3x3 matrix") {
+    std::vector<std::vector<float>> vect{
+        {1.0f, 2.0f, 6.0f}, {-5.0f, 8.0f, -4.0f}, {2.0f, 6.0f, 4.0f}};
+    RayTracerChallenge::Matrix matrix(3, 3, vect);
+    CHECK(matrix.cofactor(0, 0) == 56.0f);
+    CHECK(matrix.cofactor(0, 1) == 12.0f);
+    CHECK(matrix.cofactor(0, 2) == -46.0f);
+    CHECK(matrix.determinant() == -196.0f);
+  }
+  SUBCASE("Calculating the determinant of a 4x4 matrix") {
+    std::vector<std::vector<float>> vect{{-2.0f, -8.0f, 3.0f, 5.0f},
+                                         {-3.0f, 1.0f, 7.0f, 3.0f},
+                                         {1.0f, 2.0f, -9.0f, 6.0f},
+                                         {-6.0f, 7.0f, 7.0f, -9.0f}};
+    RayTracerChallenge::Matrix matrix(4, 4, vect);
+    CHECK(matrix.cofactor(0, 0) == 690.0f);
+    CHECK(matrix.cofactor(0, 1) == 447.0f);
+    CHECK(matrix.cofactor(0, 2) == 210.0f);
+    CHECK(matrix.cofactor(0, 3) == 51.0f);
+    CHECK(matrix.determinant() == -4071.0f);
+  }
+  SUBCASE("Testing an invertible matrix for invertibility") {
+    std::vector<std::vector<float>> vect{{6.0f, 4.0f, 4.0f, 4.0f},
+                                         {5.0f, 5.0f, 7.0f, 6.0f},
+                                         {4.0f, -9.0f, 3.0f, -7.0f},
+                                         {9.0f, 1.0f, 7.0f, -6.0f}};
+    RayTracerChallenge::Matrix matrix(4, 4, vect);
+    CHECK(matrix.invertible() == true);
+  }
+  SUBCASE("Testing an noninvertible matrix for invertibility") {
+    std::vector<std::vector<float>> vect{{-4.0f, 2.0f, -2.0f, -3.0f},
+                                         {9.0f, 6.0f, 2.0f, 6.0f},
+                                         {0.0f, -5.0f, 1.0f, -5.0f},
+                                         {0.0f, 0.0f, 0.0f, 0.0f}};
+    RayTracerChallenge::Matrix matrix(4, 4, vect);
+    CHECK(matrix.invertible() == false);
+  }
+  SUBCASE("Calculating the inverse of a matrix") {
+    std::vector<std::vector<float>> vect1{{-5.0f, 2.0f, 6.0f, -8.0f},
+                                          {1.0f, -5.0f, 1.0f, 8.0f},
+                                          {7.0f, 7.0f, -6.0f, -7.0f},
+                                          {1.0f, -3.0f, 7.0f, 4.0f}};
+    std::vector<std::vector<float>> vect2{{0.21805f, 0.45113f, 0.24060f, -0.04511f},
+                                          {-0.80827f, -1.45677f, -0.44361f, 0.52068f},
+                                          {-0.07895f, -0.22368f, -0.05263f, 0.19737f},
+                                          {-0.52256f, -0.81391f, -0.30075f, 0.30639f}};
+    RayTracerChallenge::Matrix matrix1(4, 4, vect1);
+    RayTracerChallenge::Matrix matrix2(4, 4, vect2);
+    CHECK(matrix1.inverse() == matrix2);
+  }
+  SUBCASE("Calculating the inverse of another matrix") {
+    std::vector<std::vector<float>> vect1{{8.0f, -5.0f, 9.0f, 2.0f},
+                                          {7.0f, 5.0f, 6.0f, 1.0f},
+                                          {-6.0f, 0.0f, 9.0f, 6.0f},
+                                          {-3.0f, 0.0f, -9.0f, -4.0f}};
+    std::vector<std::vector<float>> vect2{{-0.15385f, -0.15385f, -0.28205f, -0.53846f},
+                                          {-0.07692f, 0.12308f, 0.02564f, 0.03077f},
+                                          {0.35897f, 0.35897f, 0.43590f, 0.92308f},
+                                          {-0.69231f, -0.69231f, -0.76932f, -1.92308f}};
+    RayTracerChallenge::Matrix matrix1(4, 4, vect1);
+    RayTracerChallenge::Matrix matrix2(4, 4, vect2);
+    CHECK(matrix1.inverse() == matrix2);
+  }
+  SUBCASE("Calculating the inverse of a third matrix") {
+    std::vector<std::vector<float>> vect1{{9.0f, 3.0f, 0.0f, 9.0f},
+                                          {-5.0f, -2.0f, -6.0f, -3.0f},
+                                          {-4.0f, 9.0f, 6.0f, 4.0f},
+                                          {-7.0f, 6.0f, 6.0f, 2.0f}};
+    std::vector<std::vector<float>> vect2{{-0.04074f, -0.07778f, 0.14444f, -0.22222f},
+                                          {-0.07778f, 0.03333f, 0.36667f, -0.33333f},
+                                          {-0.02901f, -0.14630f, -0.10926f, 0.12963f},
+                                          {0.17778f, 0.06667f, -0.26667f, 0.33333f}};
+    RayTracerChallenge::Matrix matrix1(4, 4, vect1);
+    RayTracerChallenge::Matrix matrix2(4, 4, vect2);
+    CHECK(matrix1.inverse() == matrix2);
+  }
+  SUBCASE("Multiplying a product by its inverse") {
+    std::vector<std::vector<float>> vect1{{3.0f, -9.0f, 7.0f, 3.0f},
+                                          {3.0f, -8.0f, 2.0f, -9.0f},
+                                          {-4.0f, 4.0f, 4.0f, 1.0f},
+                                          {-6.0f, 5.0f, -1.0f, 1.0f}};
+    std::vector<std::vector<float>> vect2{{8.0f, 2.0f, 2.0f, 2.0f},
+                                          {3.0f, -1.0f, 7.0f, 0.0f},
+                                          {7.0f, 0.0f, 5.0f, 4.0f},
+                                          {6.0f, -2.0f, 0.0f, 5.0f}};
+    RayTracerChallenge::Matrix matrix1(4, 4, vect1);
+    RayTracerChallenge::Matrix matrix2(4, 4, vect2);
+    RayTracerChallenge::Matrix product = matrix1 * matrix2;
+    CHECK(product * matrix2.inverse() == matrix1);
   }
 }
