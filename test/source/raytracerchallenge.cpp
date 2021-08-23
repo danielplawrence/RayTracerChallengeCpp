@@ -301,6 +301,32 @@ TEST_CASE("Matrices") {
     RayTracerChallenge::Matrix matrix2(4, 4, vect2);
     CHECK((matrix2 == matrix1) == false);
   }
+  SUBCASE("Matrix inequality with different matrices") {
+    std::vector<std::vector<float>> vect1{{1.0f, 2.0f, 3.0f, 4.0f},
+                                          {5.5f, 6.0f, 7.0f, 8.0f},
+                                          {9.0f, 8.0f, 7.0f, 6.0f},
+                                          {5.0f, 4.0f, 3.0f, 2.0f}};
+    std::vector<std::vector<float>> vect2{{2.0f, 3.0f, 4.0f, 5.0f},
+                                          {6.0f, 7.0f, 8.0f, 9.0f},
+                                          {8.0f, 7.0f, 6.0f, 5.0f},
+                                          {4.0f, 3.0f, 2.0f, 1.0f}};
+    RayTracerChallenge::Matrix matrix1(4, 4, vect1);
+    RayTracerChallenge::Matrix matrix2(4, 4, vect2);
+    CHECK((matrix2 != matrix1) == true);
+  }
+  SUBCASE("Matrix inequality with identical matrices") {
+    std::vector<std::vector<float>> vect1{{1.0f, 2.0f, 3.0f, 4.0f},
+                                          {5.0f, 6.0f, 7.0f, 8.0f},
+                                          {9.0f, 8.0f, 7.0f, 6.0f},
+                                          {5.0f, 4.0f, 3.0f, 2.0f}};
+    std::vector<std::vector<float>> vect2{{1.0f, 2.0f, 3.0f, 4.0f},
+                                          {5.0f, 6.0f, 7.0f, 8.0f},
+                                          {9.0f, 8.0f, 7.0f, 6.0f},
+                                          {5.0f, 4.0f, 3.0f, 2.0f}};
+    RayTracerChallenge::Matrix matrix1(4, 4, vect1);
+    RayTracerChallenge::Matrix matrix2(4, 4, vect2);
+    CHECK((matrix2 != matrix1) == false);
+  }
   SUBCASE("Multiplying two matrices") {
     std::vector<std::vector<float>> vect1{{1.0f, 2.0f, 3.0f, 4.0f},
                                           {5.0f, 6.0f, 7.0f, 8.0f},
