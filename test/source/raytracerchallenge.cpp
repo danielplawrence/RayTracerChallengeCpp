@@ -662,8 +662,11 @@ TEST_CASE("Matrix transformations") {
     RayTracerChallenge::Tuple point = RayTracerChallenge::Tuple::point(1.0f, 0.0f, 1.0f);
     RayTracerChallenge::Matrix transform = RayTracerChallenge::Matrix::identity(4)
                                                .rotatedX(float(M_PI) / 2.0f)
+                                               .rotatedY(float(M_PI) / 2.0f)
+                                               .rotatedZ(float(M_PI) / 2.0f)
                                                .scaled(5.0f, 5.0f, 5.0f)
-                                               .translated(10.0f, 5.0f, 7.0f);
-    CHECK(transform * point == RayTracerChallenge::Tuple::point(15.0f, 0.0f, 7.0f));
+                                               .translated(10.0f, 5.0f, 7.0f)
+                                               .sheared(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+    CHECK(transform * point == RayTracerChallenge::Tuple::point(20.0f, 5.0f, 2.0f));
   }
 }
