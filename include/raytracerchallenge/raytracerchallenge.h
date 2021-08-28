@@ -412,7 +412,7 @@ namespace raytracerchallenge {
       Object();
       bool operator==(const Object &object) const;
     };
-    class Sphere : public Object {};
+    class [[maybe_unused]] Sphere : public Object {};
     class Intersection {
     public:
       float t{};
@@ -427,7 +427,7 @@ namespace raytracerchallenge {
       std::optional<Intersection> hit();
       explicit Intersections(std::vector<Intersection> intersections);
       Intersection operator[](unsigned int x) const;
-      [[nodiscard]] unsigned int size() const;
+      [[nodiscard]] size_t size() const;
 
     private:
       std::vector<Intersection> intersections;

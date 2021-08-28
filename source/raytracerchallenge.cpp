@@ -408,4 +408,4 @@ RayTracerChallenge::Intersection RayTracerChallenge::Intersections::operator[](
     unsigned int x) const {
   return this->intersections[x];
 }
-unsigned int RayTracerChallenge::Intersections::size() const { return this->intersections.size(); }
+size_t RayTracerChallenge::Intersections::size() const { return this->intersections.size(); }
