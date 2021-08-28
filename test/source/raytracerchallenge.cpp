@@ -670,3 +670,67 @@ TEST_CASE("Matrix transformations") {
     CHECK(transform * point == RayTracerChallenge::Tuple::point(20.0f, 5.0f, 2.0f));
   }
 }
+TEST_CASE("Ray-sphere intersections") {
+  using namespace raytracerchallenge;
+  SUBCASE("Creating and querying a ray") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(1.0f, 2.0f, 3.0f);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(4.0f, 5.0f, 6.0f);
+    RayTracerChallenge::Ray ray(origin, direction);
+    CHECK(ray.origin == origin);
+    CHECK(ray.direction == direction);
+  }
+  SUBCASE("Computing a point from a distance") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(2.0f, 3.0f, 4.0f);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(1.0f, 0.0f, 0.0f);
+    RayTracerChallenge::Ray ray(origin, direction);
+    CHECK(ray.position(0.0f) == RayTracerChallenge::Tuple::point(2.0f, 3.0f, 4.0f));
+    CHECK(ray.position(1.0f) == RayTracerChallenge::Tuple::point(3.0f, 3.0f, 4.0f));
+    CHECK(ray.position(-1.0f) == RayTracerChallenge::Tuple::point(1.0f, 3.0f, 4.0f));
+    CHECK(ray.position(2.5f) == RayTracerChallenge::Tuple::point(4.5f, 3.0f, 4.0f));
+  }
+  SUBCASE("Spheres have unique identifiers") {
+    RayTracerChallenge::Sphere sphere1;
+    RayTracerChallenge::Sphere sphere2;
+    CHECK(sphere1.id != sphere2.id);
+  }
+  SUBCASE("A ray intersects a sphere at two points") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0f, 0.0f, -5.0f);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f);
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Ray ray(origin, direction);
+    std::vector<float> intersections = sphere.intersect(ray);
+    CHECK(intersections.size() == 2);
+    CHECK(intersections[0] == 4.0f);
+    CHECK(intersections[1] == 6.0f);
+  }
+  SUBCASE("A ray intersects a sphere at a tangent") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0f, 1.0f, -5.0f);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f);
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Ray ray(origin, direction);
+    std::vector<float> intersections = sphere.intersect(ray);
+    CHECK(intersections.size() == 2);
+    CHECK(intersections[0] == 5.0f);
+    CHECK(intersections[1] == 5.0f);
+  }
+  SUBCASE("A ray originates inside a sphere") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f);
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Ray ray(origin, direction);
+    std::vector<float> intersections = sphere.intersect(ray);
+    CHECK(intersections.size() == 2);
+    CHECK(intersections[0] == -1.0f);
+    CHECK(intersections[1] == 1.0f);
+  }
+  SUBCASE("A sphere is behind a ray") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 5.0f);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f);
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Ray ray(origin, direction);
+    std::vector<float> intersections = sphere.intersect(ray);
+    CHECK(intersections.size() == 2);
+    CHECK(intersections[0] == -6.0f);
+    CHECK(intersections[1] == -4.0f);
+  }
+}

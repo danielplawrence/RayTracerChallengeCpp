@@ -342,7 +342,8 @@ namespace raytracerchallenge {
        * @param zy scaling of z relative to y
        * @return sheared matrix
        */
-      [[nodiscard]] Matrix sheared(float xy, float xz, float yx, float yz, float zx, float zy) const;
+      [[nodiscard]] Matrix sheared(float xy, float xz, float yx, float yz, float zx,
+                                   float zy) const;
       /**
        * @brief Return a translation matrix for the provided x, y, z values
        * @param x value for x
@@ -391,6 +392,19 @@ namespace raytracerchallenge {
 
     private:
       static bool floatEquals(float x, float y);
+    };
+    class Ray {
+    public:
+      Tuple origin;
+      Tuple direction;
+      Ray(Tuple origin, Tuple direction);
+      [[nodiscard]] Tuple position(float t) const;
+    };
+    class Sphere {
+    public:
+      std::string id;
+      Sphere();
+      std::vector<float> intersect(Ray ray);
     };
   };
 }  // namespace raytracerchallenge

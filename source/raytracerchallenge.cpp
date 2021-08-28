@@ -2,6 +2,7 @@
 #include <fmt/format.h>
 #include <raytracerchallenge/raytracerchallenge.h>
 
+#include <chrono>
 #include <cmath>
 
 using namespace raytracerchallenge;
@@ -338,4 +339,31 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::sheared(float xy, float x
                                                                float yz, float zx, float zy) const {
   RayTracerChallenge::Matrix t = shearing(xy, xz, yx, yz, zx, zy);
   return t * *this;
+}
+RayTracerChallenge::Ray::Ray(RayTracerChallenge::Tuple origin,
+                             RayTracerChallenge::Tuple direction) {
+  this->origin = origin;
+  this->direction = direction;
+}
+RayTracerChallenge::Tuple RayTracerChallenge::Ray::position(float t) const {
+  return RayTracerChallenge::Tuple(this->origin + this->direction * t);
+}
+RayTracerChallenge::Sphere::Sphere() {
+  uint64_t current_time_us = std::chrono::duration_cast<std::chrono::microseconds>(
+                                 std::chrono::high_resolution_clock::now().time_since_epoch())
+                                 .count();
+  this->id = fmt::to_string(current_time_us);
+}
+std::vector<float> RayTracerChallenge::Sphere::intersect(RayTracerChallenge::Ray ray) {
+  Tuple sphereToRay = ray.origin - RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+  float a = ray.direction.dot(ray.direction);
+  float b = 2.0f * ray.direction.dot(sphereToRay);
+  float c = sphereToRay.dot(sphereToRay) - 1.0f;
+  float discriminant = pow(b, 2.0f) - 4.0f * a * c;
+  if (discriminant < 0.0f) {
+    return std::vector<float>(0);
+  }
+  float t1 = (-b - sqrt(discriminant)) / (2.0f * a);
+  float t2 = (-b + sqrt(discriminant)) / (2.0f * a);
+  return {t1, t2};
 }
