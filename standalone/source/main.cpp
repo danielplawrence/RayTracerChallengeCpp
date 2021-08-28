@@ -13,6 +13,7 @@ auto main() -> int {
   RayTracerChallenge::Canvas canvas(canvasPixels, canvasPixels);
   RayTracerChallenge::Color color(1.0f, 0.0f, 0.0f);
   RayTracerChallenge::Sphere shape;
+  shape.transform = RayTracerChallenge::Matrix::scaling(1.0f, 0.5f, 1.0f);
   for (int y = 0; y < canvasPixels; y++) {
     float worldY = half - pixelSize * float(y);
     for (int x = 0; x < canvasPixels; x++) {
