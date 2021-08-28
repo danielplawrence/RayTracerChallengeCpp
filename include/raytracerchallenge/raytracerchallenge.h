@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -400,11 +401,34 @@ namespace raytracerchallenge {
       Ray(Tuple origin, Tuple direction);
       [[nodiscard]] Tuple position(float t) const;
     };
-    class Sphere {
+    class Intersection;
+    class Intersections;
+    class Object {
     public:
       std::string id;
-      Sphere();
-      std::vector<float> intersect(Ray ray);
+      Intersections intersect(Ray ray);
+      Object();
+      bool operator==(const Object &object) const;
+    };
+    class Sphere : public Object {};
+    class Intersection {
+    public:
+      float t{};
+      Object object;
+      Intersection(float t, Object object);
+      Intersection();
+      bool operator==(const Intersection &intersection) const;
+      bool operator<(const Intersection &intersection) const;
+    };
+    class Intersections {
+    public:
+      std::optional<Intersection> hit();
+      explicit Intersections(std::vector<Intersection> intersections);
+      Intersection operator[](unsigned int x) const;
+      [[nodiscard]] unsigned int size() const;
+
+    private:
+      std::vector<Intersection> intersections;
     };
   };
 }  // namespace raytracerchallenge

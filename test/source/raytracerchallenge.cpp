@@ -693,44 +693,98 @@ TEST_CASE("Ray-sphere intersections") {
     RayTracerChallenge::Sphere sphere2;
     CHECK(sphere1.id != sphere2.id);
   }
+  SUBCASE("An intersection encapsulates t and object") {
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Intersection intersection(3.5f, sphere);
+    CHECK(intersection.t == 3.5f);
+    CHECK(intersection.object == sphere);
+  }
+  SUBCASE("Aggregating intersections") {
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Intersection intersection1(1.0f, sphere);
+    RayTracerChallenge::Intersection intersection2(2.0f, sphere);
+    std::vector<RayTracerChallenge::Intersection> intersections{intersection1, intersection2};
+    CHECK(intersections.size() == 2);
+    CHECK(intersections[0].object == sphere);
+    CHECK(intersections[1].object == sphere);
+  }
   SUBCASE("A ray intersects a sphere at two points") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0f, 0.0f, -5.0f);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f);
     RayTracerChallenge::Sphere sphere;
     RayTracerChallenge::Ray ray(origin, direction);
-    std::vector<float> intersections = sphere.intersect(ray);
+    RayTracerChallenge::Intersections intersections = sphere.intersect(ray);
     CHECK(intersections.size() == 2);
-    CHECK(intersections[0] == 4.0f);
-    CHECK(intersections[1] == 6.0f);
+    CHECK(intersections[0].t == 4.0f);
+    CHECK(intersections[1].t == 6.0f);
+    CHECK(intersections[0].object == sphere);
+    CHECK(intersections[1].object == sphere);
   }
   SUBCASE("A ray intersects a sphere at a tangent") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0f, 1.0f, -5.0f);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f);
     RayTracerChallenge::Sphere sphere;
     RayTracerChallenge::Ray ray(origin, direction);
-    std::vector<float> intersections = sphere.intersect(ray);
+    RayTracerChallenge::Intersections intersections = sphere.intersect(ray);
     CHECK(intersections.size() == 2);
-    CHECK(intersections[0] == 5.0f);
-    CHECK(intersections[1] == 5.0f);
+    CHECK(intersections[0].t == 5.0f);
+    CHECK(intersections[1].t == 5.0f);
+    CHECK(intersections[0].object == sphere);
+    CHECK(intersections[1].object == sphere);
   }
   SUBCASE("A ray originates inside a sphere") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f);
     RayTracerChallenge::Sphere sphere;
     RayTracerChallenge::Ray ray(origin, direction);
-    std::vector<float> intersections = sphere.intersect(ray);
+    RayTracerChallenge::Intersections intersections = sphere.intersect(ray);
     CHECK(intersections.size() == 2);
-    CHECK(intersections[0] == -1.0f);
-    CHECK(intersections[1] == 1.0f);
+    CHECK(intersections[0].t == -1.0f);
+    CHECK(intersections[1].t == 1.0f);
+    CHECK(intersections[0].object == sphere);
+    CHECK(intersections[1].object == sphere);
   }
   SUBCASE("A sphere is behind a ray") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 5.0f);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f);
     RayTracerChallenge::Sphere sphere;
     RayTracerChallenge::Ray ray(origin, direction);
-    std::vector<float> intersections = sphere.intersect(ray);
+    RayTracerChallenge::Intersections intersections = sphere.intersect(ray);
     CHECK(intersections.size() == 2);
-    CHECK(intersections[0] == -6.0f);
-    CHECK(intersections[1] == -4.0f);
+    CHECK(intersections[0].t == -6.0f);
+    CHECK(intersections[1].t == -4.0f);
+    CHECK(intersections[0].object == sphere);
+    CHECK(intersections[1].object == sphere);
+  }
+  SUBCASE("The hit, when all intersections have positive t") {
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Intersection intersection1(1.0f, sphere);
+    RayTracerChallenge::Intersection intersection2(1.0f, sphere);
+    RayTracerChallenge::Intersections xs({intersection1, intersection2});
+    CHECK(xs.hit() == intersection1);
+  }
+  SUBCASE("The hit, when some intersections have negative t") {
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Intersection intersection1(-1.0f, sphere);
+    RayTracerChallenge::Intersection intersection2(1.0f, sphere);
+    RayTracerChallenge::Intersections xs({intersection1, intersection2});
+    CHECK(xs.hit() == intersection2);
+  }
+  SUBCASE("The hit, when all intersections have negative t") {
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Intersection intersection1(-2.0f, sphere);
+    RayTracerChallenge::Intersection intersection2(-1.0f, sphere);
+    RayTracerChallenge::Intersections xs({intersection1, intersection2});
+    CHECK(xs.hit().has_value() == false);
+  }
+  SUBCASE("The hit is always the lowest nonnegative intersection") {
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Intersection intersection1(5.0f, sphere);
+    RayTracerChallenge::Intersection intersection2(7.0f, sphere);
+    RayTracerChallenge::Intersection intersection3(-3.0f, sphere);
+    RayTracerChallenge::Intersection intersection4(2.0f, sphere);
+    RayTracerChallenge::Intersections xs(
+        {intersection1, intersection2, intersection3, intersection4});
+    CHECK(xs.hit() == intersection4);
   }
 }

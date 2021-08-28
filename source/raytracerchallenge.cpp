@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <cmath>
+#include <utility>
 
 using namespace raytracerchallenge;
 
@@ -348,22 +349,57 @@ RayTracerChallenge::Ray::Ray(RayTracerChallenge::Tuple origin,
 RayTracerChallenge::Tuple RayTracerChallenge::Ray::position(float t) const {
   return RayTracerChallenge::Tuple(this->origin + this->direction * t);
 }
-RayTracerChallenge::Sphere::Sphere() {
+RayTracerChallenge::Object::Object() {
   uint64_t current_time_us = std::chrono::duration_cast<std::chrono::microseconds>(
                                  std::chrono::high_resolution_clock::now().time_since_epoch())
                                  .count();
   this->id = fmt::to_string(current_time_us);
 }
-std::vector<float> RayTracerChallenge::Sphere::intersect(RayTracerChallenge::Ray ray) {
+RayTracerChallenge::Intersections RayTracerChallenge::Object::intersect(
+    RayTracerChallenge::Ray ray) {
   Tuple sphereToRay = ray.origin - RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
   float a = ray.direction.dot(ray.direction);
   float b = 2.0f * ray.direction.dot(sphereToRay);
   float c = sphereToRay.dot(sphereToRay) - 1.0f;
   float discriminant = pow(b, 2.0f) - 4.0f * a * c;
   if (discriminant < 0.0f) {
-    return std::vector<float>(0);
+    return Intersections(std::vector<RayTracerChallenge::Intersection>(0));
   }
   float t1 = (-b - sqrt(discriminant)) / (2.0f * a);
   float t2 = (-b + sqrt(discriminant)) / (2.0f * a);
-  return {t1, t2};
+
+  return Intersections(std::vector<RayTracerChallenge::Intersection>{
+      RayTracerChallenge::Intersection(t1, *this), RayTracerChallenge::Intersection(t2, *this)});
 }
+bool RayTracerChallenge::Object::operator==(const Object &object) const {
+  return this->id == object.id;
+}
+RayTracerChallenge::Intersection::Intersection(float t, Object object) {
+  this->t = t;
+  this->object = std::move(object);
+}
+RayTracerChallenge::Intersection::Intersection() = default;
+bool RayTracerChallenge::Intersection::operator==(const Intersection &intersection) const {
+  return this->object == intersection.object && this->t == intersection.t;
+}
+bool RayTracerChallenge::Intersection::operator<(
+    const RayTracerChallenge::Intersection &intersection) const {
+  return this->t < intersection.t;
+}
+std::optional<RayTracerChallenge::Intersection> RayTracerChallenge::Intersections::hit() {
+  std::vector<RayTracerChallenge::Intersection> nonNegative;
+  std::copy_if(intersections.cbegin(), intersections.cend(), std::back_inserter(nonNegative),
+               [](Intersection i) { return i.t >= 0.0f; });
+  if (nonNegative.empty()) {
+    return {};
+  }
+  return *std::min_element(nonNegative.begin(), nonNegative.end());
+}
+RayTracerChallenge::Intersections::Intersections(std::vector<Intersection> intersections) {
+  this->intersections = std::move(intersections);
+}
+RayTracerChallenge::Intersection RayTracerChallenge::Intersections::operator[](
+    unsigned int x) const {
+  return this->intersections[x];
+}
+unsigned int RayTracerChallenge::Intersections::size() const { return this->intersections.size(); }
