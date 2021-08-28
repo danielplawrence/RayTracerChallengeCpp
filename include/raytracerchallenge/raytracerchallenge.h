@@ -305,7 +305,7 @@ namespace raytracerchallenge {
        * @param z value for z
        * @return translated matrix
        */
-      Matrix translated(float x, float y, float z) const;
+      [[nodiscard]] Matrix translated(float x, float y, float z) const;
       /**
        * @brief Scale this matrix using the provided x, y, z values
        * @param x value for x
@@ -313,25 +313,25 @@ namespace raytracerchallenge {
        * @param z value for z
        * @return scaled matrix
        */
-      Matrix scaled(float x, float y, float z) const;
+      [[nodiscard]] Matrix scaled(float x, float y, float z) const;
       /**
        * @brief Rotate this matrix for the provided radians on the X axis
        * @param radians
        * @return X-rotated matrix
        */
-      Matrix rotatedX(float radians) const;
+      [[nodiscard]] Matrix rotatedX(float radians) const;
       /**
        * @brief Rotate this matrix for the provided radians on the Y axis
        * @param radians
        * @return Y-rotated matrix
        */
-      Matrix rotatedY(float radians) const;
+      [[nodiscard]] Matrix rotatedY(float radians) const;
       /**
        * @brief Rotate this matrix for the provided radians on the Z axis
        * @param radians
        * @return Z-rotated matrix
        */
-      Matrix rotatedZ(float radians) const;
+      [[nodiscard]] Matrix rotatedZ(float radians) const;
       /**
        * @brief Shear this matrix using the provided params
        * @param xy scaling of x relative to y
@@ -342,7 +342,7 @@ namespace raytracerchallenge {
        * @param zy scaling of z relative to y
        * @return sheared matrix
        */
-      Matrix sheared(float xy, float xz, float yx, float yz, float zx, float zy) const;
+      [[nodiscard]] Matrix sheared(float xy, float xz, float yx, float yz, float zx, float zy) const;
       /**
        * @brief Return a translation matrix for the provided x, y, z values
        * @param x value for x
