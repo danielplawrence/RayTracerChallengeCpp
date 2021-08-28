@@ -349,17 +349,23 @@ RayTracerChallenge::Ray::Ray(RayTracerChallenge::Tuple origin,
 RayTracerChallenge::Tuple RayTracerChallenge::Ray::position(float t) const {
   return RayTracerChallenge::Tuple(this->origin + this->direction * t);
 }
+RayTracerChallenge::Ray RayTracerChallenge::Ray::transform(
+    const RayTracerChallenge::Matrix &matrix) {
+  return {matrix * this->origin, matrix * this->direction};
+}
 RayTracerChallenge::Object::Object() {
   uint64_t current_time_us = std::chrono::duration_cast<std::chrono::microseconds>(
                                  std::chrono::high_resolution_clock::now().time_since_epoch())
                                  .count();
   this->id = fmt::to_string(current_time_us);
+  this->transform = Matrix::identity(4);
 }
 RayTracerChallenge::Intersections RayTracerChallenge::Object::intersect(
     RayTracerChallenge::Ray ray) {
-  Tuple sphereToRay = ray.origin - RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
-  float a = ray.direction.dot(ray.direction);
-  float b = 2.0f * ray.direction.dot(sphereToRay);
+  RayTracerChallenge::Ray transformed = ray.transform(this->transform.inverse());
+  Tuple sphereToRay = transformed.origin - RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+  float a = transformed.direction.dot(transformed.direction);
+  float b = 2.0f * transformed.direction.dot(sphereToRay);
   float c = sphereToRay.dot(sphereToRay) - 1.0f;
   float discriminant = pow(b, 2.0f) - 4.0f * a * c;
   if (discriminant < 0.0f) {

@@ -787,4 +787,52 @@ TEST_CASE("Ray-sphere intersections") {
         {intersection1, intersection2, intersection3, intersection4});
     CHECK(xs.hit() == intersection4);
   }
+  SUBCASE("Translating a ray") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(1.0f, 2.0f, 3.0f);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0f, 1.0f, 0.0f);
+    RayTracerChallenge::Ray ray(origin, direction);
+    RayTracerChallenge::Matrix matrix = RayTracerChallenge::Matrix::translation(3.0f, 4.0f, 5.0f);
+    RayTracerChallenge::Ray ray2 = ray.transform(matrix);
+    CHECK(ray2.origin == RayTracerChallenge::Tuple::point(4.0f, 6.0f, 8.0f));
+    CHECK(ray2.direction == RayTracerChallenge::Tuple::vector(0.0f, 1.0f, 0.0f));
+  }
+  SUBCASE("Scaling a ray") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(1.0f, 2.0f, 3.0f);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0f, 1.0f, 0.0f);
+    RayTracerChallenge::Ray ray(origin, direction);
+    RayTracerChallenge::Matrix matrix = RayTracerChallenge::Matrix::scaling(2.0f, 3.0f, 4.0f);
+    RayTracerChallenge::Ray ray2 = ray.transform(matrix);
+    CHECK(ray2.origin == RayTracerChallenge::Tuple::point(2.0f, 6.0f, 12.0f));
+    CHECK(ray2.direction == RayTracerChallenge::Tuple::vector(0.0f, 3.0f, 0.0f));
+  }
+  SUBCASE("A sphere's default transformation") {
+    RayTracerChallenge::Sphere sphere;
+    CHECK(sphere.transform == RayTracerChallenge::Matrix::identity(4));
+  }
+  SUBCASE("Changing a sphere's transformation") {
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Matrix matrix = RayTracerChallenge::Matrix::translation(2.0f, 3.0f, 4.0f);
+    sphere.transform = matrix;
+    CHECK(sphere.transform == matrix);
+  }
+  SUBCASE("Intersecting a scaled sphere with a ray") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0f, 0.0f, -5.0f);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f);
+    RayTracerChallenge::Ray ray(origin, direction);
+    RayTracerChallenge::Sphere sphere;
+    sphere.transform = RayTracerChallenge::Matrix::scaling(2.0f, 2.0f, 2.0f);
+    RayTracerChallenge::Intersections xs = sphere.intersect(ray);
+    CHECK(xs.size() == 2);
+    CHECK(xs[0].t == 3.0f);
+    CHECK(xs[1].t == 7.0f);
+  }
+  SUBCASE("Intersecting a translated sphere with a ray") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0f, 0.0f, -5.0f);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f);
+    RayTracerChallenge::Ray ray(origin, direction);
+    RayTracerChallenge::Sphere sphere;
+    sphere.transform = RayTracerChallenge::Matrix::translation(5.0f, 0.0f, 0.0f);
+    RayTracerChallenge::Intersections xs = sphere.intersect(ray);
+    CHECK(xs.size() == 0);
+  }
 }

@@ -400,12 +400,14 @@ namespace raytracerchallenge {
       Tuple direction;
       Ray(Tuple origin, Tuple direction);
       [[nodiscard]] Tuple position(float t) const;
+      Ray transform(const Matrix &matrix);
     };
     class Intersection;
     class Intersections;
     class Object {
     public:
       std::string id;
+      Matrix transform;
       Intersections intersect(Ray ray);
       Object();
       bool operator==(const Object &object) const;
