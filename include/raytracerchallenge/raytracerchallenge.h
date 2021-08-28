@@ -412,7 +412,7 @@ namespace raytracerchallenge {
       Object();
       bool operator==(const Object &object) const;
     };
-    class [[maybe_unused]] Sphere : public Object {};
+    class [[maybe_unused]] Sphere : public Object{};
     class Intersection {
     public:
       float t{};

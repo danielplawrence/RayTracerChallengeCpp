@@ -1,31 +1,32 @@
 #include <raytracerchallenge/raytracerchallenge.h>
-#include <raytracerchallenge/version.h>
 
-#include <cxxopts.hpp>
-#include <iostream>
-#include <string>
-#include <unordered_map>
+#include <fstream>
 
-auto main(int argc, char** argv) -> int {
-  cxxopts::Options options(*argv, "Welcome to RayTracerChallenge");
-  // clang-format off
-  options.add_options()
-    ("h,help", "Show help")
-    ("v,version", "Print the current version number")
-  ;
-  // clang-format on
-
-  auto result = options.parse(argc, argv);
-
-  if (result["help"].as<bool>()) {
-    std::cout << options.help() << std::endl;
-    return 0;
+using namespace raytracerchallenge;
+auto main() -> int {
+  RayTracerChallenge::Tuple rayOrigin = RayTracerChallenge::Tuple::point(0.0f, 0.0f, -5.0f);
+  float wallZ = 10.0f;
+  float wallSize = 7.0f;
+  int canvasPixels = 100;
+  float pixelSize = wallSize / float(canvasPixels);
+  float half = wallSize / 2;
+  RayTracerChallenge::Canvas canvas(canvasPixels, canvasPixels);
+  RayTracerChallenge::Color color(1.0f, 0.0f, 0.0f);
+  RayTracerChallenge::Sphere shape;
+  for (int y = 0; y < canvasPixels; y++) {
+    float worldY = half - pixelSize * float(y);
+    for (int x = 0; x < canvasPixels; x++) {
+      float worldX = -half + pixelSize * float(x);
+      RayTracerChallenge::Tuple position = RayTracerChallenge::Tuple::point(worldX, worldY, wallZ);
+      RayTracerChallenge::Ray ray(rayOrigin, (position - rayOrigin).normalize());
+      RayTracerChallenge::Intersections xs = shape.intersect(ray);
+      if (xs.hit().has_value()) {
+        canvas.writePixel(x, y, color);
+      }
+    }
   }
-
-  if (result["version"].as<bool>()) {
-    std::cout << "RayTracerChallenge, version " << RAYTRACERCHALLENGE_VERSION << std::endl;
-    return 0;
-  }
-
+  std::ofstream out("output.ppm");
+  out << canvas.toPortablePixmap();
+  out.close();
   return 0;
 }
