@@ -461,7 +461,15 @@ namespace raytracerchallenge {
     /**
      * @brief Represents a sphere
      */
-    class [[maybe_unused]] Sphere : public Object{};
+    class [[maybe_unused]] Sphere : public Object {
+    public:
+      /**
+       * @brief Return the normal vector at the specified point on a sphere
+       * @param point
+       * @return normal vector
+       */
+      Tuple normalAt(Tuple point);
+    };
     /**
      * @brief Represents an intersection between a ray an object
      */

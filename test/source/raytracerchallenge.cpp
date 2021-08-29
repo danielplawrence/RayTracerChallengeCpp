@@ -836,3 +836,49 @@ TEST_CASE("Ray-sphere intersections") {
     CHECK(xs.size() == 0);
   }
 }
+TEST_CASE("Normals") {
+  using namespace raytracerchallenge;
+  SUBCASE("The normal on a sphere at a point on the x axis") {
+    RayTracerChallenge::Sphere sphere;
+    auto n = sphere.normalAt(RayTracerChallenge::Tuple::point(1.0f, 0.0f, 0.0f));
+    CHECK(n == RayTracerChallenge::Tuple::vector(1.0f, 0.0f, 0.0f));
+  }
+  SUBCASE("The normal on a sphere at a point on the y axis") {
+    RayTracerChallenge::Sphere sphere;
+    auto n = sphere.normalAt(RayTracerChallenge::Tuple::point(0.0f, 1.0f, 0.0f));
+    CHECK(n == RayTracerChallenge::Tuple::vector(0.0f, 1.0f, 0.0f));
+  }
+  SUBCASE("The normal on a sphere at a point on the z axis") {
+    RayTracerChallenge::Sphere sphere;
+    auto n = sphere.normalAt(RayTracerChallenge::Tuple::point(0.0f, 0.0f, 1.0f));
+    CHECK(n == RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f));
+  }
+  SUBCASE("The normal on a sphere at a nonaxial point") {
+    RayTracerChallenge::Sphere sphere;
+    auto n = sphere.normalAt(
+        RayTracerChallenge::Tuple::point(sqrt(3.0f) / 3.0f, sqrt(3.0f) / 3.0f, sqrt(3.0f) / 3.0f));
+    CHECK(n
+          == RayTracerChallenge::Tuple::vector(sqrt(3.0f) / 3.0f, sqrt(3.0f) / 3.0f,
+                                               sqrt(3.0f) / 3.0f));
+  }
+  SUBCASE("The normal is a normalized vector") {
+    RayTracerChallenge::Sphere sphere;
+    auto n = sphere.normalAt(
+        RayTracerChallenge::Tuple::point(sqrt(3.0f) / 3.0f, sqrt(3.0f) / 3.0f, sqrt(3.0f) / 3.0f));
+    CHECK(n == n.normalize());
+  }
+  SUBCASE("Computing the normal on a translated sphere") {
+    RayTracerChallenge::Sphere sphere;
+    sphere.transform = RayTracerChallenge::Matrix::translation(0.0f, 1.0f, 0.0f);
+    auto n = sphere.normalAt(RayTracerChallenge::Tuple::point(0.0f, 1.70711f, -0.70711f));
+    CHECK(n == RayTracerChallenge::Tuple::vector(0.0f, 0.70711f, -0.70711f));
+  }
+  SUBCASE("Computing the normal on a transformed sphere") {
+    RayTracerChallenge::Sphere sphere;
+    sphere.transform = (RayTracerChallenge::Matrix::scaling(1.0f, 0.5f, 1.0f)
+                        * RayTracerChallenge::Matrix::rotationZ(float(M_PI) / 5.0f));
+    auto n = sphere.normalAt(
+        RayTracerChallenge::Tuple::point(0.0f, sqrt(2.0f) / 2.0f, -sqrt(2.0f) / 2.0f));
+    CHECK(n == RayTracerChallenge::Tuple::vector(0.0f, 0.97014f, -0.24254f));
+  }
+}

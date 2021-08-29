@@ -409,3 +409,10 @@ RayTracerChallenge::Intersection RayTracerChallenge::Intersections::operator[](
   return this->intersections[x];
 }
 size_t RayTracerChallenge::Intersections::size() const { return this->intersections.size(); }
+RayTracerChallenge::Tuple RayTracerChallenge::Sphere::normalAt(RayTracerChallenge::Tuple point) {
+  auto objectPoint = this->transform.inverse() * point;
+  auto objectNormal = objectPoint - RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+  auto worldNormal = (this->transform.inverse().transposed()) * objectNormal;
+  worldNormal.w = 0.0f;
+  return worldNormal.normalize();
+}
