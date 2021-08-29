@@ -430,6 +430,18 @@ namespace raytracerchallenge {
        */
       Ray transform(const Matrix &matrix);
     };
+    /**
+     * @brief Represents a material
+     */
+    class Material {
+    public:
+      float ambient = 0.1f;
+      float diffuse = 0.9f;
+      float specular = 0.9f;
+      float shininess = 200.0f;
+      Color color = Color(1.0f, 1.0f, 1.0f);
+      bool operator==(const Material &material) const;
+    };
     class Intersection;
     class Intersections;
     /**
@@ -445,6 +457,10 @@ namespace raytracerchallenge {
        * @brief Transformation matrix of this object
        */
       Matrix transform;
+      /**
+       * @brief Material for this object
+       */
+      Material material;
       /**
        * @brief Return all intersections between this object
        * and the provided ray
@@ -542,5 +558,31 @@ namespace raytracerchallenge {
     private:
       std::vector<Intersection> intersections;
     };
+    /**
+     * @brief Represents a light source
+     */
+    class PointLight {
+    public:
+      Color intensity;
+      Tuple position;
+      /**
+       * @brief Construct a new PointLight
+       * @param position Tuple representing the position of the light
+       * @param intensity Color of the light
+       */
+      PointLight(Tuple position, Color intensity);
+    };
+    /**
+     * Calculate the lighting at a particular position on a material
+     * using the Phong reflection model
+     * @param material Target material
+     * @param light Light source
+     * @param position Position we need the lighting for
+     * @param eyeVector Eye vector
+     * @param normalVector Normal vector
+     * @return The color for the target position
+     */
+    static Color lighting(Material material, PointLight light, Tuple position, Tuple eyeVector,
+                          Tuple normalVector);
   };
 }  // namespace raytracerchallenge

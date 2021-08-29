@@ -420,3 +420,40 @@ RayTracerChallenge::Tuple RayTracerChallenge::Sphere::normalAt(RayTracerChalleng
   worldNormal.w = 0.0f;
   return worldNormal.normalize();
 }
+RayTracerChallenge::PointLight::PointLight(RayTracerChallenge::Tuple position,
+                                           RayTracerChallenge::Color intensity) {
+  this->position = position;
+  this->intensity = intensity;
+}
+bool RayTracerChallenge::Material::operator==(const RayTracerChallenge::Material &material) const {
+  return this->ambient == material.ambient && this->diffuse == material.diffuse
+         && this->specular == material.specular && this->shininess == material.shininess;
+}
+RayTracerChallenge::Color RayTracerChallenge::lighting(RayTracerChallenge::Material material,
+                                                       RayTracerChallenge::PointLight light,
+                                                       RayTracerChallenge::Tuple position,
+                                                       RayTracerChallenge::Tuple eyeVector,
+                                                       RayTracerChallenge::Tuple normalVector) {
+  Color diffuse;
+  Color specular;
+  Color ambient;
+  auto effectiveColor = material.color * light.intensity;
+  auto lightVector = (light.position - position).normalize();
+  ambient = effectiveColor * material.ambient;
+  auto lightDotNormal = lightVector.dot(normalVector);
+  if (lightDotNormal < 0.0f) {
+    diffuse = Color(0.0f, 0.0f, 0.0f);
+    specular = Color(0.0f, 0.0f, 0.0f);
+  } else {
+    diffuse = effectiveColor * material.diffuse * lightDotNormal;
+    auto reflectVector = (-lightVector).reflect(normalVector);
+    auto reflectDotEye = reflectVector.dot(eyeVector);
+    if (reflectDotEye <= 0.0f) {
+      specular = Color(0.0f, 0.0f, 0.0f);
+    } else {
+      auto factor = pow(reflectDotEye, material.shininess);
+      specular = light.intensity * material.specular * factor;
+    }
+  }
+  return ambient + diffuse + specular;
+}

@@ -670,6 +670,26 @@ TEST_CASE("Matrix transformations") {
     CHECK(transform * point == RayTracerChallenge::Tuple::point(20.0f, 5.0f, 2.0f));
   }
 }
+TEST_CASE("Spheres") {
+  using namespace raytracerchallenge;
+  SUBCASE("Spheres have unique identifiers") {
+    RayTracerChallenge::Sphere sphere1;
+    RayTracerChallenge::Sphere sphere2;
+    CHECK(sphere1.id != sphere2.id);
+  }
+  SUBCASE("A Sphere has a default material") {
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Material material;
+    CHECK(sphere.material == material);
+  }
+  SUBCASE("A Sphere may be assigned a material") {
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Material material;
+    material.ambient = 1.0f;
+    sphere.material = material;
+    CHECK(sphere.material == material);
+  }
+}
 TEST_CASE("Ray-sphere intersections") {
   using namespace raytracerchallenge;
   SUBCASE("Creating and querying a ray") {
@@ -687,11 +707,6 @@ TEST_CASE("Ray-sphere intersections") {
     CHECK(ray.position(1.0f) == RayTracerChallenge::Tuple::point(3.0f, 3.0f, 4.0f));
     CHECK(ray.position(-1.0f) == RayTracerChallenge::Tuple::point(1.0f, 3.0f, 4.0f));
     CHECK(ray.position(2.5f) == RayTracerChallenge::Tuple::point(4.5f, 3.0f, 4.0f));
-  }
-  SUBCASE("Spheres have unique identifiers") {
-    RayTracerChallenge::Sphere sphere1;
-    RayTracerChallenge::Sphere sphere2;
-    CHECK(sphere1.id != sphere2.id);
   }
   SUBCASE("An intersection encapsulates t and object") {
     RayTracerChallenge::Sphere sphere;
@@ -895,5 +910,73 @@ TEST_CASE("Reflecting vectors") {
     auto n = RayTracerChallenge::Tuple::vector(sqrt(2.0f) / 2.0f, sqrt(2.0f) / 2.0f, 0.0f);
     auto r = v.reflect(n);
     CHECK(r == RayTracerChallenge::Tuple::vector(1.0f, 0.0f, 0.0f));
+  }
+}
+TEST_CASE("Point Lights") {
+  using namespace raytracerchallenge;
+  SUBCASE("A point light has a position and intensity") {
+    auto intensity = RayTracerChallenge::Color(1.0f, 1.0f, 1.0f);
+    auto position = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+    auto light = RayTracerChallenge::PointLight(position, intensity);
+    CHECK(light.intensity == intensity);
+    CHECK(light.position == position);
+  }
+}
+TEST_CASE("Lighting") {
+  using namespace raytracerchallenge;
+  SUBCASE("Lighting with the eye between the light and the surface") {
+    RayTracerChallenge::Material m;
+    auto position = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+    auto eyeVector = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.0f);
+    auto normalVector = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.0f);
+    auto light
+        = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0f, 0.0f, -10.0f),
+                                         RayTracerChallenge::Color(1.0f, 1.0f, 1.0f));
+    auto result = RayTracerChallenge::lighting(m, light, position, eyeVector, normalVector);
+    CHECK(result == RayTracerChallenge::Color(1.9f, 1.9f, 1.9f));
+  }
+  SUBCASE("Lighting with the eye between the light and the surface, eye offset 45 degrees") {
+    RayTracerChallenge::Material m;
+    auto position = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+    auto eyeVector = RayTracerChallenge::Tuple::vector(0.0f, sqrt(2.0f) / 2.0f, -sqrt(2.0f) / 2.0f);
+    auto normalVector = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.0f);
+    auto light
+        = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0f, 0.0f, -10.0f),
+                                         RayTracerChallenge::Color(1.0f, 1.0f, 1.0f));
+    auto result = RayTracerChallenge::lighting(m, light, position, eyeVector, normalVector);
+    CHECK(result == RayTracerChallenge::Color(1.0f, 1.0f, 1.0f));
+  }
+  SUBCASE("Lighting with the eye opposite surface, light offset 45 degrees") {
+    RayTracerChallenge::Material m;
+    auto position = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+    auto eyeVector = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.0f);
+    auto normalVector = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.0f);
+    auto light
+        = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0f, 10.0f, -10.0f),
+                                         RayTracerChallenge::Color(1.0f, 1.0f, 1.0f));
+    auto result = RayTracerChallenge::lighting(m, light, position, eyeVector, normalVector);
+    CHECK(result == RayTracerChallenge::Color(0.7364f, 0.7364f, 0.7364f));
+  }
+  SUBCASE("Lighting with eye in the path of the reflection vector") {
+    RayTracerChallenge::Material m;
+    auto position = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+    auto eyeVector
+        = RayTracerChallenge::Tuple::vector(0.0f, -sqrt(2.0f) / 2.0f, -sqrt(2.0f) / 2.0f);
+    auto normalVector = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.0f);
+    auto light
+        = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0f, 10.0f, -10.0f),
+                                         RayTracerChallenge::Color(1.0f, 1.0f, 1.0f));
+    auto result = RayTracerChallenge::lightinggit a(m, light, position, eyeVector, normalVector);
+    CHECK(result == RayTracerChallenge::Color(1.63638f, 1.63638f, 1.63638f));
+  }
+  SUBCASE("Lighting with the light behind the surface") {
+    RayTracerChallenge::Material m;
+    auto position = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+    auto eyeVector = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.0f);
+    auto normalVector = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.0f);
+    auto light = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0f, 0.0f, 10.0f),
+                                                RayTracerChallenge::Color(1.0f, 1.0f, 1.0f));
+    auto result = RayTracerChallenge::lighting(m, light, position, eyeVector, normalVector);
+    CHECK(result == RayTracerChallenge::Color(0.1f, 0.1f, 0.1f));
   }
 }
