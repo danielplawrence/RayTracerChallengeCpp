@@ -966,7 +966,7 @@ TEST_CASE("Lighting") {
     auto light
         = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0f, 10.0f, -10.0f),
                                          RayTracerChallenge::Color(1.0f, 1.0f, 1.0f));
-    auto result = RayTracerChallenge::lighting (m, light, position, eyeVector, normalVector);
+    auto result = RayTracerChallenge::lighting(m, light, position, eyeVector, normalVector);
     CHECK(result == RayTracerChallenge::Color(1.63638f, 1.63638f, 1.63638f));
   }
   SUBCASE("Lighting with the light behind the surface") {
