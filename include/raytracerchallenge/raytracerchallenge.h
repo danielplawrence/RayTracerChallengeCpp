@@ -98,6 +98,12 @@ namespace raytracerchallenge {
        * @return new Tuple representing the cross product of this tuple and another
        */
       [[nodiscard]] Tuple cross(const Tuple &t) const;
+      /**
+       * @brief return the reflection of this tuple around another
+       * @param t Tuple to reflect this one around
+       * @return reflected Tuple
+       */
+      [[nodiscard]] Tuple reflect(const Tuple &t) const;
 
     private:
       static bool floatEquals(float x, float y);

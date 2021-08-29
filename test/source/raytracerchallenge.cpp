@@ -882,3 +882,18 @@ TEST_CASE("Normals") {
     CHECK(n == RayTracerChallenge::Tuple::vector(0.0f, 0.97014f, -0.24254f));
   }
 }
+TEST_CASE("Reflecting vectors") {
+  using namespace raytracerchallenge;
+  SUBCASE("Reflecting a vector approaching at 45 degrees") {
+    auto v = RayTracerChallenge::Tuple::vector(1.0f, -1.0f, 0.0f);
+    auto n = RayTracerChallenge::Tuple::vector(0.0f, 1.0f, 0.0f);
+    auto r = v.reflect(n);
+    CHECK(r == RayTracerChallenge::Tuple::vector(1.0f, 1.0f, 0.0f));
+  }
+  SUBCASE("Reflecting a vector off a slanted surface") {
+    auto v = RayTracerChallenge::Tuple::vector(0.0f, -1.0f, 0.0f);
+    auto n = RayTracerChallenge::Tuple::vector(sqrt(2.0f) / 2.0f, sqrt(2.0f) / 2.0f, 0.0f);
+    auto r = v.reflect(n);
+    CHECK(r == RayTracerChallenge::Tuple::vector(1.0f, 0.0f, 0.0f));
+  }
+}
