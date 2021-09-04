@@ -504,7 +504,7 @@ namespace raytracerchallenge {
      */
     class [[maybe_unused]] Sphere : public Object{public : };
     /**
-     * Ray intersections computations
+     * Ray intersection computations
      */
     class Computations {
     public:
@@ -513,6 +513,7 @@ namespace raytracerchallenge {
       Tuple point;
       Tuple eyeVector;
       Tuple normalVector;
+      bool inside;
     };
     /**
      * @brief Represents an intersection between a ray an object
@@ -614,9 +615,8 @@ namespace raytracerchallenge {
       PointLight(Tuple position, Color intensity);
     };
     class World {
-      std::vector<Object> objects;
-
     public:
+      std::vector<Object> objects;
       std::optional<PointLight> light;
       /**
        * Default constructor for a World
@@ -632,7 +632,7 @@ namespace raytracerchallenge {
        * Return true if the world contains no objects
        * @return true if the world contains no objects
        */
-      bool isEmpty();
+      bool isEmpty() const;
       /**
        * Add an Object to the world
        * @param object target Object
@@ -650,6 +650,20 @@ namespace raytracerchallenge {
        * @return Default World
        */
       static World defaultWorld();
+      /**
+       * @brief Return the color at the intersection encapsulated
+       * by computations in this world
+       * @param computations
+       * @return color
+       */
+      Color shadeHit(const Computations &computations);
+      /**
+       * Intersect the world with the given ray and return
+       * the color at the resulting intersection
+       * @param ray Ray to intersect with this World
+       * @return Color at the resulting intersection
+       */
+      Color colorAt(Ray ray);
     };
     /**
      * Calculate the lighting at a particular position on a material

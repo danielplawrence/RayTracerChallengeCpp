@@ -859,9 +859,30 @@ TEST_CASE("Ray-sphere intersections") {
     RayTracerChallenge::Computations computations = intersection.prepareComputations(ray);
     CHECK(computations.t == intersection.t);
     CHECK(computations.object.is(intersection.object));
-    CHECK(computations.point == RayTracerChallenge::Tuple::point(0.0f, 0.0f, -1.f));
-    CHECK(computations.eyeVector == RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.f));
-    CHECK(computations.normalVector == RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.f));
+    CHECK(computations.point == RayTracerChallenge::Tuple::point(0.0f, 0.0f, -1.0f));
+    CHECK(computations.eyeVector == RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.0f));
+    CHECK(computations.normalVector == RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.0f));
+  }
+  SUBCASE("The hit, when an intersection occurs on the outside") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0f, 0.0f, -5.0f);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f);
+    RayTracerChallenge::Ray ray(origin, direction);
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Intersection intersection(4.0f, sphere);
+    RayTracerChallenge::Computations computations = intersection.prepareComputations(ray);
+    CHECK(computations.inside == false);
+  }
+  SUBCASE("The hit, when an intersection occurs on the inside") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f);
+    RayTracerChallenge::Ray ray(origin, direction);
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Intersection intersection(1.0f, sphere);
+    RayTracerChallenge::Computations computations = intersection.prepareComputations(ray);
+    CHECK(computations.point == RayTracerChallenge::Tuple::point(0.0f, 0.0f, 1.0f));
+    CHECK(computations.eyeVector == RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.0f));
+    CHECK(computations.normalVector == RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.0f));
+    CHECK(computations.inside == true);
   }
 }
 TEST_CASE("Normals") {
@@ -1004,7 +1025,7 @@ TEST_CASE("World") {
     auto world = RayTracerChallenge::World::defaultWorld();
     auto sphere1 = RayTracerChallenge::Sphere();
     sphere1.material.color = RayTracerChallenge::Color(0.8f, 1.0f, 0.6f);
-    sphere1.material.diffuse = 0.6f;
+    sphere1.material.diffuse = 0.7f;
     sphere1.material.specular = 0.2f;
     auto sphere2 = RayTracerChallenge::Sphere();
     sphere2.transform = RayTracerChallenge::Matrix::scaling(0.5f, 0.5f, 0.5f);
@@ -1023,5 +1044,51 @@ TEST_CASE("World") {
     CHECK(xs[1].t == 4.5f);
     CHECK(xs[2].t == 5.5f);
     CHECK(xs[3].t == 6.0f);
+  }
+  SUBCASE("Shading an intersection") {
+    auto world = RayTracerChallenge::World::defaultWorld();
+    auto ray = RayTracerChallenge::Ray(RayTracerChallenge::Tuple::point(0.0f, 0.0f, -5.0f),
+                                       RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f));
+    auto shape = world.objects[0];
+    auto intersection = RayTracerChallenge::Intersection(4.0f, shape);
+    auto computations = intersection.prepareComputations(ray);
+    auto color = world.shadeHit(computations);
+    CHECK(color == RayTracerChallenge::Color(0.38066f, 0.47583f, 0.2855f));
+  }
+  SUBCASE("Shading an intersection from the inside") {
+    auto world = RayTracerChallenge::World::defaultWorld();
+    world.light
+        = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0f, 0.25f, 0.0f),
+                                         RayTracerChallenge::Color(1.0f, 1.0f, 1.0f));
+    auto ray = RayTracerChallenge::Ray(RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f),
+                                       RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f));
+    auto shape = world.objects[1];
+    auto intersection = RayTracerChallenge::Intersection(.5f, shape);
+    auto computations = intersection.prepareComputations(ray);
+    auto color = world.shadeHit(computations);
+    CHECK(color == RayTracerChallenge::Color(0.90498f, 0.90498f, 0.90498f));
+  }
+  SUBCASE("The color when a ray misses") {
+    auto world = RayTracerChallenge::World::defaultWorld();
+    auto ray = RayTracerChallenge::Ray(RayTracerChallenge::Tuple::point(0.0f, 0.0f, -5.0f),
+                                       RayTracerChallenge::Tuple::vector(0.0f, 1.0f, 0.0f));
+    auto color = world.colorAt(ray);
+    CHECK(color == RayTracerChallenge::Color(0.0f, 0.0f, 0.0f));
+  }
+  SUBCASE("The color when a ray hits") {
+    auto world = RayTracerChallenge::World::defaultWorld();
+    auto ray = RayTracerChallenge::Ray(RayTracerChallenge::Tuple::point(0.0f, 0.0f, -5.0f),
+                                       RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f));
+    auto color = world.colorAt(ray);
+    CHECK(color == RayTracerChallenge::Color(0.38066f, 0.47583f, 0.2855f));
+  }
+  SUBCASE("The color with an intersection behind the ray") {
+    auto world = RayTracerChallenge::World::defaultWorld();
+    world.objects[0].material.ambient = 1.0f;
+    world.objects[1].material.ambient = 1.0f;
+    auto ray = RayTracerChallenge::Ray(RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.75f),
+                                       RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.0f));
+    auto color = world.colorAt(ray);
+    CHECK(color == world.objects[1].material.color);
   }
 }

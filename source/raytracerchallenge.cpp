@@ -405,6 +405,10 @@ RayTracerChallenge::Computations RayTracerChallenge::Intersection::prepareComput
   computations.point = ray.position(t);
   computations.eyeVector = -ray.direction;
   computations.normalVector = this->object.normalAt(computations.point);
+  if (computations.normalVector.dot(computations.eyeVector) < 0.0f) {
+    computations.inside = true;
+    computations.normalVector = -computations.normalVector;
+  }
   return computations;
 }
 std::optional<RayTracerChallenge::Intersection> RayTracerChallenge::Intersections::hit() {
@@ -483,7 +487,7 @@ RayTracerChallenge::World::World() = default;
 bool RayTracerChallenge::World::contains(Object &object) {
   return std::find(this->objects.begin(), this->objects.end(), object) != this->objects.end();
 }
-bool RayTracerChallenge::World::isEmpty() { return this->objects.empty(); }
+bool RayTracerChallenge::World::isEmpty() const { return this->objects.empty(); }
 void RayTracerChallenge::World::add(RayTracerChallenge::Object &object) {
   this->objects.push_back(object);
 }
@@ -492,7 +496,7 @@ RayTracerChallenge::World RayTracerChallenge::World::defaultWorld() {
   world.light = PointLight(Tuple::point(-10.0f, 10.0f, -10.0f), Color(1.0f, 1.0f, 1.0f));
   Sphere sphere1;
   sphere1.material.color = Color(0.8f, 1.0f, 0.6f);
-  sphere1.material.diffuse = 0.6f;
+  sphere1.material.diffuse = 0.7f;
   sphere1.material.specular = 0.2f;
   Sphere sphere2;
   sphere2.transform = Matrix::scaling(0.5f, 0.5f, 0.5f);
@@ -507,4 +511,16 @@ RayTracerChallenge::Intersections RayTracerChallenge::World::intersect(Ray ray) 
   }
   intersections.sort();
   return intersections;
+}
+RayTracerChallenge::Color RayTracerChallenge::World::shadeHit(const Computations &computations) {
+  return lighting(computations.object.material, this->light.value(), computations.point,
+                  computations.eyeVector, computations.normalVector);
+}
+RayTracerChallenge::Color RayTracerChallenge::World::colorAt(Ray ray) {
+  Intersections intersections = this->intersect(ray);
+  std::optional<Intersection> hit = intersections.hit();
+  if (!hit.has_value()) {
+    return {0.0f, 0.0f, 0.0f};
+  }
+  return shadeHit(hit.value().prepareComputations(ray));
 }
