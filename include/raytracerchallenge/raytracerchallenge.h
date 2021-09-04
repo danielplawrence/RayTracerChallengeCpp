@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -470,27 +471,48 @@ namespace raytracerchallenge {
        */
       Intersections intersect(Ray ray);
       /**
-       * @brief Default constructor
-       */
-      Object();
-      /**
-       * @brief Equality operator. Objects are equal if they share the same ID
-       * @param object object to compare with this one
-       * @return true if the objects share the same ID
-       */
-      bool operator==(const Object &object) const;
-    };
-    /**
-     * @brief Represents a sphere
-     */
-    class [[maybe_unused]] Sphere : public Object {
-    public:
-      /**
-       * @brief Return the normal vector at the specified point on a sphere
+       * @brief Return the normal vector at the specified point on an object
        * @param point
        * @return normal vector
        */
       Tuple normalAt(Tuple point);
+      /**
+       * @brief Default constructor
+       */
+      Object();
+      /**
+       * @brief Equality operator. Objects are equal if they share the same properties
+       * @param object object to compare with this one
+       * @return true if the objects share the same properties
+       */
+      bool operator==(const Object &object) const;
+      /**
+       * @brief Less than operator; just uses the ID
+       * @param object object to compare with this one
+       * @return true if this object is less than the target
+       */
+      bool operator<(const Object &object) const;
+      /**
+       * @brief Return true if the objects share the same ID
+       * @param object Object for comparison
+       * @return true if the objects share the same ID
+       */
+      [[nodiscard]] bool is(const Object &object) const;
+    };
+    /**
+     * @brief Represents a sphere
+     */
+    class [[maybe_unused]] Sphere : public Object{public : };
+    /**
+     * Ray intersections computations
+     */
+    class Computations {
+    public:
+      float t{};
+      Object object;
+      Tuple point;
+      Tuple eyeVector;
+      Tuple normalVector;
     };
     /**
      * @brief Represents an intersection between a ray an object
@@ -515,6 +537,12 @@ namespace raytracerchallenge {
        * @brief Default constructtor
        */
       Intersection();
+      /**
+       * @brief Prepare ray intersection computations
+       * @param ray
+       * @return Computations
+       */
+      Computations prepareComputations(Ray ray);
       /**
        * @brief Equality operator
        * @param intersection intersection to compare with this one
@@ -544,11 +572,24 @@ namespace raytracerchallenge {
        */
       explicit Intersections(std::vector<Intersection> intersections);
       /**
+       * @brief Default constructor
+       */
+      Intersections();
+      /**
        * @brief Index operator
        * @param x index
        * @return intersection at index x
        */
       Intersection operator[](unsigned int x) const;
+      /**
+       * @brief Add the content of an Intersections to this one.
+       * @param newIntersections Intersections to be added.
+       */
+      void addAll(Intersections newIntersections);
+      /**
+       * @brief Sort the intersections
+       */
+      void sort();
       /**
        * @brief Return the number of intersections in the collection
        * @return number of intersections in the collection
@@ -571,6 +612,44 @@ namespace raytracerchallenge {
        * @param intensity Color of the light
        */
       PointLight(Tuple position, Color intensity);
+    };
+    class World {
+      std::vector<Object> objects;
+
+    public:
+      std::optional<PointLight> light;
+      /**
+       * Default constructor for a World
+       */
+      World();
+      /**
+       * Return true if this object is in the World
+       * @param object Object to test
+       * @return true if this object is in the World
+       */
+      bool contains(Object &object);
+      /**
+       * Return true if the world contains no objects
+       * @return true if the world contains no objects
+       */
+      bool isEmpty();
+      /**
+       * Add an Object to the world
+       * @param object target Object
+       */
+      void add(Object &object);
+      /**
+       * Intersect this world with a ray
+       * @param ray to pass through the world
+       * @return intersections between the ray
+       * and objects in this world
+       */
+      Intersections intersect(Ray ray);
+      /**
+       * @brief Return the default World
+       * @return Default World
+       */
+      static World defaultWorld();
     };
     /**
      * Calculate the lighting at a particular position on a material

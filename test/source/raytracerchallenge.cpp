@@ -850,6 +850,19 @@ TEST_CASE("Ray-sphere intersections") {
     RayTracerChallenge::Intersections xs = sphere.intersect(ray);
     CHECK(xs.size() == 0);
   }
+  SUBCASE("Precomputing the state of an intersection") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0f, 0.0f, -5.0f);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f);
+    RayTracerChallenge::Ray ray(origin, direction);
+    RayTracerChallenge::Sphere sphere;
+    RayTracerChallenge::Intersection intersection(4.0f, sphere);
+    RayTracerChallenge::Computations computations = intersection.prepareComputations(ray);
+    CHECK(computations.t == intersection.t);
+    CHECK(computations.object.is(intersection.object));
+    CHECK(computations.point == RayTracerChallenge::Tuple::point(0.0f, 0.0f, -1.f));
+    CHECK(computations.eyeVector == RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.f));
+    CHECK(computations.normalVector == RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.f));
+  }
 }
 TEST_CASE("Normals") {
   using namespace raytracerchallenge;
@@ -978,5 +991,37 @@ TEST_CASE("Lighting") {
                                                 RayTracerChallenge::Color(1.0f, 1.0f, 1.0f));
     auto result = RayTracerChallenge::lighting(m, light, position, eyeVector, normalVector);
     CHECK(result == RayTracerChallenge::Color(0.1f, 0.1f, 0.1f));
+  }
+}
+TEST_CASE("World") {
+  using namespace raytracerchallenge;
+  SUBCASE("Creating a world") {
+    RayTracerChallenge::World world;
+    CHECK(world.isEmpty());
+    CHECK(world.light.has_value() == false);
+  }
+  SUBCASE("The default world") {
+    auto world = RayTracerChallenge::World::defaultWorld();
+    auto sphere1 = RayTracerChallenge::Sphere();
+    sphere1.material.color = RayTracerChallenge::Color(0.8f, 1.0f, 0.6f);
+    sphere1.material.diffuse = 0.6f;
+    sphere1.material.specular = 0.2f;
+    auto sphere2 = RayTracerChallenge::Sphere();
+    sphere2.transform = RayTracerChallenge::Matrix::scaling(0.5f, 0.5f, 0.5f);
+    CHECK(world.light->position == RayTracerChallenge::Tuple::point(-10.0f, 10.0f, -10.0f));
+    CHECK(world.light->intensity == RayTracerChallenge::Color(1.0f, 1.0f, 1.0f));
+    CHECK(world.contains(sphere1));
+    CHECK(world.contains(sphere2));
+  }
+  SUBCASE("Intersecting a ray with the world") {
+    auto world = RayTracerChallenge::World::defaultWorld();
+    auto ray = RayTracerChallenge::Ray(RayTracerChallenge::Tuple::point(0.0f, 0.0f, -5.0f),
+                                       RayTracerChallenge::Tuple::vector(0.0f, 0.0f, 1.0f));
+    RayTracerChallenge::Intersections xs = world.intersect(ray);
+    CHECK(xs.size() == 4);
+    CHECK(xs[0].t == 4.0f);
+    CHECK(xs[1].t == 4.5f);
+    CHECK(xs[2].t == 5.5f);
+    CHECK(xs[3].t == 6.0f);
   }
 }

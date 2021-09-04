@@ -11,9 +11,11 @@ auto main() -> int {
   float pixelSize = wallSize / float(canvasPixels);
   float half = wallSize / 2;
   RayTracerChallenge::Canvas canvas(canvasPixels, canvasPixels);
-  RayTracerChallenge::Color color(1.0f, 0.0f, 0.0f);
   RayTracerChallenge::Sphere shape;
-  shape.transform = RayTracerChallenge::Matrix::scaling(1.0f, 0.5f, 1.0f);
+  shape.material.color = RayTracerChallenge::Color(1.0f, 0.2f, 1.0f);
+  auto lightPosition = RayTracerChallenge::Tuple::point(-10.0f, 10.0f, -10.0f);
+  auto lightColor = RayTracerChallenge::Color(1.0f, 1.0f, 1.0f);
+  RayTracerChallenge::PointLight light(lightPosition, lightColor);
   for (int y = 0; y < canvasPixels; y++) {
     float worldY = half - pixelSize * float(y);
     for (int x = 0; x < canvasPixels; x++) {
@@ -22,6 +24,11 @@ auto main() -> int {
       RayTracerChallenge::Ray ray(rayOrigin, (position - rayOrigin).normalize());
       RayTracerChallenge::Intersections xs = shape.intersect(ray);
       if (xs.hit().has_value()) {
+        auto point = ray.position(xs.hit()->t);
+        auto normal = xs.hit()->object.normalAt(point);
+        auto eye = -ray.direction;
+        auto color
+            = RayTracerChallenge::lighting(xs.hit()->object.material, light, point, eye, normal);
         canvas.writePixel(x, y, color);
       }
     }

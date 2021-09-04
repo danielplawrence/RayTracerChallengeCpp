@@ -382,19 +382,30 @@ RayTracerChallenge::Intersections RayTracerChallenge::Object::intersect(
       RayTracerChallenge::Intersection(t1, *this), RayTracerChallenge::Intersection(t2, *this)});
 }
 bool RayTracerChallenge::Object::operator==(const Object &object) const {
-  return this->id == object.id;
+  return this->transform == object.transform && this->material == object.material;
 }
+bool RayTracerChallenge::Object::is(const Object &object) const { return this->id == object.id; }
 RayTracerChallenge::Intersection::Intersection(float t, Object object) {
   this->t = t;
   this->object = std::move(object);
 }
 RayTracerChallenge::Intersection::Intersection() = default;
 bool RayTracerChallenge::Intersection::operator==(const Intersection &intersection) const {
-  return this->object == intersection.object && this->t == intersection.t;
+  return this->object.is(intersection.object) && this->t == intersection.t;
 }
 bool RayTracerChallenge::Intersection::operator<(
     const RayTracerChallenge::Intersection &intersection) const {
   return this->t < intersection.t;
+}
+RayTracerChallenge::Computations RayTracerChallenge::Intersection::prepareComputations(
+    RayTracerChallenge::Ray ray) {
+  auto computations = RayTracerChallenge::Computations();
+  computations.t = this->t;
+  computations.object = this->object;
+  computations.point = ray.position(t);
+  computations.eyeVector = -ray.direction;
+  computations.normalVector = this->object.normalAt(computations.point);
+  return computations;
 }
 std::optional<RayTracerChallenge::Intersection> RayTracerChallenge::Intersections::hit() {
   std::vector<RayTracerChallenge::Intersection> nonNegative;
@@ -405,6 +416,11 @@ std::optional<RayTracerChallenge::Intersection> RayTracerChallenge::Intersection
   }
   return *std::min_element(nonNegative.begin(), nonNegative.end());
 }
+RayTracerChallenge::Intersections::Intersections() = default;
+void RayTracerChallenge::Intersections::Intersections::addAll(Intersections newIntersections) {
+  this->intersections.insert(this->intersections.end(), newIntersections.intersections.begin(),
+                             newIntersections.intersections.end());
+}
 RayTracerChallenge::Intersections::Intersections(std::vector<Intersection> intersections) {
   this->intersections = std::move(intersections);
 }
@@ -413,12 +429,18 @@ RayTracerChallenge::Intersection RayTracerChallenge::Intersections::operator[](
   return this->intersections[x];
 }
 size_t RayTracerChallenge::Intersections::size() const { return this->intersections.size(); }
-RayTracerChallenge::Tuple RayTracerChallenge::Sphere::normalAt(RayTracerChallenge::Tuple point) {
+void RayTracerChallenge::Intersections::sort() {
+  std::sort(this->intersections.begin(), this->intersections.end());
+}
+RayTracerChallenge::Tuple RayTracerChallenge::Object::normalAt(RayTracerChallenge::Tuple point) {
   auto objectPoint = this->transform.inverse() * point;
   auto objectNormal = objectPoint - RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
   auto worldNormal = (this->transform.inverse().transposed()) * objectNormal;
   worldNormal.w = 0.0f;
   return worldNormal.normalize();
+}
+bool RayTracerChallenge::Object::operator<(const RayTracerChallenge::Object &object) const {
+  return this->id < object.id;
 }
 RayTracerChallenge::PointLight::PointLight(RayTracerChallenge::Tuple position,
                                            RayTracerChallenge::Color intensity) {
@@ -456,4 +478,33 @@ RayTracerChallenge::Color RayTracerChallenge::lighting(RayTracerChallenge::Mater
     }
   }
   return ambient + diffuse + specular;
+}
+RayTracerChallenge::World::World() = default;
+bool RayTracerChallenge::World::contains(Object &object) {
+  return std::find(this->objects.begin(), this->objects.end(), object) != this->objects.end();
+}
+bool RayTracerChallenge::World::isEmpty() { return this->objects.empty(); }
+void RayTracerChallenge::World::add(RayTracerChallenge::Object &object) {
+  this->objects.push_back(object);
+}
+RayTracerChallenge::World RayTracerChallenge::World::defaultWorld() {
+  World world;
+  world.light = PointLight(Tuple::point(-10.0f, 10.0f, -10.0f), Color(1.0f, 1.0f, 1.0f));
+  Sphere sphere1;
+  sphere1.material.color = Color(0.8f, 1.0f, 0.6f);
+  sphere1.material.diffuse = 0.6f;
+  sphere1.material.specular = 0.2f;
+  Sphere sphere2;
+  sphere2.transform = Matrix::scaling(0.5f, 0.5f, 0.5f);
+  world.add(sphere1);
+  world.add(sphere2);
+  return world;
+}
+RayTracerChallenge::Intersections RayTracerChallenge::World::intersect(Ray ray) {
+  Intersections intersections;
+  for (Object object : this->objects) {
+    intersections.addAll(object.intersect(ray));
+  }
+  intersections.sort();
+  return intersections;
 }
