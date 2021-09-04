@@ -669,6 +669,39 @@ TEST_CASE("Matrix transformations") {
                                                .sheared(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
     CHECK(transform * point == RayTracerChallenge::Tuple::point(20.0f, 5.0f, 2.0f));
   }
+  SUBCASE("The transformation matrix for the default orientation") {
+    auto from = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+    auto to = RayTracerChallenge::Tuple::point(0.0f, 0.0f, -1.0f);
+    auto up = RayTracerChallenge::Tuple::vector(0.0f, 1.0f, 0.0f);
+    auto transformation = RayTracerChallenge::Matrix::view(from, to, up);
+    CHECK(transformation == RayTracerChallenge::Matrix::identity(4));
+  }
+  SUBCASE("A view transformation matrix looking in positive z direction") {
+    auto from = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+    auto to = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 1.0f);
+    auto up = RayTracerChallenge::Tuple::vector(0.0f, 1.0f, 0.0f);
+    auto transformation = RayTracerChallenge::Matrix::view(from, to, up);
+    CHECK(transformation == RayTracerChallenge::Matrix::scaling(-1.0f, 1.0f, -1.0f));
+  }
+  SUBCASE("The view transformation moves the world") {
+    auto from = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 8.0f);
+    auto to = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 1.0f);
+    auto up = RayTracerChallenge::Tuple::vector(0.0f, 1.0f, 0.0f);
+    auto transformation = RayTracerChallenge::Matrix::view(from, to, up);
+    CHECK(transformation == RayTracerChallenge::Matrix::translation(0.0f, 0.0f, -8.0f));
+  }
+  SUBCASE("An arbitrary view transformation") {
+    auto from = RayTracerChallenge::Tuple::point(1.0f, 3.0f, 2.0f);
+    auto to = RayTracerChallenge::Tuple::point(4.0f, -2.0f, 8.0f);
+    auto up = RayTracerChallenge::Tuple::vector(1.0f, 1.0f, 0.0f);
+    auto transformation = RayTracerChallenge::Matrix::view(from, to, up);
+    RayTracerChallenge::Matrix matrix(4, 4,
+                                      {{-0.50709f, 0.50709f, 0.67612f, -2.36643f},
+                                       {0.76772f, 0.60609f, 0.12122f, -2.82843f},
+                                       {-0.35857f, 0.59761f, -0.71714f, 0.00000f},
+                                       {0.00000f, 0.00000f, 0.00000f, 1.00000f}});
+    CHECK(transformation == matrix);
+  }
 }
 TEST_CASE("Spheres") {
   using namespace raytracerchallenge;

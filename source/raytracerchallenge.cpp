@@ -345,6 +345,20 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::sheared(float xy, float x
   RayTracerChallenge::Matrix t = shearing(xy, xz, yx, yz, zx, zy);
   return t * *this;
 }
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::view(RayTracerChallenge::Tuple from,
+                                                            RayTracerChallenge::Tuple to,
+                                                            RayTracerChallenge::Tuple up) {
+  auto forward = (to - from).normalize();
+  auto upN = up.normalize();
+  auto left = forward.cross(upN);
+  auto trueUp = left.cross(forward);
+  RayTracerChallenge::Matrix orientation(4, 4,
+                                         {{left.x, left.y, left.z, 0.0f},
+                                          {trueUp.x, trueUp.y, trueUp.z, 0.0f},
+                                          {-forward.x, -forward.y, -forward.z, 0.0f},
+                                          {0.0f, 0.0f, 0.0f, 1.0f}});
+  return orientation * translation(-from.x, -from.y, -from.z);
+}
 RayTracerChallenge::Ray::Ray(RayTracerChallenge::Tuple origin,
                              RayTracerChallenge::Tuple direction) {
   this->origin = origin;

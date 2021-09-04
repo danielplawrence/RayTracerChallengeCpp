@@ -397,6 +397,14 @@ namespace raytracerchallenge {
        * @return shearing matrix
        */
       static Matrix shearing(float xy, float xz, float yx, float yz, float zx, float zy);
+      /**
+       * @brief Return the view transform
+       * @param from location of eye
+       * @param to point where eye is looking
+       * @param up vector representing up
+       * @return View transform
+       */
+      static Matrix view(Tuple from, Tuple to, Tuple up);
 
     private:
       static bool floatEquals(float x, float y);
