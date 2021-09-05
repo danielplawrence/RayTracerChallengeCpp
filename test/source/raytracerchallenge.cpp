@@ -1125,3 +1125,53 @@ TEST_CASE("World") {
     CHECK(color == world.objects[1].material.color);
   }
 }
+TEST_CASE("Camera") {
+  using namespace raytracerchallenge;
+  SUBCASE("Constructing a camera") {
+    auto camera = RayTracerChallenge::Camera(160, 120, float(M_PI) / 2.0f);
+    CHECK(camera.hSize == 160);
+    CHECK(camera.vSize == 120);
+    CHECK(camera.fieldOfView == float(M_PI) / 2.0f);
+    CHECK(camera.transform == RayTracerChallenge::Matrix::identity(4));
+  }
+  SUBCASE("The pixel size for a horizontal canvas") {
+    auto camera = RayTracerChallenge::Camera(200, 125, float(M_PI) / 2.0f);
+    CHECK(camera.pixelSize == 0.01f);
+  }
+  SUBCASE("The pixel size for a vertical canvas") {
+    auto camera = RayTracerChallenge::Camera(125, 200, float(M_PI) / 2.0f);
+    CHECK(camera.pixelSize == 0.01f);
+  }
+  SUBCASE("Constructing a ray through the center of the canvas") {
+    auto camera = RayTracerChallenge::Camera(201, 101, float(M_PI) / 2.0f);
+    auto ray = camera.rayForPixel(100, 50);
+    CHECK(ray.origin == RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f));
+    CHECK(ray.direction == RayTracerChallenge::Tuple::vector(0.0f, 0.0f, -1.0f));
+  }
+  SUBCASE("Constructing a ray through a corner of the canvas") {
+    auto camera = RayTracerChallenge::Camera(201, 101, float(M_PI) / 2.0f);
+    auto ray = camera.rayForPixel(0, 0);
+    CHECK(ray.origin == RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f));
+    CHECK(ray.direction == RayTracerChallenge::Tuple::vector(0.66519f, 0.33259f, -0.66851f));
+  }
+  SUBCASE("Constructing a ray when the camera is transformed") {
+    auto camera = RayTracerChallenge::Camera(201, 101, float(M_PI) / 2.0f);
+    camera.transform = RayTracerChallenge::Matrix::identity(4)
+                           .translated(0.0f, -2.0f, 5.0f)
+                           .rotatedY(float(M_PI) / 4.0f);
+    auto ray = camera.rayForPixel(100, 50);
+    CHECK(ray.origin == RayTracerChallenge::Tuple::point(0.0f, 2.0f, -5.0f));
+    CHECK(ray.direction
+          == RayTracerChallenge::Tuple::vector(sqrt(2) / 2.0f, 0.0f, -sqrt(2) / 2.0f));
+  }
+  SUBCASE("Rendering a world with a camera") {
+    auto world = RayTracerChallenge::World::defaultWorld();
+    auto camera = RayTracerChallenge::Camera(11, 11, float(M_PI) / 2.0f);
+    auto from = RayTracerChallenge::Tuple::point(0.0f, 0.0f, -5.0f);
+    auto to = RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+    auto up = RayTracerChallenge::Tuple::vector(0.0f, 1.0f, 0.0f);
+    camera.transform = RayTracerChallenge::Matrix::view(from, to, up);
+    auto image = camera.render(world);
+    CHECK(image.pixelAt(5, 5) == RayTracerChallenge::Color(0.38066f, 0.47583f, 0.2855f));
+  }
+}

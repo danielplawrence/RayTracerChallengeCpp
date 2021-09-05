@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <optional>
 #include <set>
 #include <string>
@@ -437,7 +438,7 @@ namespace raytracerchallenge {
        * @param matrix transformation matrix
        * @return a new Ray with the transformation applied
        */
-      Ray transform(const Matrix &matrix);
+      [[nodiscard]] Ray transform(const Matrix &matrix) const;
     };
     /**
      * @brief Represents a material
@@ -521,7 +522,7 @@ namespace raytracerchallenge {
       Tuple point;
       Tuple eyeVector;
       Tuple normalVector;
-      bool inside;
+      bool inside{};
     };
     /**
      * @brief Represents an intersection between a ray an object
@@ -640,7 +641,7 @@ namespace raytracerchallenge {
        * Return true if the world contains no objects
        * @return true if the world contains no objects
        */
-      bool isEmpty() const;
+      [[nodiscard]] bool isEmpty() const;
       /**
        * Add an Object to the world
        * @param object target Object
@@ -672,6 +673,39 @@ namespace raytracerchallenge {
        * @return Color at the resulting intersection
        */
       Color colorAt(Ray ray);
+    };
+    /**
+     * Represents a Camera
+     */
+    class Camera {
+    public:
+      int hSize;
+      int vSize;
+      float pixelSize;
+      float fieldOfView;
+      float halfWidth;
+      float halfHeight;
+      Matrix transform;
+      /**
+       * Create a new camera
+       * @param hSize horizontal size of canvas
+       * @param vSize vertical size of canvas
+       * @param fieldOfView camera angle
+       */
+      Camera(int hSize, int vSize, float fieldOfView);
+      /**
+       * Return a ray targeting the pixel at this position
+       * @param x X position
+       * @param y Y positionim
+       * @return Ray
+       */
+      Ray rayForPixel(int x, int y);
+      /**
+       * Render a world using this camera
+       * @param world The World to render
+       * @return a Canvas containing the rendered image
+       */
+      Canvas render(World world);
     };
     /**
      * Calculate the lighting at a particular position on a material

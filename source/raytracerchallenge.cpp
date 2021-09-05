@@ -368,7 +368,7 @@ RayTracerChallenge::Tuple RayTracerChallenge::Ray::position(float t) const {
   return RayTracerChallenge::Tuple(this->origin + this->direction * t);
 }
 RayTracerChallenge::Ray RayTracerChallenge::Ray::transform(
-    const RayTracerChallenge::Matrix &matrix) {
+    const RayTracerChallenge::Matrix &matrix) const {
   return {matrix * this->origin, matrix * this->direction};
 }
 RayTracerChallenge::Object::Object() {
@@ -537,4 +537,41 @@ RayTracerChallenge::Color RayTracerChallenge::World::colorAt(Ray ray) {
     return {0.0f, 0.0f, 0.0f};
   }
   return shadeHit(hit.value().prepareComputations(ray));
+}
+RayTracerChallenge::Camera::Camera(int hSize, int vSize, float fieldOfView) {
+  this->hSize = hSize;
+  this->vSize = vSize;
+  this->fieldOfView = fieldOfView;
+  this->transform = Matrix::identity(4);
+  auto halfView = tan(this->fieldOfView / 2.0f);
+  auto aspect = float(this->hSize) / float(this->vSize);
+  if (aspect >= 1) {
+    halfWidth = halfView;
+    halfHeight = halfView / aspect;
+  } else {
+    halfWidth = halfView * aspect;
+    halfHeight = halfView;
+  }
+  pixelSize = (halfWidth * 2.0f) / float(hSize);
+}
+RayTracerChallenge::Ray RayTracerChallenge::Camera::rayForPixel(int x, int y) {
+  auto xOffset = (x + 0.5) * pixelSize;
+  auto yOffset = (y + 0.5) * pixelSize;
+  auto worldX = float(halfWidth - xOffset);
+  auto worldY = float(halfHeight - yOffset);
+  auto pixel = transform.inverse() * Tuple::point(worldX, worldY, -1.0f);
+  auto origin = transform.inverse() * Tuple::point(0.0f, 0.0f, 0.0f);
+  auto direction = (pixel - origin).normalize();
+  return {origin, direction};
+}
+RayTracerChallenge::Canvas RayTracerChallenge::Camera::render(World world) {
+  auto image = Canvas(hSize, vSize);
+  for (int y = 0; y < vSize; y++) {
+    for (int x = 0; x < hSize; x++) {
+      auto ray = rayForPixel(x, y);
+      auto color = world.colorAt(ray);
+      image.writePixel(x, y, color);
+    }
+  }
+  return image;
 }
