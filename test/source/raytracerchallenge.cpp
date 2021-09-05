@@ -1162,7 +1162,7 @@ TEST_CASE("Camera") {
     auto ray = camera.rayForPixel(100, 50);
     CHECK(ray.origin == RayTracerChallenge::Tuple::point(0.0f, 2.0f, -5.0f));
     CHECK(ray.direction
-          == RayTracerChallenge::Tuple::vector(sqrt(2) / 2.0f, 0.0f, -sqrt(2) / 2.0f));
+          == RayTracerChallenge::Tuple::vector(sqrt(2.0f) / 2.0f, 0.0f, -sqrt(2.0f) / 2.0f));
   }
   SUBCASE("Rendering a world with a camera") {
     auto world = RayTracerChallenge::World::defaultWorld();

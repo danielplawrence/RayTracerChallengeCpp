@@ -4,37 +4,71 @@
 
 using namespace raytracerchallenge;
 auto main() -> int {
-  RayTracerChallenge::Tuple rayOrigin = RayTracerChallenge::Tuple::point(0.0f, 0.0f, -5.0f);
-  float wallZ = 10.0f;
-  float wallSize = 7.0f;
-  int canvasPixels = 100;
-  float pixelSize = wallSize / float(canvasPixels);
-  float half = wallSize / 2;
-  RayTracerChallenge::Canvas canvas(canvasPixels, canvasPixels);
-  RayTracerChallenge::Sphere shape;
-  shape.material.color = RayTracerChallenge::Color(1.0f, 0.2f, 1.0f);
-  auto lightPosition = RayTracerChallenge::Tuple::point(-10.0f, 10.0f, -10.0f);
-  auto lightColor = RayTracerChallenge::Color(1.0f, 1.0f, 1.0f);
-  RayTracerChallenge::PointLight light(lightPosition, lightColor);
-  for (int y = 0; y < canvasPixels; y++) {
-    float worldY = half - pixelSize * float(y);
-    for (int x = 0; x < canvasPixels; x++) {
-      float worldX = -half + pixelSize * float(x);
-      RayTracerChallenge::Tuple position = RayTracerChallenge::Tuple::point(worldX, worldY, wallZ);
-      RayTracerChallenge::Ray ray(rayOrigin, (position - rayOrigin).normalize());
-      RayTracerChallenge::Intersections xs = shape.intersect(ray);
-      if (xs.hit().has_value()) {
-        auto point = ray.position(xs.hit()->t);
-        auto normal = xs.hit()->object.normalAt(point);
-        auto eye = -ray.direction;
-        auto color
-            = RayTracerChallenge::lighting(xs.hit()->object.material, light, point, eye, normal);
-        canvas.writePixel(x, y, color);
-      }
-    }
-  }
+
+  RayTracerChallenge::World world;
+  world.light = RayTracerChallenge::PointLight(
+      RayTracerChallenge::Tuple::point(-10.0f, 10.0f, -10.0f),
+      RayTracerChallenge::Color(1.0f, 1.0f, 1.0f));
+
+  auto camera = RayTracerChallenge::Camera(500, 250, float(M_PI)/3.0f);
+  auto from = RayTracerChallenge::Tuple::point(0.0f, 1.5f, -5.0f);
+  auto to = RayTracerChallenge::Tuple::point(0.0f, 1.0f, 0.0f);
+  auto up = RayTracerChallenge::Tuple::vector(0.0f, 1.0f, 0.0f);
+  camera.transform = RayTracerChallenge::Matrix::view(from, to, up);
+
+
+  RayTracerChallenge::Sphere floor;
+  floor.transform = RayTracerChallenge::Matrix::scaling(10.0f, 0.01f, 10.0f);
+  floor.material.color = {1.0f, 0.9f, 0.9f};
+  floor.material.specular = 0.0f;
+
+  RayTracerChallenge::Sphere leftWall;
+  leftWall.transform = RayTracerChallenge::Matrix::translation(0.0f, 0.0f, 5.0f)
+      * RayTracerChallenge::Matrix::rotationY(-float(M_PI)/4.0f)
+      * RayTracerChallenge::Matrix::rotationX(float(M_PI)/2.0f)
+      * RayTracerChallenge::Matrix::scaling(10.0f, 0.01f, 10.0f);
+  leftWall.material.color = {1.0f, 0.9f, 0.9f};
+  leftWall.material.specular = 0.0f;
+
+  RayTracerChallenge::Sphere rightWall;
+  rightWall.transform = RayTracerChallenge::Matrix::translation(0.0f, 0.0f, 5.0f)
+      * RayTracerChallenge::Matrix::rotationY(float(M_PI)/4.0f)
+      * RayTracerChallenge::Matrix::rotationX(float(M_PI)/2.0f)
+      * RayTracerChallenge::Matrix::scaling(10.0f, 0.01f, 10.0f);
+  rightWall.material.color = {1.0f, 0.9f, 0.9f};
+  rightWall.material.specular = 0.0f;
+
+  RayTracerChallenge::Sphere middle;
+  middle.transform = RayTracerChallenge::Matrix::translation(-0.5f, 1.0f, 0.5f);
+  middle.material.color = {0.1f, 1.0f, 0.5f};
+  middle.material.specular = 0.3f;
+  middle.material.diffuse = 0.7f;
+
+  RayTracerChallenge::Sphere right;
+  right.transform = RayTracerChallenge::Matrix::translation(1.5f, 0.5f, -0.5f)
+      * RayTracerChallenge::Matrix::scaling(0.5f, 0.5f, 0.5f);
+  right.material.color = {0.5f, 1.0f, 0.1f};
+  right.material.specular = 0.3f;
+  right.material.diffuse = 0.7f;
+
+  RayTracerChallenge::Sphere left;
+  left.transform = RayTracerChallenge::Matrix::translation(-1.5f, 0.33f, -0.75f)
+      * RayTracerChallenge::Matrix::scaling(0.33f, 0.33f, 0.33f);
+  left.material.color = {1.0f, 0.8f, 0.1f};
+  left.material.specular = 0.3f;
+  left.material.diffuse = 0.7f;
+
+  world.add(floor);
+  world.add(leftWall);
+  world.add(rightWall);
+  world.add(middle);
+  world.add(right);
+  world.add(left);
+
+  auto image = camera.render(world);
+
   std::ofstream out("output.ppm");
-  out << canvas.toPortablePixmap();
+  out << image.toPortablePixmap();
   out.close();
   return 0;
 }
