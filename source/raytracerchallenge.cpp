@@ -133,8 +133,9 @@ std::string RayTracerChallenge::Canvas::toPortablePixmap() {
     for (int x = 0; x < this->width; x++) {
       Color c = this->pixels[x][y];
       std::vector<double> colorVals{c.red, c.green, c.blue};
-      std::for_each(colorVals.begin(), colorVals.end(), [&line, &header](float f) {
-        std::string val = fmt::to_string(std::ceil(std::clamp(f * 255.0f, 0.0f, 255.0f)));
+      std::for_each(colorVals.begin(), colorVals.end(), [&line, &header](double f) {
+        std::string val
+            = fmt::to_string(std::ceil(std::clamp(f * 255.0f, double(0.0f), double(255.0f))));
         if (line.size() + val.size() > 70) {
           line.pop_back();
           header += line + "\n";
