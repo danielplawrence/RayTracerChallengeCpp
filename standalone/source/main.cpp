@@ -65,7 +65,7 @@ auto main() -> int {
 
   auto image = camera.render(world);
 
-  std::ofstream out("output.ppm");
+  std::ofstream out("output_lo_res.ppm");
   out << image.toPortablePixmap();
   out.close();
   return 0;

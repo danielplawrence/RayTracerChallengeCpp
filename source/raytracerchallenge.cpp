@@ -8,7 +8,7 @@
 
 using namespace raytracerchallenge;
 
-const float EPS = 0.01f;
+const float EPS = 0.0001f;
 
 RayTracerChallenge::Tuple::Tuple() {
   this->x = 0.0f;
@@ -16,15 +16,15 @@ RayTracerChallenge::Tuple::Tuple() {
   this->z = 0.0f;
   this->w = 0.0f;
 }
-RayTracerChallenge::Tuple::Tuple(float x, float y, float z, float w) {
+RayTracerChallenge::Tuple::Tuple(double x, double y, double z, double w) {
   this->x = x;
   this->y = y;
   this->z = z;
   this->w = w;
 }
 bool RayTracerChallenge::Tuple::isVector() const { return w == 0; }
-float RayTracerChallenge::Tuple::magnitude() const {
-  return sqrtf(powf(this->x, 2) + powf(this->y, 2) + powf(this->z, 2) + powf(this->w, 2));
+double RayTracerChallenge::Tuple::magnitude() const {
+  return sqrt(pow(this->x, 2) + pow(this->y, 2) + pow(this->z, 2) + pow(this->w, 2));
 }
 RayTracerChallenge::Tuple RayTracerChallenge::Tuple::normalize() const {
   return {this->x / this->magnitude(), this->y / this->magnitude(), this->z / this->magnitude(),
@@ -34,7 +34,7 @@ bool RayTracerChallenge::Tuple::operator==(const RayTracerChallenge::Tuple &t) c
   return floatEquals(t.x, this->x) && floatEquals(t.y, this->y) && floatEquals(t.z, this->z)
          && floatEquals(t.w, this->w);
 }
-float RayTracerChallenge::Tuple::dot(const RayTracerChallenge::Tuple &t) const {
+double RayTracerChallenge::Tuple::dot(const RayTracerChallenge::Tuple &t) const {
   return this->x * t.x + this->y * t.y + this->z * t.z + this->w * t.w;
 }
 RayTracerChallenge::Tuple RayTracerChallenge::Tuple::cross(
@@ -57,31 +57,31 @@ RayTracerChallenge::Tuple RayTracerChallenge::Tuple::operator-(
 RayTracerChallenge::Tuple RayTracerChallenge::Tuple::operator-() const {
   return {-this->x, -this->y, -this->z, -this->w};
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Tuple::operator*(float f) const {
+RayTracerChallenge::Tuple RayTracerChallenge::Tuple::operator*(double f) const {
   return {f * this->x, f * this->y, f * this->z, f * this->w};
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Tuple::operator/(float f) const {
+RayTracerChallenge::Tuple RayTracerChallenge::Tuple::operator/(double f) const {
   return {this->x / f, this->y / f, this->z / f, this->w / f};
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Tuple::point(float x, float y, float z) {
+RayTracerChallenge::Tuple RayTracerChallenge::Tuple::point(double x, double y, double z) {
   return {x, y, z, 1.0};
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Tuple::vector(float x, float y, float z) {
+RayTracerChallenge::Tuple RayTracerChallenge::Tuple::vector(double x, double y, double z) {
   return {x, y, z, 0.0};
 }
-bool RayTracerChallenge::Tuple::floatEquals(float x, float y) { return abs(x - y) < EPS; }
+bool RayTracerChallenge::Tuple::floatEquals(double x, double y) { return abs(x - y) < EPS; }
 
 RayTracerChallenge::Color::Color() {
   this->red = 0.0f;
   this->green = 0.0f;
   this->blue = 0.0f;
 }
-RayTracerChallenge::Color::Color(float red, float green, float blue) {
+RayTracerChallenge::Color::Color(double red, double green, double blue) {
   this->red = red;
   this->green = green;
   this->blue = blue;
 }
-RayTracerChallenge::Color RayTracerChallenge::Color::operator*(float f) const {
+RayTracerChallenge::Color RayTracerChallenge::Color::operator*(double f) const {
   Tuple t = Tuple(this->red, this->green, this->blue, 0) * f;
   return {t.x, t.y, t.z};
 }
@@ -132,7 +132,7 @@ std::string RayTracerChallenge::Canvas::toPortablePixmap() {
     std::string line;
     for (int x = 0; x < this->width; x++) {
       Color c = this->pixels[x][y];
-      std::vector<float> colorVals{c.red, c.green, c.blue};
+      std::vector<double> colorVals{c.red, c.green, c.blue};
       std::for_each(colorVals.begin(), colorVals.end(), [&line, &header](float f) {
         std::string val = fmt::to_string(std::ceil(std::clamp(f * 255.0f, 0.0f, 255.0f)));
         if (line.size() + val.size() > 70) {
@@ -149,18 +149,18 @@ std::string RayTracerChallenge::Canvas::toPortablePixmap() {
   return header;
 }
 
-RayTracerChallenge::Matrix::Row::Row(std::vector<float> r) : row(std::move(r)) {}
-float RayTracerChallenge::Matrix::Row::operator[](unsigned int y) { return row.at(y); }
+RayTracerChallenge::Matrix::Row::Row(std::vector<double> r) : row(std::move(r)) {}
+double RayTracerChallenge::Matrix::Row::operator[](unsigned int y) { return row.at(y); }
 RayTracerChallenge::Matrix::Matrix(unsigned int x, unsigned int y,
-                                   std::vector<std::vector<float>> m) {
-  this->m.resize(x, std::vector<float>(y, false));
+                                   std::vector<std::vector<double>> m) {
+  this->m.resize(x, std::vector<double>(y, false));
   this->m = std::move(m);
 }
 RayTracerChallenge::Matrix::Matrix() = default;
 RayTracerChallenge::Matrix::Row RayTracerChallenge::Matrix::operator[](const unsigned int x) const {
   return RayTracerChallenge::Matrix::Row(m.at(x));
 }
-bool RayTracerChallenge::Matrix::floatEquals(float x, float y) { return abs(x - y) < EPS; }
+bool RayTracerChallenge::Matrix::floatEquals(double x, double y) { return abs(x - y) < EPS; }
 bool RayTracerChallenge::Matrix::operator==(const Matrix &matrix) const {
   for (int x = 0; x < (int)this->m.size(); x++) {
     for (int y = 0; y < (int)this->m[0].size(); y++) {
@@ -176,11 +176,11 @@ bool RayTracerChallenge::Matrix::operator!=(const Matrix &matrix) const {
 }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::operator*(
     const RayTracerChallenge::Matrix &matrix) const {
-  std::vector<std::vector<float>> res(this->m.size());
+  std::vector<std::vector<double>> res(this->m.size());
   for (int x = 0; x < (int)this->m.size(); x++) {
-    res[x] = std::vector<float>(this->m[0].size());
+    res[x] = std::vector<double>(this->m[0].size());
     for (int y = 0; y < (int)this->m[0].size(); y++) {
-      float cellVal = float();
+      double cellVal = double();
       for (int z = 0; z < (int)this->m.size(); z++) {
         cellVal += this->m[x][z] * matrix.m[z][y];
       }
@@ -199,11 +199,11 @@ RayTracerChallenge::Tuple RayTracerChallenge::Matrix::operator*(
   return res;
 }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::identity(unsigned int size) {
-  std::vector<std::vector<float>> res(size);
+  std::vector<std::vector<double>> res(size);
   unsigned int diagX = 0;
   unsigned int diagY = 0;
   for (unsigned int x = 0; x < size; x++) {
-    res[x] = std::vector<float>(size);
+    res[x] = std::vector<double>(size);
     for (unsigned int y = 0; y < size; y++) {
       if (x == diagX && y == diagY) {
         res[x][y] = 1.0f;
@@ -217,9 +217,9 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::identity(unsigned int siz
   return {size, size, res};
 }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::transposed() {
-  std::vector<std::vector<float>> res(this->m.size());
+  std::vector<std::vector<double>> res(this->m.size());
   for (unsigned int x = 0; x < this->m.size(); x++) {
-    res[x] = std::vector<float>(this->m.size());
+    res[x] = std::vector<double>(this->m.size());
   }
   for (unsigned int x = 0; x < this->m.size(); x++) {
     for (unsigned int y = 0; y < this->m.size(); y++) {
@@ -230,18 +230,18 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::transposed() {
           res};
 }
 
-float RayTracerChallenge::Matrix::determinant() {
+double RayTracerChallenge::Matrix::determinant() {
   if (this->m.size() == 2) {
     return this->m[0][0] * this->m[1][1] - this->m[0][1] * this->m[1][0];
   }
-  float det = 0;
+  double det = 0;
   for (int col = 0; col < (int)m.size(); col++) {
     det += m[0][col] * cofactor(0, col);
   }
   return det;
 }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::submatrix(unsigned int x, unsigned int y) {
-  std::vector<std::vector<float>> res(this->m.size());
+  std::vector<std::vector<double>> res(this->m.size());
   res = m;
   for (auto &re : res) {
     re.erase(re.cbegin() + y);
@@ -249,11 +249,11 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::submatrix(unsigned int x,
   res.erase(res.cbegin() + x);
   return {static_cast<unsigned int>(res.size()), static_cast<unsigned int>(res.size()), res};
 }
-float RayTracerChallenge::Matrix::minor(unsigned int x, unsigned int y) {
+double RayTracerChallenge::Matrix::minor(unsigned int x, unsigned int y) {
   return this->submatrix(x, y).determinant();
 }
-float RayTracerChallenge::Matrix::cofactor(unsigned int x, unsigned int y) {
-  float det = this->submatrix(x, y).determinant();
+double RayTracerChallenge::Matrix::cofactor(unsigned int x, unsigned int y) {
+  double det = this->submatrix(x, y).determinant();
   if ((x + y) % 2 == 0) {
     return det;
   }
@@ -261,9 +261,9 @@ float RayTracerChallenge::Matrix::cofactor(unsigned int x, unsigned int y) {
 }
 bool RayTracerChallenge::Matrix::invertible() { return determinant() != 0.0f; }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::inverse() {
-  std::vector<std::vector<float>> res(this->m.size());
+  std::vector<std::vector<double>> res(this->m.size());
   for (unsigned int x = 0; x < this->m.size(); x++) {
-    res[x] = std::vector<float>(this->m.size());
+    res[x] = std::vector<double>(this->m.size());
   }
   for (unsigned int row = 0; row < this->m.size(); row++) {
     for (unsigned int col = 0; col < this->m.size(); col++) {
@@ -272,14 +272,14 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::inverse() {
   }
   return {static_cast<unsigned int>(res.size()), static_cast<unsigned int>(res.size()), res};
 }
-RayTracerChallenge::Matrix RayTracerChallenge::Matrix::translation(float x, float y, float z) {
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::translation(double x, double y, double z) {
   RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
   res.m[0][3] = x;
   res.m[1][3] = y;
   res.m[2][3] = z;
   return res;
 }
-RayTracerChallenge::Matrix RayTracerChallenge::Matrix::scaling(float x, float y, float z) {
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::scaling(double x, double y, double z) {
   RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
   res.m[0][0] = x;
   res.m[1][1] = y;
@@ -287,7 +287,7 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::scaling(float x, float y,
   res.m[3][3] = 1;
   return res;
 }
-RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotationX(float radians) {
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotationX(double radians) {
   RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
   res.m[1][1] = cos(radians);
   res.m[1][2] = -sin(radians);
@@ -295,7 +295,7 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotationX(float radians) 
   res.m[2][2] = cos(radians);
   return res;
 }
-RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotationY(float radians) {
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotationY(double radians) {
   RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
   res.m[0][0] = cos(radians);
   res.m[0][2] = sin(radians);
@@ -303,7 +303,7 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotationY(float radians) 
   res.m[2][2] = cos(radians);
   return res;
 }
-RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotationZ(float radians) {
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotationZ(double radians) {
   RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
   res.m[0][0] = cos(radians);
   res.m[0][1] = -sin(radians);
@@ -311,8 +311,8 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotationZ(float radians) 
   res.m[1][1] = cos(radians);
   return res;
 }
-RayTracerChallenge::Matrix RayTracerChallenge::Matrix::shearing(float xy, float xz, float yx,
-                                                                float yz, float zx, float zy) {
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::shearing(double xy, double xz, double yx,
+                                                                double yz, double zx, double zy) {
   RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
   res.m[0][1] = xy;
   res.m[0][2] = xz;
@@ -322,28 +322,30 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::shearing(float xy, float 
   res.m[2][1] = zy;
   return res;
 }
-RayTracerChallenge::Matrix RayTracerChallenge::Matrix::translated(float x, float y, float z) const {
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::translated(double x, double y,
+                                                                  double z) const {
   RayTracerChallenge::Matrix t = translation(x, y, z);
   return t * *this;
 }
-RayTracerChallenge::Matrix RayTracerChallenge::Matrix::scaled(float x, float y, float z) const {
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::scaled(double x, double y, double z) const {
   RayTracerChallenge::Matrix t = scaling(x, y, z);
   return t * *this;
 }
-RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotatedX(float radians) const {
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotatedX(double radians) const {
   RayTracerChallenge::Matrix t = rotationX(radians);
   return t * *this;
 }
-RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotatedY(float radians) const {
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotatedY(double radians) const {
   RayTracerChallenge::Matrix t = rotationY(radians);
   return t * *this;
 }
-RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotatedZ(float radians) const {
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotatedZ(double radians) const {
   RayTracerChallenge::Matrix t = rotationZ(radians);
   return t * *this;
 }
-RayTracerChallenge::Matrix RayTracerChallenge::Matrix::sheared(float xy, float xz, float yx,
-                                                               float yz, float zx, float zy) const {
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::sheared(double xy, double xz, double yx,
+                                                               double yz, double zx,
+                                                               double zy) const {
   RayTracerChallenge::Matrix t = shearing(xy, xz, yx, yz, zx, zy);
   return t * *this;
 }
@@ -366,7 +368,7 @@ RayTracerChallenge::Ray::Ray(RayTracerChallenge::Tuple origin,
   this->origin = origin;
   this->direction = direction;
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Ray::position(float t) const {
+RayTracerChallenge::Tuple RayTracerChallenge::Ray::position(double t) const {
   return RayTracerChallenge::Tuple(this->origin + this->direction * t);
 }
 RayTracerChallenge::Ray RayTracerChallenge::Ray::transform(
@@ -384,15 +386,15 @@ RayTracerChallenge::Intersections RayTracerChallenge::Object::intersect(
     RayTracerChallenge::Ray ray) {
   RayTracerChallenge::Ray transformed = ray.transform(this->transform.inverse());
   Tuple sphereToRay = transformed.origin - RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
-  float a = transformed.direction.dot(transformed.direction);
-  float b = 2.0f * transformed.direction.dot(sphereToRay);
-  float c = sphereToRay.dot(sphereToRay) - 1.0f;
-  float discriminant = pow(b, 2.0f) - 4.0f * a * c;
+  double a = transformed.direction.dot(transformed.direction);
+  double b = 2.0f * transformed.direction.dot(sphereToRay);
+  double c = sphereToRay.dot(sphereToRay) - 1.0f;
+  double discriminant = pow(b, 2.0f) - 4.0f * a * c;
   if (discriminant < 0.0f) {
     return Intersections(std::vector<RayTracerChallenge::Intersection>(0));
   }
-  float t1 = (-b - sqrt(discriminant)) / (2.0f * a);
-  float t2 = (-b + sqrt(discriminant)) / (2.0f * a);
+  double t1 = (-b - sqrt(discriminant)) / (2.0f * a);
+  double t2 = (-b + sqrt(discriminant)) / (2.0f * a);
 
   return Intersections(std::vector<RayTracerChallenge::Intersection>{
       RayTracerChallenge::Intersection(t1, *this), RayTracerChallenge::Intersection(t2, *this)});
@@ -401,7 +403,7 @@ bool RayTracerChallenge::Object::operator==(const Object &object) const {
   return this->transform == object.transform && this->material == object.material;
 }
 bool RayTracerChallenge::Object::is(const Object &object) const { return this->id == object.id; }
-RayTracerChallenge::Intersection::Intersection(float t, Object object) {
+RayTracerChallenge::Intersection::Intersection(double t, Object object) {
   this->t = t;
   this->object = std::move(object);
 }
@@ -431,7 +433,7 @@ RayTracerChallenge::Computations RayTracerChallenge::Intersection::prepareComput
 std::optional<RayTracerChallenge::Intersection> RayTracerChallenge::Intersections::hit() {
   std::vector<RayTracerChallenge::Intersection> nonNegative;
   std::copy_if(intersections.cbegin(), intersections.cend(), std::back_inserter(nonNegative),
-               [](Intersection i) { return i.t >= 0.0f; });
+               [](const Intersection &i) { return i.t >= 0.0f; });
   if (nonNegative.empty()) {
     return {};
   }
@@ -486,7 +488,7 @@ RayTracerChallenge::Color RayTracerChallenge::lighting(RayTracerChallenge::Mater
   ambient = effectiveColor * material.ambient;
   if (inShadow) {
     return ambient;
-  };
+  }
   auto lightDotNormal = lightVector.dot(normalVector);
   if (lightDotNormal < 0.0f) {
     diffuse = Color(0.0f, 0.0f, 0.0f);
@@ -556,13 +558,13 @@ bool RayTracerChallenge::World::isShadowed(RayTracerChallenge::Tuple point) {
   }
   return false;
 }
-RayTracerChallenge::Camera::Camera(int hSize, int vSize, float fieldOfView) {
+RayTracerChallenge::Camera::Camera(int hSize, int vSize, double fieldOfView) {
   this->hSize = hSize;
   this->vSize = vSize;
   this->fieldOfView = fieldOfView;
   this->transform = Matrix::identity(4);
   auto halfView = tan(this->fieldOfView / 2.0f);
-  auto aspect = float(this->hSize) / float(this->vSize);
+  auto aspect = double(this->hSize) / double(this->vSize);
   if (aspect >= 1) {
     halfWidth = halfView;
     halfHeight = halfView / aspect;
@@ -570,13 +572,13 @@ RayTracerChallenge::Camera::Camera(int hSize, int vSize, float fieldOfView) {
     halfWidth = halfView * aspect;
     halfHeight = halfView;
   }
-  pixelSize = (halfWidth * 2.0f) / float(hSize);
+  pixelSize = (halfWidth * 2.0f) / double(hSize);
 }
 RayTracerChallenge::Ray RayTracerChallenge::Camera::rayForPixel(int x, int y) {
   auto xOffset = (x + 0.5) * pixelSize;
   auto yOffset = (y + 0.5) * pixelSize;
-  auto worldX = float(halfWidth - xOffset);
-  auto worldY = float(halfHeight - yOffset);
+  auto worldX = double(halfWidth - xOffset);
+  auto worldY = double(halfHeight - yOffset);
   auto pixel = transform.inverse() * Tuple::point(worldX, worldY, -1.0f);
   auto origin = transform.inverse() * Tuple::point(0.0f, 0.0f, 0.0f);
   auto direction = (pixel - origin).normalize();

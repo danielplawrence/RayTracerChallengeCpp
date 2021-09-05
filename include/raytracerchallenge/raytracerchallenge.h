@@ -17,12 +17,12 @@ namespace raytracerchallenge {
      */
     class Tuple {
     public:
-      float x{};
-      float y{};
-      float z{};
-      float w{};
+      double x{};
+      double y{};
+      double z{};
+      double w{};
       [[nodiscard]] bool isVector() const;
-      [[nodiscard]] float magnitude() const;
+      [[nodiscard]] double magnitude() const;
       /**
        * @brief default constructor for Tuples
        */
@@ -34,21 +34,21 @@ namespace raytracerchallenge {
        * @param z position on the z axis
        * @param w 0 for a vector; 1 for a point
        */
-      Tuple(float x, float y, float z, float w);
+      Tuple(double x, double y, double z, double w);
       /**
        * @brief create a point
        * @param x position on the x axis
        * @param y position on the y axis
        * @param z position on the z axis
        */
-      static Tuple point(float x, float y, float z);
+      static Tuple point(double x, double y, double z);
       /**
        * @brief create a vector
        * @param x position on the x axis
        * @param y position on the y axis
        * @param z position on the z axis
        */
-      static Tuple vector(float x, float y, float z);
+      static Tuple vector(double x, double y, double z);
       /**
        * @brief equality operator
        * @param t target for comparison
@@ -76,13 +76,13 @@ namespace raytracerchallenge {
        * @brief scalar multiplication operator
        * @return a new Tuple multiplied by f
        */
-      Tuple operator*(float f) const;
+      Tuple operator*(double f) const;
       /**
        * @brief scalar division operator
        * @param f divisor
        * @return a new Tuple divided by f
        */
-      Tuple operator/(float f) const;
+      Tuple operator/(double) const;
       /**
        * @brief normalize the Tuple
        * @return normalized Tuple
@@ -93,7 +93,7 @@ namespace raytracerchallenge {
        * @param t Tuple to compute dot product with
        * @return scalar value representing the dot product of the two tuples
        */
-      [[nodiscard]] float dot(const Tuple &t) const;
+      [[nodiscard]] double dot(const Tuple &t) const;
       /**
        * @brief the cross product of this Tuple and another
        * @param t Tuple to compute cross product with
@@ -108,16 +108,16 @@ namespace raytracerchallenge {
       [[nodiscard]] Tuple reflect(const Tuple &t) const;
 
     private:
-      static bool floatEquals(float x, float y);
+      static bool floatEquals(double x, double y);
     };
     /**
      * Represents an RGB Color
      */
     class Color {
     public:
-      float red{};
-      float green{};
-      float blue{};
+      double red{};
+      double green{};
+      double blue{};
       /**
        * Default constructor
        */
@@ -128,7 +128,7 @@ namespace raytracerchallenge {
        * @param green green value
        * @param blue value
        */
-      Color(float red, float green, float blue);
+      Color(double red, double green, double blue);
       /**
        * @brief binary subtraction operator
        * @param c target for subtraction
@@ -152,7 +152,7 @@ namespace raytracerchallenge {
        * @param f target for multiplication
        * @return a new Color multiplied by f
        */
-      Color operator*(float f) const;
+      Color operator*(double f) const;
       /**
        * @brief equality operator
        * @param c target for comparison
@@ -198,25 +198,25 @@ namespace raytracerchallenge {
      * @brief Represents a matrix of floating-point numbers
      */
     class Matrix {
-      std::vector<std::vector<float>> m;
+      std::vector<std::vector<double>> m;
 
     public:
       /**
        * @brief The row of a Matrix
        */
       class Row {
-        std::vector<float> row;
+        std::vector<double> row;
 
       public:
         /**
          * @brief Row index
          */
-        float operator[](unsigned int y);
+        double operator[](unsigned int y);
         /**
          * @brief Construct a row from a vector of floating-point numbers
          * @param r Vector to create this row from
          */
-        explicit Row(std::vector<float> r);
+        explicit Row(std::vector<double> r);
       };
       /**
        * Default constructor
@@ -228,7 +228,7 @@ namespace raytracerchallenge {
        * @param width of the input vector
        * @param m a 2D vector providing initial values for the Matrix
        */
-      Matrix(unsigned int x, unsigned int y, std::vector<std::vector<float>> m);
+      Matrix(unsigned int x, unsigned int y, std::vector<std::vector<double>> m);
       /**
        * @brief return a Row of the Matrix at index x
        * @param x row index
@@ -274,7 +274,7 @@ namespace raytracerchallenge {
        * @brief Return the determinant of this Matrix
        * @return the determinant
        */
-      float determinant();
+      double determinant();
       /**
        * @brief Return the submatrix which results fromm removing
        * the column at index xy
@@ -289,14 +289,14 @@ namespace raytracerchallenge {
        * @param y index
        * @return the minor of the element at index x,y
        */
-      float minor(unsigned int x, unsigned int y);
+      double minor(unsigned int x, unsigned int y);
       /**
        * @brief Return the cofactor of the element at index x,y
        * @param x x index
        * @param y index
        * @return the cofactor of the element at index x,y
        */
-      float cofactor(unsigned int x, unsigned int y);
+      double cofactor(unsigned int x, unsigned int y);
       /**
        * @brief Return true if the Matrix is invertible
        * @return true if the Matrix is invertible
@@ -314,7 +314,7 @@ namespace raytracerchallenge {
        * @param z value for z
        * @return translated matrix
        */
-      [[nodiscard]] Matrix translated(float x, float y, float z) const;
+      [[nodiscard]] Matrix translated(double x, double y, double z) const;
       /**
        * @brief Scale this matrix using the provided x, y, z values
        * @param x value for x
@@ -322,25 +322,25 @@ namespace raytracerchallenge {
        * @param z value for z
        * @return scaled matrix
        */
-      [[nodiscard]] Matrix scaled(float x, float y, float z) const;
+      [[nodiscard]] Matrix scaled(double x, double y, double z) const;
       /**
        * @brief Rotate this matrix for the provided radians on the X axis
        * @param radians
        * @return X-rotated matrix
        */
-      [[nodiscard]] Matrix rotatedX(float radians) const;
+      [[nodiscard]] Matrix rotatedX(double radians) const;
       /**
        * @brief Rotate this matrix for the provided radians on the Y axis
        * @param radians
        * @return Y-rotated matrix
        */
-      [[nodiscard]] Matrix rotatedY(float radians) const;
+      [[nodiscard]] Matrix rotatedY(double radians) const;
       /**
        * @brief Rotate this matrix for the provided radians on the Z axis
        * @param radians
        * @return Z-rotated matrix
        */
-      [[nodiscard]] Matrix rotatedZ(float radians) const;
+      [[nodiscard]] Matrix rotatedZ(double radians) const;
       /**
        * @brief Shear this matrix using the provided params
        * @param xy scaling of x relative to y
@@ -351,8 +351,8 @@ namespace raytracerchallenge {
        * @param zy scaling of z relative to y
        * @return sheared matrix
        */
-      [[nodiscard]] Matrix sheared(float xy, float xz, float yx, float yz, float zx,
-                                   float zy) const;
+      [[nodiscard]] Matrix sheared(double xy, double xz, double yx, double yz, double zx,
+                                   double zy) const;
       /**
        * @brief Return a translation matrix for the provided x, y, z values
        * @param x value for x
@@ -360,7 +360,7 @@ namespace raytracerchallenge {
        * @param z value for z
        * @return translation matrix
        */
-      static Matrix translation(float x, float y, float z);
+      static Matrix translation(double x, double y, double z);
       /**
        * @brief Return a scaling matrix for the provided x, y, z values
        * @param x value for x
@@ -368,25 +368,25 @@ namespace raytracerchallenge {
        * @param z value for z
        * @return scaling matrix
        */
-      static Matrix scaling(float x, float y, float z);
+      static Matrix scaling(double x, double y, double z);
       /**
        * @brief Return an X-rotation matrix for the provided radians
        * @param radians
        * @return X-rotation matrix
        */
-      static Matrix rotationX(float radians);
+      static Matrix rotationX(double radians);
       /**
        * @brief Return a Y-rotation matrix for the provided radians
        * @param radians
        * @return Y-rotation matrix
        */
-      static Matrix rotationY(float radians);
+      static Matrix rotationY(double radians);
       /**
        * @brief Return a Z-rotation matrix for the provided radians
        * @param radians
        * @return Z-rotation matrix
        */
-      static Matrix rotationZ(float radians);
+      static Matrix rotationZ(double radians);
       /**
        * @brief Return a shearing matrix for the provided params
        * @param xy scaling of x relative to y
@@ -397,7 +397,7 @@ namespace raytracerchallenge {
        * @param zy scaling of z relative to y
        * @return shearing matrix
        */
-      static Matrix shearing(float xy, float xz, float yx, float yz, float zx, float zy);
+      static Matrix shearing(double xy, double xz, double yx, double yz, double zx, double zy);
       /**
        * @brief Return the view transform
        * @param from location of eye
@@ -408,7 +408,7 @@ namespace raytracerchallenge {
       static Matrix view(Tuple from, Tuple to, Tuple up);
 
     private:
-      static bool floatEquals(float x, float y);
+      static bool floatEquals(double x, double y);
     };
     /**
      * @brief Represents a ray of light
@@ -432,7 +432,7 @@ namespace raytracerchallenge {
       /**
        * @brief Return the position at point t along the ray
        */
-      [[nodiscard]] Tuple position(float t) const;
+      [[nodiscard]] Tuple position(double t) const;
       /**
        * @brief Return the transformation of this ray using the provided transformation matrix
        * @param matrix transformation matrix
@@ -517,7 +517,7 @@ namespace raytracerchallenge {
      */
     class Computations {
     public:
-      float t{};
+      double t{};
       Object object;
       Tuple point;
       Tuple overPoint;
@@ -533,7 +533,7 @@ namespace raytracerchallenge {
       /**
        * @brief the point on the ray where it intersected with an object
        */
-      float t{};
+      double t{};
       /**
        * @brief the object that intersected with the ray
        */
@@ -543,7 +543,7 @@ namespace raytracerchallenge {
        * @param t the point where this intersection occurred on a ray
        * @param object the object which intersected with the ray
        */
-      Intersection(float t, Object object);
+      Intersection(double t, Object object);
       /**
        * @brief Default constructtor
        */
@@ -688,10 +688,10 @@ namespace raytracerchallenge {
     public:
       int hSize;
       int vSize;
-      float pixelSize;
-      float fieldOfView;
-      float halfWidth;
-      float halfHeight;
+      double pixelSize;
+      double fieldOfView;
+      double halfWidth;
+      double halfHeight;
       Matrix transform;
       /**
        * Create a new camera
@@ -699,7 +699,7 @@ namespace raytracerchallenge {
        * @param vSize vertical size of canvas
        * @param fieldOfView camera angle
        */
-      Camera(int hSize, int vSize, float fieldOfView);
+      Camera(int hSize, int vSize, double fieldOfView);
       /**
        * Return a ray targeting the pixel at this position
        * @param x X position
