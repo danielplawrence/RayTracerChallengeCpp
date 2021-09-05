@@ -4,18 +4,16 @@
 
 using namespace raytracerchallenge;
 auto main() -> int {
-
   RayTracerChallenge::World world;
-  world.light = RayTracerChallenge::PointLight(
-      RayTracerChallenge::Tuple::point(-10.0f, 10.0f, -10.0f),
-      RayTracerChallenge::Color(1.0f, 1.0f, 1.0f));
+  world.light
+      = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(-10.0f, 10.0f, -10.0f),
+                                       RayTracerChallenge::Color(1.0f, 1.0f, 1.0f));
 
-  auto camera = RayTracerChallenge::Camera(500, 250, float(M_PI)/3.0f);
+  auto camera = RayTracerChallenge::Camera(50, 25, float(M_PI) / 3.0f);
   auto from = RayTracerChallenge::Tuple::point(0.0f, 1.5f, -5.0f);
   auto to = RayTracerChallenge::Tuple::point(0.0f, 1.0f, 0.0f);
   auto up = RayTracerChallenge::Tuple::vector(0.0f, 1.0f, 0.0f);
   camera.transform = RayTracerChallenge::Matrix::view(from, to, up);
-
 
   RayTracerChallenge::Sphere floor;
   floor.transform = RayTracerChallenge::Matrix::scaling(10.0f, 0.01f, 10.0f);
@@ -24,17 +22,17 @@ auto main() -> int {
 
   RayTracerChallenge::Sphere leftWall;
   leftWall.transform = RayTracerChallenge::Matrix::translation(0.0f, 0.0f, 5.0f)
-      * RayTracerChallenge::Matrix::rotationY(-float(M_PI)/4.0f)
-      * RayTracerChallenge::Matrix::rotationX(float(M_PI)/2.0f)
-      * RayTracerChallenge::Matrix::scaling(10.0f, 0.01f, 10.0f);
+                       * RayTracerChallenge::Matrix::rotationY(-float(M_PI) / 4.0f)
+                       * RayTracerChallenge::Matrix::rotationX(float(M_PI) / 2.0f)
+                       * RayTracerChallenge::Matrix::scaling(10.0f, 0.01f, 10.0f);
   leftWall.material.color = {1.0f, 0.9f, 0.9f};
   leftWall.material.specular = 0.0f;
 
   RayTracerChallenge::Sphere rightWall;
   rightWall.transform = RayTracerChallenge::Matrix::translation(0.0f, 0.0f, 5.0f)
-      * RayTracerChallenge::Matrix::rotationY(float(M_PI)/4.0f)
-      * RayTracerChallenge::Matrix::rotationX(float(M_PI)/2.0f)
-      * RayTracerChallenge::Matrix::scaling(10.0f, 0.01f, 10.0f);
+                        * RayTracerChallenge::Matrix::rotationY(float(M_PI) / 4.0f)
+                        * RayTracerChallenge::Matrix::rotationX(float(M_PI) / 2.0f)
+                        * RayTracerChallenge::Matrix::scaling(10.0f, 0.01f, 10.0f);
   rightWall.material.color = {1.0f, 0.9f, 0.9f};
   rightWall.material.specular = 0.0f;
 
@@ -46,14 +44,14 @@ auto main() -> int {
 
   RayTracerChallenge::Sphere right;
   right.transform = RayTracerChallenge::Matrix::translation(1.5f, 0.5f, -0.5f)
-      * RayTracerChallenge::Matrix::scaling(0.5f, 0.5f, 0.5f);
+                    * RayTracerChallenge::Matrix::scaling(0.5f, 0.5f, 0.5f);
   right.material.color = {0.5f, 1.0f, 0.1f};
   right.material.specular = 0.3f;
   right.material.diffuse = 0.7f;
 
   RayTracerChallenge::Sphere left;
   left.transform = RayTracerChallenge::Matrix::translation(-1.5f, 0.33f, -0.75f)
-      * RayTracerChallenge::Matrix::scaling(0.33f, 0.33f, 0.33f);
+                   * RayTracerChallenge::Matrix::scaling(0.33f, 0.33f, 0.33f);
   left.material.color = {1.0f, 0.8f, 0.1f};
   left.material.specular = 0.3f;
   left.material.diffuse = 0.7f;

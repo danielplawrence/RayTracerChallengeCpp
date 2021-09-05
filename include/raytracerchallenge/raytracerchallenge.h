@@ -520,6 +520,7 @@ namespace raytracerchallenge {
       float t{};
       Object object;
       Tuple point;
+      Tuple overPoint;
       Tuple eyeVector;
       Tuple normalVector;
       bool inside{};
@@ -673,6 +674,12 @@ namespace raytracerchallenge {
        * @return Color at the resulting intersection
        */
       Color colorAt(Ray ray);
+      /**
+       * Return True if this point is in shadow
+       * @param point to check for shadow
+       * @return True if this point is in shadow
+       */
+      bool isShadowed(Tuple point);
     };
     /**
      * Represents a Camera
@@ -715,9 +722,10 @@ namespace raytracerchallenge {
      * @param position Position we need the lighting for
      * @param eyeVector Eye vector
      * @param normalVector Normal vector
+     * @param inShadow Whether or not the position is in shadow
      * @return The color for the target position
      */
     static Color lighting(Material material, PointLight light, Tuple position, Tuple eyeVector,
-                          Tuple normalVector);
+                          Tuple normalVector, bool inShadow);
   };
 }  // namespace raytracerchallenge

@@ -8,6 +8,8 @@
 
 using namespace raytracerchallenge;
 
+const float EPS = 0.01f;
+
 RayTracerChallenge::Tuple::Tuple() {
   this->x = 0.0f;
   this->y = 0.0f;
@@ -67,7 +69,7 @@ RayTracerChallenge::Tuple RayTracerChallenge::Tuple::point(float x, float y, flo
 RayTracerChallenge::Tuple RayTracerChallenge::Tuple::vector(float x, float y, float z) {
   return {x, y, z, 0.0};
 }
-bool RayTracerChallenge::Tuple::floatEquals(float x, float y) { return abs(x - y) < 0.00001; }
+bool RayTracerChallenge::Tuple::floatEquals(float x, float y) { return abs(x - y) < EPS; }
 
 RayTracerChallenge::Color::Color() {
   this->red = 0.0f;
@@ -158,7 +160,7 @@ RayTracerChallenge::Matrix::Matrix() = default;
 RayTracerChallenge::Matrix::Row RayTracerChallenge::Matrix::operator[](const unsigned int x) const {
   return RayTracerChallenge::Matrix::Row(m.at(x));
 }
-bool RayTracerChallenge::Matrix::floatEquals(float x, float y) { return abs(x - y) < 0.0001; }
+bool RayTracerChallenge::Matrix::floatEquals(float x, float y) { return abs(x - y) < EPS; }
 bool RayTracerChallenge::Matrix::operator==(const Matrix &matrix) const {
   for (int x = 0; x < (int)this->m.size(); x++) {
     for (int y = 0; y < (int)this->m[0].size(); y++) {
@@ -423,6 +425,7 @@ RayTracerChallenge::Computations RayTracerChallenge::Intersection::prepareComput
     computations.inside = true;
     computations.normalVector = -computations.normalVector;
   }
+  computations.overPoint = computations.point + (computations.normalVector * EPS);
   return computations;
 }
 std::optional<RayTracerChallenge::Intersection> RayTracerChallenge::Intersections::hit() {
@@ -473,13 +476,17 @@ RayTracerChallenge::Color RayTracerChallenge::lighting(RayTracerChallenge::Mater
                                                        RayTracerChallenge::PointLight light,
                                                        RayTracerChallenge::Tuple position,
                                                        RayTracerChallenge::Tuple eyeVector,
-                                                       RayTracerChallenge::Tuple normalVector) {
+                                                       RayTracerChallenge::Tuple normalVector,
+                                                       bool inShadow) {
   Color diffuse;
   Color specular;
   Color ambient;
   auto effectiveColor = material.color * light.intensity;
   auto lightVector = (light.position - position).normalize();
   ambient = effectiveColor * material.ambient;
+  if (inShadow) {
+    return ambient;
+  };
   auto lightDotNormal = lightVector.dot(normalVector);
   if (lightDotNormal < 0.0f) {
     diffuse = Color(0.0f, 0.0f, 0.0f);
@@ -527,8 +534,9 @@ RayTracerChallenge::Intersections RayTracerChallenge::World::intersect(Ray ray) 
   return intersections;
 }
 RayTracerChallenge::Color RayTracerChallenge::World::shadeHit(const Computations &computations) {
-  return lighting(computations.object.material, this->light.value(), computations.point,
-                  computations.eyeVector, computations.normalVector);
+  bool shadowed = isShadowed(computations.overPoint);
+  return lighting(computations.object.material, this->light.value(), computations.overPoint,
+                  computations.eyeVector, computations.normalVector, shadowed);
 }
 RayTracerChallenge::Color RayTracerChallenge::World::colorAt(Ray ray) {
   Intersections intersections = this->intersect(ray);
@@ -537,6 +545,16 @@ RayTracerChallenge::Color RayTracerChallenge::World::colorAt(Ray ray) {
     return {0.0f, 0.0f, 0.0f};
   }
   return shadeHit(hit.value().prepareComputations(ray));
+}
+bool RayTracerChallenge::World::isShadowed(RayTracerChallenge::Tuple point) {
+  auto distance = (light->position - point).magnitude();
+  auto direction = (light->position - point).normalize();
+  auto ray = RayTracerChallenge::Ray(point, direction);
+  auto hit = intersect(ray).hit();
+  if (hit.has_value() && hit.value().t < distance) {
+    return true;
+  }
+  return false;
 }
 RayTracerChallenge::Camera::Camera(int hSize, int vSize, float fieldOfView) {
   this->hSize = hSize;
