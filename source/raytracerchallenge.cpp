@@ -376,19 +376,22 @@ RayTracerChallenge::Ray RayTracerChallenge::Ray::transform(
     const RayTracerChallenge::Matrix &matrix) const {
   return {matrix * this->origin, matrix * this->direction};
 }
-RayTracerChallenge::Object::Object() {
+RayTracerChallenge::Shape::Shape() {
   uint64_t current_time_us = std::chrono::duration_cast<std::chrono::microseconds>(
                                  std::chrono::high_resolution_clock::now().time_since_epoch())
                                  .count();
   this->id = fmt::to_string(current_time_us);
   this->transform = Matrix::identity(4);
 }
-RayTracerChallenge::Intersections RayTracerChallenge::Object::intersect(
+RayTracerChallenge::Intersections RayTracerChallenge::Shape::intersect(
     RayTracerChallenge::Ray ray) {
   RayTracerChallenge::Ray transformed = ray.transform(this->transform.inverse());
-  Tuple sphereToRay = transformed.origin - RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
-  double a = transformed.direction.dot(transformed.direction);
-  double b = 2.0 * transformed.direction.dot(sphereToRay);
+  return localIntersect(transformed);
+}
+RayTracerChallenge::Intersections RayTracerChallenge::Shape::localIntersect(Ray ray) {
+  Tuple sphereToRay = ray.origin - RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
+  double a = ray.direction.dot(ray.direction);
+  double b = 2.0 * ray.direction.dot(sphereToRay);
   double c = sphereToRay.dot(sphereToRay) - 1.0;
   double discriminant = pow(b, 2.0) - 4.0 * a * c;
   if (discriminant < 0.0) {
@@ -399,12 +402,12 @@ RayTracerChallenge::Intersections RayTracerChallenge::Object::intersect(
 
   return Intersections(std::vector<RayTracerChallenge::Intersection>{
       RayTracerChallenge::Intersection(t1, *this), RayTracerChallenge::Intersection(t2, *this)});
-}
-bool RayTracerChallenge::Object::operator==(const Object &object) const {
+};
+bool RayTracerChallenge::Shape::operator==(const Shape &object) const {
   return this->transform == object.transform && this->material == object.material;
 }
-bool RayTracerChallenge::Object::is(const Object &object) const { return this->id == object.id; }
-RayTracerChallenge::Intersection::Intersection(double t, Object object) {
+bool RayTracerChallenge::Shape::is(const Shape &object) const { return this->id == object.id; }
+RayTracerChallenge::Intersection::Intersection(double t, Shape object) {
   this->t = t;
   this->object = std::move(object);
 }
@@ -456,14 +459,18 @@ size_t RayTracerChallenge::Intersections::size() const { return this->intersecti
 void RayTracerChallenge::Intersections::sort() {
   std::sort(this->intersections.begin(), this->intersections.end());
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Object::normalAt(RayTracerChallenge::Tuple point) {
+RayTracerChallenge::Tuple RayTracerChallenge::Shape::localNormalAt(
+    RayTracerChallenge::Tuple point) {
+  return point - RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
+}
+RayTracerChallenge::Tuple RayTracerChallenge::Shape::normalAt(RayTracerChallenge::Tuple point) {
   auto objectPoint = this->transform.inverse() * point;
-  auto objectNormal = objectPoint - RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
+  auto objectNormal = localNormalAt(objectPoint);
   auto worldNormal = (this->transform.inverse().transposed()) * objectNormal;
   worldNormal.w = 0.0;
   return worldNormal.normalize();
 }
-bool RayTracerChallenge::Object::operator<(const RayTracerChallenge::Object &object) const {
+bool RayTracerChallenge::Shape::operator<(const RayTracerChallenge::Shape &object) const {
   return this->id < object.id;
 }
 RayTracerChallenge::PointLight::PointLight(RayTracerChallenge::Tuple position,
@@ -508,11 +515,11 @@ RayTracerChallenge::Color RayTracerChallenge::lighting(RayTracerChallenge::Mater
   return ambient + diffuse + specular;
 }
 RayTracerChallenge::World::World() = default;
-bool RayTracerChallenge::World::contains(Object &object) {
+bool RayTracerChallenge::World::contains(Shape &object) {
   return std::find(this->objects.begin(), this->objects.end(), object) != this->objects.end();
 }
 bool RayTracerChallenge::World::isEmpty() const { return this->objects.empty(); }
-void RayTracerChallenge::World::add(RayTracerChallenge::Object &object) {
+void RayTracerChallenge::World::add(RayTracerChallenge::Shape &object) {
   this->objects.push_back(object);
 }
 RayTracerChallenge::World RayTracerChallenge::World::defaultWorld() {
@@ -530,7 +537,7 @@ RayTracerChallenge::World RayTracerChallenge::World::defaultWorld() {
 }
 RayTracerChallenge::Intersections RayTracerChallenge::World::intersect(Ray ray) {
   Intersections intersections;
-  for (Object object : this->objects) {
+  for (Shape object : this->objects) {
     intersections.addAll(object.intersect(ray));
   }
   intersections.sort();

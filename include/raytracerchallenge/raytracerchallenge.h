@@ -457,7 +457,7 @@ namespace raytracerchallenge {
     /**
      * @brief Base class for objects
      */
-    class Object {
+    class Shape {
     public:
       /**
        * @brief A unique id for this object
@@ -476,9 +476,17 @@ namespace raytracerchallenge {
        * and the provided ray
        * @param ray
        * @return collection of Intersections representing positions where
-       * the ray passed throough this object
+       * the ray passed through this object
        */
       Intersections intersect(Ray ray);
+      /**
+       * @brief Implementation-specific logic for returning all intersections
+       * between a shape and a ray. Defaults to Sphere behavior.
+       * @param ray
+       * @return collection of Intersections representing positions where
+       * the ray passed through this object
+       */
+      virtual Intersections localIntersect(Ray ray);
       /**
        * @brief Return the normal vector at the specified point on an object
        * @param point
@@ -486,39 +494,47 @@ namespace raytracerchallenge {
        */
       Tuple normalAt(Tuple point);
       /**
+       * Implementation-specific logic for returning the normal at a specific
+       * point on this object. Defaults to Sphere behavior.
+       * @param point
+       * @return the normal vector at the specified point on this object
+       */
+      virtual Tuple localNormalAt(Tuple point);
+      /**
        * @brief Default constructor
        */
-      Object();
+      Shape();
       /**
        * @brief Equality operator. Objects are equal if they share the same properties
        * @param object object to compare with this one
        * @return true if the objects share the same properties
        */
-      bool operator==(const Object &object) const;
+      bool operator==(const Shape &object) const;
       /**
        * @brief Less than operator; just uses the ID
        * @param object object to compare with this one
        * @return true if this object is less than the target
        */
-      bool operator<(const Object &object) const;
+      bool operator<(const Shape &object) const;
       /**
        * @brief Return true if the objects share the same ID
        * @param object Object for comparison
        * @return true if the objects share the same ID
        */
-      [[nodiscard]] bool is(const Object &object) const;
+      [[nodiscard]] bool is(const Shape &object) const;
+      virtual ~Shape() = default;
     };
     /**
      * @brief Represents a sphere
      */
-    class [[maybe_unused]] Sphere : public Object{public : };
+    class [[maybe_unused]] Sphere : public Shape{public : };
     /**
      * Ray intersection computations
      */
     class Computations {
     public:
       double t{};
-      Object object;
+      Shape object;
       Tuple point;
       Tuple overPoint;
       Tuple eyeVector;
@@ -537,13 +553,13 @@ namespace raytracerchallenge {
       /**
        * @brief the object that intersected with the ray
        */
-      Object object;
+      Shape object;
       /**
        * @brief Construct a new Intersection
        * @param t the point where this intersection occurred on a ray
        * @param object the object which intersected with the ray
        */
-      Intersection(double t, Object object);
+      Intersection(double t, Shape object);
       /**
        * @brief Default constructtor
        */
@@ -626,7 +642,7 @@ namespace raytracerchallenge {
     };
     class World {
     public:
-      std::vector<Object> objects;
+      std::vector<Shape> objects;
       std::optional<PointLight> light;
       /**
        * Default constructor for a World
@@ -637,7 +653,7 @@ namespace raytracerchallenge {
        * @param object Object to test
        * @return true if this object is in the World
        */
-      bool contains(Object &object);
+      bool contains(Shape &object);
       /**
        * Return true if the world contains no objects
        * @return true if the world contains no objects
@@ -647,7 +663,7 @@ namespace raytracerchallenge {
        * Add an Object to the world
        * @param object target Object
        */
-      void add(Object &object);
+      void add(Shape &object);
       /**
        * Intersect this world with a ray
        * @param ray to pass through the world
