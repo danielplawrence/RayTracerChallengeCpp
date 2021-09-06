@@ -8,13 +8,13 @@
 
 using namespace raytracerchallenge;
 
-const float EPS = 0.0001f;
+const float EPS = 0.0001;
 
 RayTracerChallenge::Tuple::Tuple() {
-  this->x = 0.0f;
-  this->y = 0.0f;
-  this->z = 0.0f;
-  this->w = 0.0f;
+  this->x = 0.0;
+  this->y = 0.0;
+  this->z = 0.0;
+  this->w = 0.0;
 }
 RayTracerChallenge::Tuple::Tuple(double x, double y, double z, double w) {
   this->x = x;
@@ -44,7 +44,7 @@ RayTracerChallenge::Tuple RayTracerChallenge::Tuple::cross(
 }
 RayTracerChallenge::Tuple RayTracerChallenge::Tuple::reflect(
     const RayTracerChallenge::Tuple &t) const {
-  return *this - t * 2.0f * this->dot(t);
+  return *this - t * 2.0 * this->dot(t);
 }
 RayTracerChallenge::Tuple RayTracerChallenge::Tuple::operator+(
     const RayTracerChallenge::Tuple &t) const {
@@ -72,9 +72,9 @@ RayTracerChallenge::Tuple RayTracerChallenge::Tuple::vector(double x, double y, 
 bool RayTracerChallenge::Tuple::floatEquals(double x, double y) { return abs(x - y) < EPS; }
 
 RayTracerChallenge::Color::Color() {
-  this->red = 0.0f;
-  this->green = 0.0f;
-  this->blue = 0.0f;
+  this->red = 0.0;
+  this->green = 0.0;
+  this->blue = 0.0;
 }
 RayTracerChallenge::Color::Color(double red, double green, double blue) {
   this->red = red;
@@ -135,7 +135,7 @@ std::string RayTracerChallenge::Canvas::toPortablePixmap() {
       std::vector<double> colorVals{c.red, c.green, c.blue};
       std::for_each(colorVals.begin(), colorVals.end(), [&line, &header](double f) {
         std::string val
-            = fmt::to_string(std::ceil(std::clamp(float(f * 255.0f), float(0.0f), float(255.0f))));
+            = fmt::to_string(std::ceil(std::clamp(float(f * 255.0), float(0.0), float(255.0))));
         if (line.size() + val.size() > 70) {
           line.pop_back();
           header += line + "\n";
@@ -207,11 +207,11 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::identity(unsigned int siz
     res[x] = std::vector<double>(size);
     for (unsigned int y = 0; y < size; y++) {
       if (x == diagX && y == diagY) {
-        res[x][y] = 1.0f;
+        res[x][y] = 1.0;
         diagX++;
         diagY++;
       } else {
-        res[x][y] = 0.0f;
+        res[x][y] = 0.0;
       }
     }
   }
@@ -260,7 +260,7 @@ double RayTracerChallenge::Matrix::cofactor(unsigned int x, unsigned int y) {
   }
   return -det;
 }
-bool RayTracerChallenge::Matrix::invertible() { return determinant() != 0.0f; }
+bool RayTracerChallenge::Matrix::invertible() { return determinant() != 0.0; }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::inverse() {
   std::vector<std::vector<double>> res(this->m.size());
   for (unsigned int x = 0; x < this->m.size(); x++) {
@@ -358,10 +358,10 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::view(RayTracerChallenge::
   auto left = forward.cross(upN);
   auto trueUp = left.cross(forward);
   RayTracerChallenge::Matrix orientation(4, 4,
-                                         {{left.x, left.y, left.z, 0.0f},
-                                          {trueUp.x, trueUp.y, trueUp.z, 0.0f},
-                                          {-forward.x, -forward.y, -forward.z, 0.0f},
-                                          {0.0f, 0.0f, 0.0f, 1.0f}});
+                                         {{left.x, left.y, left.z, 0.0},
+                                          {trueUp.x, trueUp.y, trueUp.z, 0.0},
+                                          {-forward.x, -forward.y, -forward.z, 0.0},
+                                          {0.0, 0.0, 0.0, 1.0}});
   return orientation * translation(-from.x, -from.y, -from.z);
 }
 RayTracerChallenge::Ray::Ray(RayTracerChallenge::Tuple origin,
@@ -386,16 +386,16 @@ RayTracerChallenge::Object::Object() {
 RayTracerChallenge::Intersections RayTracerChallenge::Object::intersect(
     RayTracerChallenge::Ray ray) {
   RayTracerChallenge::Ray transformed = ray.transform(this->transform.inverse());
-  Tuple sphereToRay = transformed.origin - RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+  Tuple sphereToRay = transformed.origin - RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
   double a = transformed.direction.dot(transformed.direction);
-  double b = 2.0f * transformed.direction.dot(sphereToRay);
-  double c = sphereToRay.dot(sphereToRay) - 1.0f;
-  double discriminant = pow(b, 2.0f) - 4.0f * a * c;
-  if (discriminant < 0.0f) {
+  double b = 2.0 * transformed.direction.dot(sphereToRay);
+  double c = sphereToRay.dot(sphereToRay) - 1.0;
+  double discriminant = pow(b, 2.0) - 4.0 * a * c;
+  if (discriminant < 0.0) {
     return Intersections(std::vector<RayTracerChallenge::Intersection>(0));
   }
-  double t1 = (-b - sqrt(discriminant)) / (2.0f * a);
-  double t2 = (-b + sqrt(discriminant)) / (2.0f * a);
+  double t1 = (-b - sqrt(discriminant)) / (2.0 * a);
+  double t2 = (-b + sqrt(discriminant)) / (2.0 * a);
 
   return Intersections(std::vector<RayTracerChallenge::Intersection>{
       RayTracerChallenge::Intersection(t1, *this), RayTracerChallenge::Intersection(t2, *this)});
@@ -424,7 +424,7 @@ RayTracerChallenge::Computations RayTracerChallenge::Intersection::prepareComput
   computations.point = ray.position(t);
   computations.eyeVector = -ray.direction;
   computations.normalVector = this->object.normalAt(computations.point);
-  if (computations.normalVector.dot(computations.eyeVector) < 0.0f) {
+  if (computations.normalVector.dot(computations.eyeVector) < 0.0) {
     computations.inside = true;
     computations.normalVector = -computations.normalVector;
   }
@@ -434,7 +434,7 @@ RayTracerChallenge::Computations RayTracerChallenge::Intersection::prepareComput
 std::optional<RayTracerChallenge::Intersection> RayTracerChallenge::Intersections::hit() {
   std::vector<RayTracerChallenge::Intersection> nonNegative;
   std::copy_if(intersections.cbegin(), intersections.cend(), std::back_inserter(nonNegative),
-               [](const Intersection &i) { return i.t >= 0.0f; });
+               [](const Intersection &i) { return i.t >= 0.0; });
   if (nonNegative.empty()) {
     return {};
   }
@@ -458,9 +458,9 @@ void RayTracerChallenge::Intersections::sort() {
 }
 RayTracerChallenge::Tuple RayTracerChallenge::Object::normalAt(RayTracerChallenge::Tuple point) {
   auto objectPoint = this->transform.inverse() * point;
-  auto objectNormal = objectPoint - RayTracerChallenge::Tuple::point(0.0f, 0.0f, 0.0f);
+  auto objectNormal = objectPoint - RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
   auto worldNormal = (this->transform.inverse().transposed()) * objectNormal;
-  worldNormal.w = 0.0f;
+  worldNormal.w = 0.0;
   return worldNormal.normalize();
 }
 bool RayTracerChallenge::Object::operator<(const RayTracerChallenge::Object &object) const {
@@ -491,15 +491,15 @@ RayTracerChallenge::Color RayTracerChallenge::lighting(RayTracerChallenge::Mater
     return ambient;
   }
   auto lightDotNormal = lightVector.dot(normalVector);
-  if (lightDotNormal < 0.0f) {
-    diffuse = Color(0.0f, 0.0f, 0.0f);
-    specular = Color(0.0f, 0.0f, 0.0f);
+  if (lightDotNormal < 0.0) {
+    diffuse = Color(0.0, 0.0, 0.0);
+    specular = Color(0.0, 0.0, 0.0);
   } else {
     diffuse = effectiveColor * material.diffuse * lightDotNormal;
     auto reflectVector = (-lightVector).reflect(normalVector);
     auto reflectDotEye = reflectVector.dot(eyeVector);
-    if (reflectDotEye <= 0.0f) {
-      specular = Color(0.0f, 0.0f, 0.0f);
+    if (reflectDotEye <= 0.0) {
+      specular = Color(0.0, 0.0, 0.0);
     } else {
       auto factor = pow(reflectDotEye, material.shininess);
       specular = light.intensity * material.specular * factor;
@@ -517,13 +517,13 @@ void RayTracerChallenge::World::add(RayTracerChallenge::Object &object) {
 }
 RayTracerChallenge::World RayTracerChallenge::World::defaultWorld() {
   World world;
-  world.light = PointLight(Tuple::point(-10.0f, 10.0f, -10.0f), Color(1.0f, 1.0f, 1.0f));
+  world.light = PointLight(Tuple::point(-10.0, 10.0, -10.0), Color(1.0, 1.0, 1.0));
   Sphere sphere1;
-  sphere1.material.color = Color(0.8f, 1.0f, 0.6f);
-  sphere1.material.diffuse = 0.7f;
-  sphere1.material.specular = 0.2f;
+  sphere1.material.color = Color(0.8, 1.0, 0.6);
+  sphere1.material.diffuse = 0.7;
+  sphere1.material.specular = 0.2;
   Sphere sphere2;
-  sphere2.transform = Matrix::scaling(0.5f, 0.5f, 0.5f);
+  sphere2.transform = Matrix::scaling(0.5, 0.5, 0.5);
   world.add(sphere1);
   world.add(sphere2);
   return world;
@@ -545,7 +545,7 @@ RayTracerChallenge::Color RayTracerChallenge::World::colorAt(Ray ray) {
   Intersections intersections = this->intersect(ray);
   std::optional<Intersection> hit = intersections.hit();
   if (!hit.has_value()) {
-    return {0.0f, 0.0f, 0.0f};
+    return {0.0, 0.0, 0.0};
   }
   return shadeHit(hit.value().prepareComputations(ray));
 }
@@ -564,7 +564,7 @@ RayTracerChallenge::Camera::Camera(int hSize, int vSize, double fieldOfView) {
   this->vSize = vSize;
   this->fieldOfView = fieldOfView;
   this->transform = Matrix::identity(4);
-  auto halfView = tan(this->fieldOfView / 2.0f);
+  auto halfView = tan(this->fieldOfView / 2.0);
   auto aspect = double(this->hSize) / double(this->vSize);
   if (aspect >= 1) {
     halfWidth = halfView;
@@ -573,15 +573,15 @@ RayTracerChallenge::Camera::Camera(int hSize, int vSize, double fieldOfView) {
     halfWidth = halfView * aspect;
     halfHeight = halfView;
   }
-  pixelSize = (halfWidth * 2.0f) / double(hSize);
+  pixelSize = (halfWidth * 2.0) / double(hSize);
 }
 RayTracerChallenge::Ray RayTracerChallenge::Camera::rayForPixel(int x, int y) {
   auto xOffset = (x + 0.5) * pixelSize;
   auto yOffset = (y + 0.5) * pixelSize;
   auto worldX = double(halfWidth - xOffset);
   auto worldY = double(halfHeight - yOffset);
-  auto pixel = transform.inverse() * Tuple::point(worldX, worldY, -1.0f);
-  auto origin = transform.inverse() * Tuple::point(0.0f, 0.0f, 0.0f);
+  auto pixel = transform.inverse() * Tuple::point(worldX, worldY, -1.0);
+  auto origin = transform.inverse() * Tuple::point(0.0, 0.0, 0.0);
   auto direction = (pixel - origin).normalize();
   return {origin, direction};
 }
