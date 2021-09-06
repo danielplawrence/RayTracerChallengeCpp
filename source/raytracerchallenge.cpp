@@ -31,8 +31,8 @@ RayTracerChallenge::Tuple RayTracerChallenge::Tuple::normalize() const {
           this->w / this->magnitude()};
 }
 bool RayTracerChallenge::Tuple::operator==(const RayTracerChallenge::Tuple &t) const {
-  return floatEquals(t.x, this->x) && floatEquals(t.y, this->y) && floatEquals(t.z, this->z)
-         && floatEquals(t.w, this->w);
+  return doubleEquals(t.x, this->x) && doubleEquals(t.y, this->y) && doubleEquals(t.z, this->z)
+         && doubleEquals(t.w, this->w);
 }
 double RayTracerChallenge::Tuple::dot(const RayTracerChallenge::Tuple &t) const {
   return this->x * t.x + this->y * t.y + this->z * t.z + this->w * t.w;
@@ -69,7 +69,7 @@ RayTracerChallenge::Tuple RayTracerChallenge::Tuple::point(double x, double y, d
 RayTracerChallenge::Tuple RayTracerChallenge::Tuple::vector(double x, double y, double z) {
   return {x, y, z, 0.0};
 }
-bool RayTracerChallenge::Tuple::floatEquals(double x, double y) { return abs(x - y) < EPS; }
+bool RayTracerChallenge::Tuple::doubleEquals(double x, double y) { return abs(x - y) < EPS; }
 
 RayTracerChallenge::Color::Color() {
   this->red = 0.0;
@@ -161,11 +161,11 @@ RayTracerChallenge::Matrix::Matrix() = default;
 RayTracerChallenge::Matrix::Row RayTracerChallenge::Matrix::operator[](const unsigned int x) const {
   return RayTracerChallenge::Matrix::Row(m.at(x));
 }
-bool RayTracerChallenge::Matrix::floatEquals(double x, double y) { return abs(x - y) < EPS; }
+bool RayTracerChallenge::Matrix::doubleEquals(double x, double y) { return abs(x - y) < EPS; }
 bool RayTracerChallenge::Matrix::operator==(const Matrix &matrix) const {
   for (int x = 0; x < (int)this->m.size(); x++) {
     for (int y = 0; y < (int)this->m[0].size(); y++) {
-      if (!floatEquals(this->m[x][y], matrix.m[x][y])) {
+      if (!doubleEquals(this->m[x][y], matrix.m[x][y])) {
         return false;
       }
     }

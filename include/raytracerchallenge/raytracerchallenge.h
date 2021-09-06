@@ -108,7 +108,7 @@ namespace raytracerchallenge {
       [[nodiscard]] Tuple reflect(const Tuple &t) const;
 
     private:
-      static bool floatEquals(double x, double y);
+      static bool doubleEquals(double x, double y);
     };
     /**
      * Represents an RGB Color
@@ -408,7 +408,7 @@ namespace raytracerchallenge {
       static Matrix view(Tuple from, Tuple to, Tuple up);
 
     private:
-      static bool floatEquals(double x, double y);
+      static bool doubleEquals(double x, double y);
     };
     /**
      * @brief Represents a ray of light
@@ -445,11 +445,11 @@ namespace raytracerchallenge {
      */
     class Material {
     public:
-      float ambient = 0.1f;
-      float diffuse = 0.9f;
-      float specular = 0.9f;
-      float shininess = 200.0f;
-      Color color = Color(1.0f, 1.0f, 1.0f);
+      double ambient = 0.1;
+      double diffuse = 0.9;
+      double specular = 0.9;
+      double shininess = 200.0;
+      Color color = Color(1.0, 1.0, 1.0);
       bool operator==(const Material &material) const;
     };
     class Intersection;
