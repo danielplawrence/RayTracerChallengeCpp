@@ -8,7 +8,7 @@
 
 using namespace raytracerchallenge;
 
-const float EPS = 0.0001;
+const double EPS = 0.0001;
 
 RayTracerChallenge::Tuple::Tuple() {
   this->x = 0.0;
