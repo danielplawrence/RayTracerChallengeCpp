@@ -402,7 +402,7 @@ RayTracerChallenge::Intersections RayTracerChallenge::Shape::localIntersect(Ray 
 
   return Intersections(std::vector<RayTracerChallenge::Intersection>{
       RayTracerChallenge::Intersection(t1, *this), RayTracerChallenge::Intersection(t2, *this)});
-};
+}
 bool RayTracerChallenge::Shape::operator==(const Shape &object) const {
   return this->transform == object.transform && this->material == object.material;
 }
@@ -472,6 +472,17 @@ RayTracerChallenge::Tuple RayTracerChallenge::Shape::normalAt(RayTracerChallenge
 }
 bool RayTracerChallenge::Shape::operator<(const RayTracerChallenge::Shape &object) const {
   return this->id < object.id;
+}
+RayTracerChallenge::Tuple RayTracerChallenge::Plane::localNormalAt(Tuple point) {
+  (void)point;
+  return RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0);
+}
+RayTracerChallenge::Intersections RayTracerChallenge::Plane::localIntersect(Ray ray) {
+  if (abs(ray.direction.y) < EPS) {
+    return {};
+  }
+  auto t = -ray.origin.y / ray.direction.y;
+  return Intersections({RayTracerChallenge::Intersection(t, *this)});
 }
 RayTracerChallenge::PointLight::PointLight(RayTracerChallenge::Tuple position,
                                            RayTracerChallenge::Color intensity) {

@@ -529,6 +529,14 @@ namespace raytracerchallenge {
      */
     class [[maybe_unused]] Sphere : public Shape{public : };
     /**
+     * @brief Represents a flat surface
+     */
+    class Plane : public Shape {
+    public:
+      Tuple localNormalAt(Tuple point) override;
+      Intersections localIntersect(Ray ray) override;
+    };
+    /**
      * Ray intersection computations
      */
     class Computations {

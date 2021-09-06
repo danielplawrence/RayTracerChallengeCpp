@@ -920,6 +920,54 @@ TEST_CASE("Normals") {
     CHECK(n == RayTracerChallenge::Tuple::vector(0.0, 0.97014, -0.24254));
   }
 }
+TEST_CASE("Planes") {
+  using namespace raytracerchallenge;
+  SUBCASE("The normal of a plane is constant everywhere") {
+    RayTracerChallenge::Plane plane;
+    auto n1 = plane.localNormalAt({0.0, 0.0, 0.0, 0.0});
+    auto n2 = plane.localNormalAt({10.0, 0.0, -10.0, 0.0});
+    auto n3 = plane.localNormalAt({-5.0, 0.0, 150.0, 0.0});
+    CHECK(n1 == RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0));
+    CHECK(n2 == RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0));
+    CHECK(n3 == RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0));
+  }
+  SUBCASE("Intersect with a ray parallel to the plane") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 10.0, 1.0);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0);
+    RayTracerChallenge::Ray ray(origin, direction);
+    RayTracerChallenge::Plane plane;
+    auto xs = plane.localIntersect(ray);
+    CHECK(xs.size() == 0);
+  }
+  SUBCASE("Intersect with a coplanar ray") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0);
+    RayTracerChallenge::Ray ray(origin, direction);
+    RayTracerChallenge::Plane plane;
+    auto xs = plane.localIntersect(ray);
+    CHECK(xs.size() == 0);
+  }
+  SUBCASE("A ray intersecting a plane from above") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 1.0, 0.0);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, -1.0, 0.0);
+    RayTracerChallenge::Ray ray(origin, direction);
+    RayTracerChallenge::Plane plane;
+    auto xs = plane.localIntersect(ray);
+    CHECK(xs.size() == 1);
+    CHECK(xs[0].t == 1);
+    CHECK(xs[0].object == plane);
+  }
+  SUBCASE("A ray intersecting a plane from below") {
+    RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, -1.0, 0.0);
+    RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0);
+    RayTracerChallenge::Ray ray(origin, direction);
+    RayTracerChallenge::Plane plane;
+    auto xs = plane.localIntersect(ray);
+    CHECK(xs.size() == 1);
+    CHECK(xs[0].t == 1);
+    CHECK(xs[0].object == plane);
+  }
+}
 TEST_CASE("Reflecting vectors") {
   using namespace raytracerchallenge;
   SUBCASE("Reflecting a vector approaching at 45 degrees") {

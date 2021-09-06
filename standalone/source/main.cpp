@@ -15,26 +15,10 @@ auto main() -> int {
   auto up = RayTracerChallenge::Tuple::vector(0.0f, 1.0f, 0.0f);
   camera.transform = RayTracerChallenge::Matrix::view(from, to, up);
 
-  RayTracerChallenge::Sphere floor;
+  RayTracerChallenge::Plane floor;
   floor.transform = RayTracerChallenge::Matrix::scaling(10.0f, 0.01f, 10.0f);
   floor.material.color = {1.0f, 0.9f, 0.9f};
   floor.material.specular = 0.0f;
-
-  RayTracerChallenge::Sphere leftWall;
-  leftWall.transform = RayTracerChallenge::Matrix::translation(0.0f, 0.0f, 5.0f)
-                       * RayTracerChallenge::Matrix::rotationY(-float(M_PI) / 4.0f)
-                       * RayTracerChallenge::Matrix::rotationX(float(M_PI) / 2.0f)
-                       * RayTracerChallenge::Matrix::scaling(10.0f, 0.01f, 10.0f);
-  leftWall.material.color = {1.0f, 0.9f, 0.9f};
-  leftWall.material.specular = 0.0f;
-
-  RayTracerChallenge::Sphere rightWall;
-  rightWall.transform = RayTracerChallenge::Matrix::translation(0.0f, 0.0f, 5.0f)
-                        * RayTracerChallenge::Matrix::rotationY(float(M_PI) / 4.0f)
-                        * RayTracerChallenge::Matrix::rotationX(float(M_PI) / 2.0f)
-                        * RayTracerChallenge::Matrix::scaling(10.0f, 0.01f, 10.0f);
-  rightWall.material.color = {1.0f, 0.9f, 0.9f};
-  rightWall.material.specular = 0.0f;
 
   RayTracerChallenge::Sphere middle;
   middle.transform = RayTracerChallenge::Matrix::translation(-0.5f, 1.0f, 0.5f);
@@ -57,8 +41,6 @@ auto main() -> int {
   left.material.diffuse = 0.7f;
 
   world.add(floor);
-  world.add(leftWall);
-  world.add(rightWall);
   world.add(middle);
   world.add(right);
   world.add(left);
