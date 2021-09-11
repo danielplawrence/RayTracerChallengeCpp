@@ -549,12 +549,6 @@ namespace raytracerchallenge {
     public:
       Matrix transform = Matrix::identity(4);
       /**
-       * Get the color at this point
-       * @param point
-       * @return Color
-       */
-      [[nodiscard]] virtual Color colorAt(Tuple point) const = 0;
-      /**
        * Get the color at this point on this shape
        * @param shape
        * @param point
@@ -572,7 +566,6 @@ namespace raytracerchallenge {
 
     public:
       StripePattern(Color a, Color b);
-      [[nodiscard]] Color colorAt(Tuple point) const override;
       [[nodiscard]] Color colorAt(Shape shape, Tuple point) const override;
     };
     /**
@@ -780,7 +773,7 @@ namespace raytracerchallenge {
     /**
      * Calculate the lighting at a particular position on a material
      * using the Phong reflection model
-     * @param material Target material
+     * @param shape Target object
      * @param light Light source
      * @param position Position we need the lighting for
      * @param eyeVector Eye vector
@@ -788,7 +781,7 @@ namespace raytracerchallenge {
      * @param inShadow Whether or not the position is in shadow
      * @return The color for the target position
      */
-    static Color lighting(const Material &material, PointLight light, Tuple position,
-                          Tuple eyeVector, Tuple normalVector, bool inShadow);
+    static Color lighting(const Shape &shape, PointLight light, Tuple position, Tuple eyeVector,
+                          Tuple normalVector, bool inShadow);
   };
 }  // namespace raytracerchallenge

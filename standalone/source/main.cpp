@@ -9,7 +9,7 @@ auto main() -> int {
       = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(-10.0f, 10.0f, -10.0f),
                                        RayTracerChallenge::Color(1.0f, 1.0f, 1.0f));
 
-  auto camera = RayTracerChallenge::Camera(50, 25, float(M_PI) / 3.0f);
+  auto camera = RayTracerChallenge::Camera(100, 50, float(M_PI) / 3.0f);
   auto from = RayTracerChallenge::Tuple::point(0.0f, 1.5f, -5.0f);
   auto to = RayTracerChallenge::Tuple::point(0.0f, 1.0f, 0.0f);
   auto up = RayTracerChallenge::Tuple::vector(0.0f, 1.0f, 0.0f);
@@ -22,7 +22,10 @@ auto main() -> int {
 
   RayTracerChallenge::Sphere middle;
   middle.transform = RayTracerChallenge::Matrix::translation(-0.5f, 1.0f, 0.5f);
-  middle.material.color = {0.1f, 1.0f, 0.5f};
+  middle.material.color = {0.0f, 0.0f, 0.0f};
+  auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
+                                                   RayTracerChallenge::Color::BLACK);
+  middle.material.pattern = &pattern;
   middle.material.specular = 0.3f;
   middle.material.diffuse = 0.7f;
 

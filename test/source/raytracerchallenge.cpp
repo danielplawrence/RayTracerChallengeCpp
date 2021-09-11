@@ -996,80 +996,80 @@ TEST_CASE("Point Lights") {
 TEST_CASE("Lighting") {
   using namespace raytracerchallenge;
   SUBCASE("Lighting with the eye between the light and the surface") {
-    RayTracerChallenge::Material m;
+    RayTracerChallenge::Sphere s;
     auto position = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
     auto eyeVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto normalVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto light = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0, 0.0, -10.0),
                                                 RayTracerChallenge::Color(1.0, 1.0, 1.0));
-    auto result = RayTracerChallenge::lighting(m, light, position, eyeVector, normalVector, false);
+    auto result = RayTracerChallenge::lighting(s, light, position, eyeVector, normalVector, false);
     CHECK(result == RayTracerChallenge::Color(1.9, 1.9, 1.9));
   }
   SUBCASE("Lighting with the eye between the light and the surface, eye offset 45 degrees") {
-    RayTracerChallenge::Material m;
+    RayTracerChallenge::Sphere s;
     auto position = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
     auto eyeVector = RayTracerChallenge::Tuple::vector(0.0, sqrt(2.0) / 2.0, -sqrt(2.0) / 2.0);
     auto normalVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto light = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0, 0.0, -10.0),
                                                 RayTracerChallenge::Color(1.0, 1.0, 1.0));
-    auto result = RayTracerChallenge::lighting(m, light, position, eyeVector, normalVector, false);
+    auto result = RayTracerChallenge::lighting(s, light, position, eyeVector, normalVector, false);
     CHECK(result == RayTracerChallenge::Color(1.0, 1.0, 1.0));
   }
   SUBCASE("Lighting with the eye opposite surface, light offset 45 degrees") {
-    RayTracerChallenge::Material m;
+    RayTracerChallenge::Sphere s;
     auto position = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
     auto eyeVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto normalVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto light = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0, 10.0, -10.0),
                                                 RayTracerChallenge::Color(1.0, 1.0, 1.0));
-    auto result = RayTracerChallenge::lighting(m, light, position, eyeVector, normalVector, false);
+    auto result = RayTracerChallenge::lighting(s, light, position, eyeVector, normalVector, false);
     CHECK(result == RayTracerChallenge::Color(0.7364, 0.7364, 0.7364));
   }
   SUBCASE("Lighting with eye in the path of the reflection vector") {
-    RayTracerChallenge::Material m;
+    RayTracerChallenge::Sphere s;
     auto position = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
     auto eyeVector = RayTracerChallenge::Tuple::vector(0.0, -sqrt(2.0) / 2.0, -sqrt(2.0) / 2.0);
     auto normalVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto light = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0, 10.0, -10.0),
                                                 RayTracerChallenge::Color(1.0, 1.0, 1.0));
-    auto result = RayTracerChallenge::lighting(m, light, position, eyeVector, normalVector, false);
+    auto result = RayTracerChallenge::lighting(s, light, position, eyeVector, normalVector, false);
     CHECK(result == RayTracerChallenge::Color(1.63638, 1.63638, 1.63638));
   }
   SUBCASE("Lighting with the light behind the surface") {
-    RayTracerChallenge::Material m;
+    RayTracerChallenge::Sphere s;
     auto position = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
     auto eyeVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto normalVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto light = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0, 0.0, 10.0),
                                                 RayTracerChallenge::Color(1.0, 1.0, 1.0));
-    auto result = RayTracerChallenge::lighting(m, light, position, eyeVector, normalVector, false);
+    auto result = RayTracerChallenge::lighting(s, light, position, eyeVector, normalVector, false);
     CHECK(result == RayTracerChallenge::Color(0.1, 0.1, 0.1));
   }
   SUBCASE("Lighting with the surface in shadow") {
-    RayTracerChallenge::Material m;
+    RayTracerChallenge::Sphere s;
     auto position = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
     auto eyeVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto normalVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto light = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0, 0.0, -10.0),
                                                 RayTracerChallenge::Color(1.0, 1.0, 1.0));
-    auto result = RayTracerChallenge::lighting(m, light, position, eyeVector, normalVector, true);
+    auto result = RayTracerChallenge::lighting(s, light, position, eyeVector, normalVector, true);
     CHECK(result == RayTracerChallenge::Color(0.1, 0.1, 0.1));
   }
   SUBCASE("Lighting with a pattern applied") {
-    RayTracerChallenge::Material m;
+    RayTracerChallenge::Sphere s;
     auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
                                                      RayTracerChallenge::Color::BLACK);
-    m.pattern = &pattern;
-    m.ambient = 1.0;
-    m.diffuse = 0.0;
-    m.specular = 0.0;
+    s.material.pattern = &pattern;
+    s.material.ambient = 1.0;
+    s.material.diffuse = 0.0;
+    s.material.specular = 0.0;
     auto eyeVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto normalVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto light = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0, 0.0, -10.0),
                                                 RayTracerChallenge::Color(1.0, 1.0, 1.0));
-    auto c1 = RayTracerChallenge::lighting(m, light, {0.9, 0.0, 0.0, 1.0}, eyeVector, normalVector,
+    auto c1 = RayTracerChallenge::lighting(s, light, {0.9, 0.0, 0.0, 1.0}, eyeVector, normalVector,
                                            false);
-    auto c2 = RayTracerChallenge::lighting(m, light, {1.1, 0.0, 0.0, 1.0}, eyeVector, normalVector,
+    auto c2 = RayTracerChallenge::lighting(s, light, {1.1, 0.0, 0.0, 1.0}, eyeVector, normalVector,
                                            false);
     CHECK(c1 == RayTracerChallenge::Color::WHITE);
     CHECK(c2 == RayTracerChallenge::Color::BLACK);
@@ -1240,28 +1240,31 @@ TEST_CASE("Camera") {
 TEST_CASE("Patterns") {
   using namespace raytracerchallenge;
   SUBCASE("A stripe pattern is constant in y") {
+    auto shape = RayTracerChallenge::Sphere();
     auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
                                                      RayTracerChallenge::Color::BLACK);
-    CHECK(pattern.colorAt({0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
-    CHECK(pattern.colorAt({0.0, 1.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
-    CHECK(pattern.colorAt({0.0, 2.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {0.0, 1.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {0.0, 2.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
   }
   SUBCASE("A stripe pattern is constant in z") {
+    auto shape = RayTracerChallenge::Sphere();
     auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
                                                      RayTracerChallenge::Color::BLACK);
-    CHECK(pattern.colorAt({0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
-    CHECK(pattern.colorAt({0.0, 0.0, 1.0, 1.0}) == RayTracerChallenge::Color::WHITE);
-    CHECK(pattern.colorAt({0.0, 0.0, 2.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {0.0, 0.0, 1.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {0.0, 0.0, 2.0, 1.0}) == RayTracerChallenge::Color::WHITE);
   }
   SUBCASE("A stripe pattern alternates in x") {
     auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
                                                      RayTracerChallenge::Color::BLACK);
-    CHECK(pattern.colorAt({0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
-    CHECK(pattern.colorAt({0.9, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
-    CHECK(pattern.colorAt({1.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
-    CHECK(pattern.colorAt({-0.1, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
-    CHECK(pattern.colorAt({-1.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
-    CHECK(pattern.colorAt({-1.1, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    auto shape = RayTracerChallenge::Sphere();
+    CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {0.9, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {1.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt(shape, {-0.1, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt(shape, {-1.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt(shape, {-1.1, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
   }
   SUBCASE("Stripes with an object transformation") {
     auto object = RayTracerChallenge::Sphere();
