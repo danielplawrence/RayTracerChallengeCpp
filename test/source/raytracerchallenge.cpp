@@ -1288,4 +1288,24 @@ TEST_CASE("Patterns") {
     pattern.transform = RayTracerChallenge::Matrix::translation(0.5, 0.0, 0.0);
     CHECK(pattern.colorAt(object, {2.5, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
   }
+  SUBCASE("A gradient linearly interpolates between colors") {
+    auto shape = RayTracerChallenge::Sphere();
+    auto pattern = RayTracerChallenge::GradientPattern(RayTracerChallenge::Color::WHITE,
+                                                       RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {0.25, 0.0, 0.0, 1.0})
+          == RayTracerChallenge::Color(0.75, 0.75, 0.75));
+    CHECK(pattern.colorAt(shape, {0.5, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color(0.5, 0.5, 0.5));
+    CHECK(pattern.colorAt(shape, {0.75, 0.0, 0.0, 1.0})
+          == RayTracerChallenge::Color(0.25, 0.25, 0.25));
+  }
+  SUBCASE("A ring should extend in both x and z") {
+    auto shape = RayTracerChallenge::Sphere();
+    auto pattern = RayTracerChallenge::RingPattern(RayTracerChallenge::Color::WHITE,
+                                                   RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {1.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt(shape, {0.0, 0.0, 1.0, 1.0}) == RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt(shape, {0.708, 0.0, 0.708, 1.0}) == RayTracerChallenge::Color::BLACK);
+  }
 }

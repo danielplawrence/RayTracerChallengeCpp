@@ -637,3 +637,32 @@ RayTracerChallenge::Color RayTracerChallenge::StripePattern::colorAt(
   }
   return this->b;
 }
+RayTracerChallenge::GradientPattern::GradientPattern(RayTracerChallenge::Color a,
+                                                     RayTracerChallenge::Color b) {
+  this->a = a;
+  this->b = b;
+}
+RayTracerChallenge::Color RayTracerChallenge::GradientPattern::colorAt(
+    RayTracerChallenge::Shape shape, RayTracerChallenge::Tuple point) const {
+  auto objectPoint = shape.transform.inverse() * point;
+  auto patternPoint = this->transform.inverse() * objectPoint;
+  auto distance = this->b - this->a;
+  auto fraction = patternPoint.x - floor(patternPoint.x);
+  return this->a + distance * fraction;
+}
+RayTracerChallenge::RingPattern::RingPattern(RayTracerChallenge::Color a,
+                                             RayTracerChallenge::Color b) {
+  this->a = a;
+  this->b = b;
+}
+RayTracerChallenge::Color RayTracerChallenge::RingPattern::colorAt(
+    RayTracerChallenge::Shape shape, RayTracerChallenge::Tuple point) const {
+  auto objectPoint = shape.transform.inverse() * point;
+  auto patternPoint = this->transform.inverse() * objectPoint;
+  auto xSquared = pow(patternPoint.x, 2);
+  auto zSquared = pow(patternPoint.z, 2);
+  if (int(floor(sqrt(xSquared + zSquared))) % 2 == 0) {
+    return this->a;
+  }
+  return this->b;
+}

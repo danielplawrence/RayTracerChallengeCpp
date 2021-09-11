@@ -569,6 +569,27 @@ namespace raytracerchallenge {
       [[nodiscard]] Color colorAt(Shape shape, Tuple point) const override;
     };
     /**
+     * Represents a gradient
+     */
+    class GradientPattern : public Pattern {
+    private:
+      Color a;
+      Color b;
+
+    public:
+      GradientPattern(Color a, Color b);
+      [[nodiscard]] Color colorAt(Shape shape, Tuple point) const override;
+    };
+    class RingPattern : public Pattern {
+    private:
+      Color a;
+      Color b;
+
+    public:
+      RingPattern(Color a, Color b);
+      [[nodiscard]] Color colorAt(Shape shape, Tuple point) const override;
+    };
+    /**
      * Ray intersection computations
      */
     class Computations {
