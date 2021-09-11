@@ -276,7 +276,7 @@ namespace raytracerchallenge {
        * @brief Return the determinant of this Matrix
        * @return the determinant
        */
-      double determinant();
+      [[nodiscard]] double determinant() const;
       /**
        * @brief Return the submatrix which results fromm removing
        * the column at index xy
@@ -284,31 +284,31 @@ namespace raytracerchallenge {
        * @param y column to remove
        * @return this Matrix with row x and column y removed
        */
-      Matrix submatrix(unsigned int x, unsigned int y);
+      [[nodiscard]] RayTracerChallenge::Matrix submatrix(unsigned int x, unsigned int y) const;
       /**
        * @brief Return the minor of the element at index x,y
        * @param x x index
        * @param y index
        * @return the minor of the element at index x,y
        */
-      double minor(unsigned int x, unsigned int y);
+      [[nodiscard]] double minor(unsigned int x, unsigned int y) const;
       /**
        * @brief Return the cofactor of the element at index x,y
        * @param x x index
        * @param y index
        * @return the cofactor of the element at index x,y
        */
-      double cofactor(unsigned int x, unsigned int y);
+      [[nodiscard]] double cofactor(unsigned int x, unsigned int y) const;
       /**
        * @brief Return true if the Matrix is invertible
        * @return true if the Matrix is invertible
        */
-      bool invertible();
+      [[nodiscard]] bool invertible() const;
       /**
        * @brief Return the inverse of this Matrix
        * @return the inverse of this Matrix
        */
-      Matrix inverse();
+      [[nodiscard]] RayTracerChallenge::Matrix inverse() const;
       /**
        * @brief Translate this matrix using the provided x, y, z values
        * @param x value for x
@@ -442,29 +442,7 @@ namespace raytracerchallenge {
        */
       [[nodiscard]] Ray transform(const Matrix &matrix) const;
     };
-    /**
-     * A Pattern accepts a point in space and returns a color
-     */
-    class Pattern {
-    public:
-      /**
-       * Get the color at this point
-       * @param point
-       * @return Color
-       */
-      [[nodiscard]] virtual Color colorAt(Tuple point) const = 0;
-    };
-    /**
-     * Represents alternating stripes
-     */
-    class StripePattern : public Pattern {
-    private:
-      Color a;
-      Color b;
-    public:
-      StripePattern(Color a, Color b);
-      [[nodiscard]] Color colorAt(Tuple point) const override;
-    };
+    class Pattern;
     /**
      * @brief Represents a material
      */
@@ -565,6 +543,39 @@ namespace raytracerchallenge {
       Intersections localIntersect(Ray ray) override;
     };
     /**
+     * A Pattern accepts a point in space and returns a color
+     */
+    class Pattern {
+    public:
+      Matrix transform = Matrix::identity(4);
+      /**
+       * Get the color at this point
+       * @param point
+       * @return Color
+       */
+      [[nodiscard]] virtual Color colorAt(Tuple point) const = 0;
+      /**
+       * Get the color at this point on this shape
+       * @param shape
+       * @param point
+       * @return Color
+       */
+      [[nodiscard]] virtual Color colorAt(Shape shape, Tuple point) const = 0;
+    };
+    /**
+     * Represents alternating stripes
+     */
+    class StripePattern : public Pattern {
+    private:
+      Color a;
+      Color b;
+
+    public:
+      StripePattern(Color a, Color b);
+      [[nodiscard]] Color colorAt(Tuple point) const override;
+      [[nodiscard]] Color colorAt(Shape shape, Tuple point) const override;
+    };
+    /**
      * Ray intersection computations
      */
     class Computations {
@@ -595,7 +606,7 @@ namespace raytracerchallenge {
        * @param t the point where this intersection occurred on a ray
        * @param object the object which intersected with the ray
        */
-      Intersection(double t, Shape object);
+      Intersection(double t, const Shape &object);
       /**
        * @brief Default constructtor
        */
@@ -758,13 +769,13 @@ namespace raytracerchallenge {
        * @param y Y positionim
        * @return Ray
        */
-      Ray rayForPixel(int x, int y);
+      [[nodiscard]] Ray rayForPixel(int x, int y) const;
       /**
        * Render a world using this camera
        * @param world The World to render
        * @return a Canvas containing the rendered image
        */
-      Canvas render(World world);
+      [[nodiscard]] Canvas render(World world) const;
     };
     /**
      * Calculate the lighting at a particular position on a material

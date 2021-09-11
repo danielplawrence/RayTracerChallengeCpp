@@ -233,7 +233,7 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::transposed() {
           res};
 }
 
-double RayTracerChallenge::Matrix::determinant() {
+double RayTracerChallenge::Matrix::determinant() const {
   if (this->m.size() == 2) {
     return this->m[0][0] * this->m[1][1] - this->m[0][1] * this->m[1][0];
   }
@@ -243,7 +243,8 @@ double RayTracerChallenge::Matrix::determinant() {
   }
   return det;
 }
-RayTracerChallenge::Matrix RayTracerChallenge::Matrix::submatrix(unsigned int x, unsigned int y) {
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::submatrix(unsigned int x,
+                                                                 unsigned int y) const {
   std::vector<std::vector<double>> res(this->m.size());
   res = m;
   for (auto &re : res) {
@@ -252,18 +253,18 @@ RayTracerChallenge::Matrix RayTracerChallenge::Matrix::submatrix(unsigned int x,
   res.erase(res.cbegin() + x);
   return {static_cast<unsigned int>(res.size()), static_cast<unsigned int>(res.size()), res};
 }
-double RayTracerChallenge::Matrix::minor(unsigned int x, unsigned int y) {
+double RayTracerChallenge::Matrix::minor(unsigned int x, unsigned int y) const {
   return this->submatrix(x, y).determinant();
 }
-double RayTracerChallenge::Matrix::cofactor(unsigned int x, unsigned int y) {
+double RayTracerChallenge::Matrix::cofactor(unsigned int x, unsigned int y) const {
   double det = this->submatrix(x, y).determinant();
   if ((x + y) % 2 == 0) {
     return det;
   }
   return -det;
 }
-bool RayTracerChallenge::Matrix::invertible() { return determinant() != 0.0; }
-RayTracerChallenge::Matrix RayTracerChallenge::Matrix::inverse() {
+bool RayTracerChallenge::Matrix::invertible() const { return determinant() != 0.0; }
+RayTracerChallenge::Matrix RayTracerChallenge::Matrix::inverse() const {
   std::vector<std::vector<double>> res(this->m.size());
   for (unsigned int x = 0; x < this->m.size(); x++) {
     res[x] = std::vector<double>(this->m.size());
@@ -409,9 +410,9 @@ bool RayTracerChallenge::Shape::operator==(const Shape &object) const {
   return this->transform == object.transform && this->material == object.material;
 }
 bool RayTracerChallenge::Shape::is(const Shape &object) const { return this->id == object.id; }
-RayTracerChallenge::Intersection::Intersection(double t, Shape object) {
+RayTracerChallenge::Intersection::Intersection(double t, const Shape &object) {
   this->t = t;
-  this->object = std::move(object);
+  this->object = object;
 }
 RayTracerChallenge::Intersection::Intersection() = default;
 bool RayTracerChallenge::Intersection::operator==(const Intersection &intersection) const {
@@ -601,7 +602,7 @@ RayTracerChallenge::Camera::Camera(int hSize, int vSize, double fieldOfView) {
   }
   pixelSize = (halfWidth * 2.0) / double(hSize);
 }
-RayTracerChallenge::Ray RayTracerChallenge::Camera::rayForPixel(int x, int y) {
+RayTracerChallenge::Ray RayTracerChallenge::Camera::rayForPixel(int x, int y) const {
   auto xOffset = (x + 0.5) * pixelSize;
   auto yOffset = (y + 0.5) * pixelSize;
   auto worldX = double(halfWidth - xOffset);
@@ -611,7 +612,7 @@ RayTracerChallenge::Ray RayTracerChallenge::Camera::rayForPixel(int x, int y) {
   auto direction = (pixel - origin).normalize();
   return {origin, direction};
 }
-RayTracerChallenge::Canvas RayTracerChallenge::Camera::render(World world) {
+RayTracerChallenge::Canvas RayTracerChallenge::Camera::render(World world) const {
   auto image = Canvas(hSize, vSize);
   for (int y = 0; y < vSize; y++) {
     for (int x = 0; x < hSize; x++) {
@@ -622,6 +623,11 @@ RayTracerChallenge::Canvas RayTracerChallenge::Camera::render(World world) {
   }
   return image;
 }
+RayTracerChallenge::StripePattern::StripePattern(RayTracerChallenge::Color a,
+                                                 RayTracerChallenge::Color b) {
+  this->a = a;
+  this->b = b;
+}
 RayTracerChallenge::Color RayTracerChallenge::StripePattern::colorAt(
     RayTracerChallenge::Tuple point) const {
   if (int(floor(point.x)) % 2 == 0) {
@@ -629,8 +635,9 @@ RayTracerChallenge::Color RayTracerChallenge::StripePattern::colorAt(
   }
   return this->b;
 }
-RayTracerChallenge::StripePattern::StripePattern(RayTracerChallenge::Color a,
-                                                 RayTracerChallenge::Color b) {
-  this->a = a;
-  this->b = b;
+RayTracerChallenge::Color RayTracerChallenge::StripePattern::colorAt(
+    RayTracerChallenge::Shape shape, RayTracerChallenge::Tuple point) const {
+  auto objectPoint = shape.transform.inverse() * point;
+  auto patternPoint = this->transform.inverse() * objectPoint;
+  return this->colorAt(patternPoint);
 }

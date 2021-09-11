@@ -1263,4 +1263,26 @@ TEST_CASE("Patterns") {
     CHECK(pattern.colorAt({-1.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
     CHECK(pattern.colorAt({-1.1, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
   }
+  SUBCASE("Stripes with an object transformation") {
+    auto object = RayTracerChallenge::Sphere();
+    object.transform = RayTracerChallenge::Matrix::scaling(2.0, 2.0, 2.0);
+    auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
+                                                     RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt(object, {1.5, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+  }
+  SUBCASE("Stripes with an pattern transformation") {
+    auto object = RayTracerChallenge::Sphere();
+    auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
+                                                     RayTracerChallenge::Color::BLACK);
+    pattern.transform = RayTracerChallenge::Matrix::scaling(2.0, 2.0, 2.0);
+    CHECK(pattern.colorAt(object, {1.5, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+  }
+  SUBCASE("Stripes with both an object and pattern transformation") {
+    auto object = RayTracerChallenge::Sphere();
+    auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
+                                                     RayTracerChallenge::Color::BLACK);
+    object.transform = RayTracerChallenge::Matrix::scaling(2.0, 2.0, 2.0);
+    pattern.transform = RayTracerChallenge::Matrix::translation(0.5, 0.0, 0.0);
+    CHECK(pattern.colorAt(object, {2.5, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+  }
 }
