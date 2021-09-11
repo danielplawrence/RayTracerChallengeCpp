@@ -108,6 +108,8 @@ bool RayTracerChallenge::Color::operator==(const RayTracerChallenge::Color &c) c
   Tuple t2 = Tuple(c.red, c.green, c.blue, 0);
   return t1 == t2;
 }
+const RayTracerChallenge::Color RayTracerChallenge::Color::BLACK = {0.0, 0.0, 0.0};
+const RayTracerChallenge::Color RayTracerChallenge::Color::WHITE = {1.0, 1.0, 1.0};
 RayTracerChallenge::Canvas::Canvas(int width, int height) {
   this->width = width;
   this->height = height;
@@ -493,7 +495,7 @@ bool RayTracerChallenge::Material::operator==(const RayTracerChallenge::Material
   return this->ambient == material.ambient && this->diffuse == material.diffuse
          && this->specular == material.specular && this->shininess == material.shininess;
 }
-RayTracerChallenge::Color RayTracerChallenge::lighting(RayTracerChallenge::Material material,
+RayTracerChallenge::Color RayTracerChallenge::lighting(const RayTracerChallenge::Material &material,
                                                        RayTracerChallenge::PointLight light,
                                                        RayTracerChallenge::Tuple position,
                                                        RayTracerChallenge::Tuple eyeVector,
@@ -502,7 +504,13 @@ RayTracerChallenge::Color RayTracerChallenge::lighting(RayTracerChallenge::Mater
   Color diffuse;
   Color specular;
   Color ambient;
-  auto effectiveColor = material.color * light.intensity;
+  Color color;
+  if (material.pattern != nullptr) {
+    color = material.pattern->colorAt(position);
+  } else {
+    color = material.color;
+  }
+  auto effectiveColor = color * light.intensity;
   auto lightVector = (light.position - position).normalize();
   ambient = effectiveColor * material.ambient;
   if (inShadow) {
@@ -613,4 +621,16 @@ RayTracerChallenge::Canvas RayTracerChallenge::Camera::render(World world) {
     }
   }
   return image;
+}
+RayTracerChallenge::Color RayTracerChallenge::StripePattern::colorAt(
+    RayTracerChallenge::Tuple point) const {
+  if (int(floor(point.x)) % 2 == 0) {
+    return this->a;
+  }
+  return this->b;
+}
+RayTracerChallenge::StripePattern::StripePattern(RayTracerChallenge::Color a,
+                                                 RayTracerChallenge::Color b) {
+  this->a = a;
+  this->b = b;
 }

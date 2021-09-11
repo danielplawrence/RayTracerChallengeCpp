@@ -1055,6 +1055,25 @@ TEST_CASE("Lighting") {
     auto result = RayTracerChallenge::lighting(m, light, position, eyeVector, normalVector, true);
     CHECK(result == RayTracerChallenge::Color(0.1, 0.1, 0.1));
   }
+  SUBCASE("Lighting with a pattern applied") {
+    RayTracerChallenge::Material m;
+    auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
+                                                     RayTracerChallenge::Color::BLACK);
+    m.pattern = &pattern;
+    m.ambient = 1.0;
+    m.diffuse = 0.0;
+    m.specular = 0.0;
+    auto eyeVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
+    auto normalVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
+    auto light = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0, 0.0, -10.0),
+                                                RayTracerChallenge::Color(1.0, 1.0, 1.0));
+    auto c1 = RayTracerChallenge::lighting(m, light, {0.9, 0.0, 0.0, 1.0}, eyeVector, normalVector,
+                                           false);
+    auto c2 = RayTracerChallenge::lighting(m, light, {1.1, 0.0, 0.0, 1.0}, eyeVector, normalVector,
+                                           false);
+    CHECK(c1 == RayTracerChallenge::Color::WHITE);
+    CHECK(c2 == RayTracerChallenge::Color::BLACK);
+  }
 }
 TEST_CASE("World") {
   using namespace raytracerchallenge;
@@ -1216,5 +1235,32 @@ TEST_CASE("Camera") {
     camera.transform = RayTracerChallenge::Matrix::view(from, to, up);
     auto image = camera.render(world);
     CHECK(image.pixelAt(5, 5) == RayTracerChallenge::Color(0.38066, 0.47583, 0.2855));
+  }
+}
+TEST_CASE("Patterns") {
+  using namespace raytracerchallenge;
+  SUBCASE("A stripe pattern is constant in y") {
+    auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
+                                                     RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt({0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt({0.0, 1.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt({0.0, 2.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+  }
+  SUBCASE("A stripe pattern is constant in z") {
+    auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
+                                                     RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt({0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt({0.0, 0.0, 1.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt({0.0, 0.0, 2.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+  }
+  SUBCASE("A stripe pattern alternates in x") {
+    auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
+                                                     RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt({0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt({0.9, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt({1.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt({-0.1, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt({-1.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt({-1.1, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
   }
 }

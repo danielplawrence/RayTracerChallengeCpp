@@ -159,6 +159,8 @@ namespace raytracerchallenge {
        * @return true if the colors have the same red, green and blue values
        */
       bool operator==(const Color &c) const;
+      static const Color BLACK;
+      static const Color WHITE;
     };
 
     class Canvas {
@@ -441,10 +443,34 @@ namespace raytracerchallenge {
       [[nodiscard]] Ray transform(const Matrix &matrix) const;
     };
     /**
+     * A Pattern accepts a point in space and returns a color
+     */
+    class Pattern {
+    public:
+      /**
+       * Get the color at this point
+       * @param point
+       * @return Color
+       */
+      [[nodiscard]] virtual Color colorAt(Tuple point) const = 0;
+    };
+    /**
+     * Represents alternating stripes
+     */
+    class StripePattern : public Pattern {
+    private:
+      Color a;
+      Color b;
+    public:
+      StripePattern(Color a, Color b);
+      [[nodiscard]] Color colorAt(Tuple point) const override;
+    };
+    /**
      * @brief Represents a material
      */
     class Material {
     public:
+      Pattern *pattern = nullptr;
       double ambient = 0.1;
       double diffuse = 0.9;
       double specular = 0.9;
@@ -527,7 +553,9 @@ namespace raytracerchallenge {
     /**
      * @brief Represents a sphere
      */
-    class [[maybe_unused]] Sphere : public Shape{public : };
+    class [[maybe_unused]] Sphere : public Shape {
+    public:
+    };
     /**
      * @brief Represents a flat surface
      */
@@ -749,7 +777,7 @@ namespace raytracerchallenge {
      * @param inShadow Whether or not the position is in shadow
      * @return The color for the target position
      */
-    static Color lighting(Material material, PointLight light, Tuple position, Tuple eyeVector,
-                          Tuple normalVector, bool inShadow);
+    static Color lighting(const Material &material, PointLight light, Tuple position,
+                          Tuple eyeVector, Tuple normalVector, bool inShadow);
   };
 }  // namespace raytracerchallenge
