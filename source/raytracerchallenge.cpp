@@ -666,3 +666,18 @@ RayTracerChallenge::Color RayTracerChallenge::RingPattern::colorAt(
   }
   return this->b;
 }
+RayTracerChallenge::CheckersPattern::CheckersPattern(RayTracerChallenge::Color a,
+                                                     RayTracerChallenge::Color b) {
+  this->a = a;
+  this->b = b;
+}
+RayTracerChallenge::Color RayTracerChallenge::CheckersPattern::colorAt(
+    RayTracerChallenge::Shape shape, RayTracerChallenge::Tuple point) const {
+  auto objectPoint = shape.transform.inverse() * point;
+  auto patternPoint = this->transform.inverse() * objectPoint;
+  auto vectorSum = int(floor(patternPoint.x) + floor(patternPoint.y) + floor(patternPoint.z));
+  if (vectorSum % 2 == 0) {
+    return this->a;
+  }
+  return this->b;
+}

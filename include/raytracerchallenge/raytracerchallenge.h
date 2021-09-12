@@ -580,6 +580,9 @@ namespace raytracerchallenge {
       GradientPattern(Color a, Color b);
       [[nodiscard]] Color colorAt(Shape shape, Tuple point) const override;
     };
+    /**
+     * Represents a ring pattern
+     */
     class RingPattern : public Pattern {
     private:
       Color a;
@@ -587,6 +590,18 @@ namespace raytracerchallenge {
 
     public:
       RingPattern(Color a, Color b);
+      [[nodiscard]] Color colorAt(Shape shape, Tuple point) const override;
+    };
+    /**
+     * Represents a checkers pattern
+     */
+    class CheckersPattern : public Pattern {
+    private:
+      Color a;
+      Color b;
+
+    public:
+      CheckersPattern(Color a, Color b);
       [[nodiscard]] Color colorAt(Shape shape, Tuple point) const override;
     };
     /**
