@@ -1308,4 +1308,28 @@ TEST_CASE("Patterns") {
     CHECK(pattern.colorAt(shape, {0.0, 0.0, 1.0, 1.0}) == RayTracerChallenge::Color::BLACK);
     CHECK(pattern.colorAt(shape, {0.708, 0.0, 0.708, 1.0}) == RayTracerChallenge::Color::BLACK);
   }
+  SUBCASE("Checkers should repeat in x") {
+    auto shape = RayTracerChallenge::Sphere();
+    auto pattern = RayTracerChallenge::CheckersPattern(RayTracerChallenge::Color::WHITE,
+                                                       RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {0.99, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {1.01, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
+  }
+  SUBCASE("Checkers should repeat in y") {
+    auto shape = RayTracerChallenge::Sphere();
+    auto pattern = RayTracerChallenge::CheckersPattern(RayTracerChallenge::Color::WHITE,
+                                                       RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {0.0, 0.99, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {0.0, 1.01, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
+  }
+  SUBCASE("Checkers should repeat in z") {
+    auto shape = RayTracerChallenge::Sphere();
+    auto pattern = RayTracerChallenge::CheckersPattern(RayTracerChallenge::Color::WHITE,
+                                                       RayTracerChallenge::Color::BLACK);
+    CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.99, 1.0}) == RayTracerChallenge::Color::WHITE);
+    CHECK(pattern.colorAt(shape, {0.0, 0.0, 1.01, 1.0}) == RayTracerChallenge::Color::BLACK);
+  }
 }
