@@ -15,19 +15,19 @@ auto main() -> int {
   auto up = RayTracerChallenge::Tuple::vector(0.0f, 1.0f, 0.0f);
   camera.transform = RayTracerChallenge::Matrix::view(from, to, up);
 
-  RayTracerChallenge::Sphere floor;
-  floor.transform = RayTracerChallenge::Matrix::scaling(10.0, 0.01, 10.0);
-  floor.material.color = {1.0, 0.9, 0.9};
-  floor.material.specular = 0.0;
+  auto floor = RayTracerChallenge::Sphere::create();
+  floor->transform = RayTracerChallenge::Matrix::scaling(10.0, 0.01, 10.0);
+  floor->material.color = {1.0, 0.9, 0.9};
+  floor->material.specular = 0.0;
   auto floorPattern = RayTracerChallenge::CheckersPattern(RayTracerChallenge::Color::WHITE,
                                                           RayTracerChallenge::Color::BLACK);
   floorPattern.transform = floorPattern.transform.scaled(0.125f, 0.125f, 1.0f);
-  floor.material.pattern = &floorPattern;
+  floor->material.pattern = &floorPattern;
 
-  RayTracerChallenge::Sphere middle;
-  middle.transform = RayTracerChallenge::Matrix::translation(-0.5f, 1.0f, 0.5f);
+  auto middle = RayTracerChallenge::Sphere::create();
+  middle->transform = RayTracerChallenge::Matrix::translation(-0.5f, 1.0f, 0.5f);
   auto pattern = RayTracerChallenge::GradientPattern({1.0, 0.0, 0.0}, {0.0, 0.0, 1.0});
-  middle.material.pattern = &pattern;
+  middle->material.pattern = &pattern;
 
   world.add(floor);
   world.add(middle);

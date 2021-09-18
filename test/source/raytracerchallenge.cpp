@@ -652,21 +652,21 @@ TEST_CASE("Matrix transformations") {
 TEST_CASE("Spheres") {
   using namespace raytracerchallenge;
   SUBCASE("Spheres have unique identifiers") {
-    RayTracerChallenge::Sphere sphere1;
-    RayTracerChallenge::Sphere sphere2;
-    CHECK(sphere1.id != sphere2.id);
+    auto sphere1 = RayTracerChallenge::Sphere::create();
+    auto sphere2 = RayTracerChallenge::Sphere::create();
+    CHECK(sphere1->id != sphere2->id);
   }
   SUBCASE("A Sphere has a default material") {
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Material material;
-    CHECK(sphere.material == material);
+    CHECK(sphere->material == material);
   }
   SUBCASE("A Sphere may be assigned a material") {
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Material material;
     material.ambient = 1.0;
-    sphere.material = material;
-    CHECK(sphere.material == material);
+    sphere->material = material;
+    CHECK(sphere->material == material);
   }
 }
 TEST_CASE("Ray-sphere intersections") {
@@ -688,91 +688,91 @@ TEST_CASE("Ray-sphere intersections") {
     CHECK(ray.position(2.5) == RayTracerChallenge::Tuple::point(4.5, 3.0, 4.0));
   }
   SUBCASE("An intersection encapsulates t and object") {
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Intersection intersection(3.5, sphere);
     CHECK(intersection.t == 3.5);
-    CHECK(intersection.object == sphere);
+    CHECK(*intersection.object == *sphere);
   }
   SUBCASE("Aggregating intersections") {
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Intersection intersection1(1.0, sphere);
     RayTracerChallenge::Intersection intersection2(2.0, sphere);
     std::vector<RayTracerChallenge::Intersection> intersections{intersection1, intersection2};
     CHECK(intersections.size() == 2);
-    CHECK(intersections[0].object == sphere);
-    CHECK(intersections[1].object == sphere);
+    CHECK(*intersections[0].object == *sphere);
+    CHECK(*intersections[1].object == *sphere);
   }
   SUBCASE("A ray intersects a sphere at two points") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 0.0, -5.0);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0);
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Ray ray(origin, direction);
-    RayTracerChallenge::Intersections intersections = sphere.intersect(ray);
+    RayTracerChallenge::Intersections intersections = sphere->intersect(ray);
     CHECK(intersections.size() == 2);
     CHECK(intersections[0].t == 4.0);
     CHECK(intersections[1].t == 6.0);
-    CHECK(intersections[0].object == sphere);
-    CHECK(intersections[1].object == sphere);
+    CHECK(*sphere == *intersections[0].object);
+    CHECK(*sphere == *intersections[1].object);
   }
   SUBCASE("A ray intersects a sphere at a tangent") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 1.0, -5.0);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0);
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Ray ray(origin, direction);
-    RayTracerChallenge::Intersections intersections = sphere.intersect(ray);
+    RayTracerChallenge::Intersections intersections = sphere->intersect(ray);
     CHECK(intersections.size() == 2);
     CHECK(intersections[0].t == 5.0);
     CHECK(intersections[1].t == 5.0);
-    CHECK(intersections[0].object == sphere);
-    CHECK(intersections[1].object == sphere);
+    CHECK(*sphere == *intersections[0].object);
+    CHECK(*sphere == *intersections[1].object);
   }
   SUBCASE("A ray originates inside a sphere") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0);
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Ray ray(origin, direction);
-    RayTracerChallenge::Intersections intersections = sphere.intersect(ray);
+    RayTracerChallenge::Intersections intersections = sphere->intersect(ray);
     CHECK(intersections.size() == 2);
     CHECK(intersections[0].t == -1.0);
     CHECK(intersections[1].t == 1.0);
-    CHECK(intersections[0].object == sphere);
-    CHECK(intersections[1].object == sphere);
+    CHECK(*sphere == *intersections[0].object);
+    CHECK(*sphere == *intersections[1].object);
   }
   SUBCASE("A sphere is behind a ray") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 0.0, 5.0);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0);
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Ray ray(origin, direction);
-    RayTracerChallenge::Intersections intersections = sphere.intersect(ray);
+    RayTracerChallenge::Intersections intersections = sphere->intersect(ray);
     CHECK(intersections.size() == 2);
     CHECK(intersections[0].t == -6.0);
     CHECK(intersections[1].t == -4.0);
-    CHECK(intersections[0].object == sphere);
-    CHECK(intersections[1].object == sphere);
+    CHECK(*sphere == *intersections[0].object);
+    CHECK(*sphere == *intersections[1].object);
   }
   SUBCASE("The hit, when all intersections have positive t") {
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Intersection intersection1(1.0, sphere);
     RayTracerChallenge::Intersection intersection2(1.0, sphere);
     RayTracerChallenge::Intersections xs({intersection1, intersection2});
     CHECK(xs.hit() == intersection1);
   }
   SUBCASE("The hit, when some intersections have negative t") {
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Intersection intersection1(-1.0, sphere);
     RayTracerChallenge::Intersection intersection2(1.0, sphere);
     RayTracerChallenge::Intersections xs({intersection1, intersection2});
     CHECK(xs.hit() == intersection2);
   }
   SUBCASE("The hit, when all intersections have negative t") {
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Intersection intersection1(-2.0, sphere);
     RayTracerChallenge::Intersection intersection2(-1.0, sphere);
     RayTracerChallenge::Intersections xs({intersection1, intersection2});
     CHECK(xs.hit().has_value() == false);
   }
   SUBCASE("The hit is always the lowest nonnegative intersection") {
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Intersection intersection1(5.0, sphere);
     RayTracerChallenge::Intersection intersection2(7.0, sphere);
     RayTracerChallenge::Intersection intersection3(-3.0, sphere);
@@ -800,22 +800,22 @@ TEST_CASE("Ray-sphere intersections") {
     CHECK(ray2.direction == RayTracerChallenge::Tuple::vector(0.0, 3.0, 0.0));
   }
   SUBCASE("A sphere's default transformation") {
-    RayTracerChallenge::Sphere sphere;
-    CHECK(sphere.transform == RayTracerChallenge::Matrix::identity(4));
+    auto sphere = RayTracerChallenge::Sphere::create();
+    CHECK(sphere->transform == RayTracerChallenge::Matrix::identity(4));
   }
   SUBCASE("Changing a sphere's transformation") {
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Matrix matrix = RayTracerChallenge::Matrix::translation(2.0, 3.0, 4.0);
-    sphere.transform = matrix;
-    CHECK(sphere.transform == matrix);
+    sphere->transform = matrix;
+    CHECK(sphere->transform == matrix);
   }
   SUBCASE("Intersecting a scaled sphere with a ray") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 0.0, -5.0);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0);
     RayTracerChallenge::Ray ray(origin, direction);
-    RayTracerChallenge::Sphere sphere;
-    sphere.transform = RayTracerChallenge::Matrix::scaling(2.0, 2.0, 2.0);
-    RayTracerChallenge::Intersections xs = sphere.intersect(ray);
+    auto sphere = RayTracerChallenge::Sphere::create();
+    sphere->transform = RayTracerChallenge::Matrix::scaling(2.0, 2.0, 2.0);
+    RayTracerChallenge::Intersections xs = sphere->intersect(ray);
     CHECK(xs.size() == 2);
     CHECK(xs[0].t == 3.0);
     CHECK(xs[1].t == 7.0);
@@ -824,20 +824,20 @@ TEST_CASE("Ray-sphere intersections") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 0.0, -5.0);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0);
     RayTracerChallenge::Ray ray(origin, direction);
-    RayTracerChallenge::Sphere sphere;
-    sphere.transform = RayTracerChallenge::Matrix::translation(5.0, 0.0, 0.0);
-    RayTracerChallenge::Intersections xs = sphere.intersect(ray);
+    auto sphere = RayTracerChallenge::Sphere::create();
+    sphere->transform = RayTracerChallenge::Matrix::translation(5.0, 0.0, 0.0);
+    RayTracerChallenge::Intersections xs = sphere->intersect(ray);
     CHECK(xs.size() == 0);
   }
   SUBCASE("Precomputing the state of an intersection") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 0.0, -5.0);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0);
     RayTracerChallenge::Ray ray(origin, direction);
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Intersection intersection(4.0, sphere);
     RayTracerChallenge::Computations computations = intersection.prepareComputations(ray);
     CHECK(computations.t == intersection.t);
-    CHECK(computations.object.is(intersection.object));
+    CHECK(computations.object->is(*intersection.object));
     CHECK(computations.point == RayTracerChallenge::Tuple::point(0.0, 0.0, -1.0));
     CHECK(computations.eyeVector == RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0));
     CHECK(computations.normalVector == RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0));
@@ -846,7 +846,7 @@ TEST_CASE("Ray-sphere intersections") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 0.0, -5.0);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0);
     RayTracerChallenge::Ray ray(origin, direction);
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Intersection intersection(4.0, sphere);
     RayTracerChallenge::Computations computations = intersection.prepareComputations(ray);
     CHECK(computations.inside == false);
@@ -855,7 +855,7 @@ TEST_CASE("Ray-sphere intersections") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0);
     RayTracerChallenge::Ray ray(origin, direction);
-    RayTracerChallenge::Sphere sphere;
+    auto sphere = RayTracerChallenge::Sphere::create();
     RayTracerChallenge::Intersection intersection(1.0, sphere);
     RayTracerChallenge::Computations computations = intersection.prepareComputations(ray);
     CHECK(computations.point == RayTracerChallenge::Tuple::point(0.0, 0.0, 1.0));
@@ -867,66 +867,67 @@ TEST_CASE("Ray-sphere intersections") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 0.0, -5.0);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0);
     RayTracerChallenge::Ray ray(origin, direction);
-    RayTracerChallenge::Sphere sphere;
-    sphere.transform = RayTracerChallenge::Matrix::translation(0.0, 0.0, 1.0);
+    auto sphere = RayTracerChallenge::Sphere::create();
+    sphere->transform = RayTracerChallenge::Matrix::translation(0.0, 0.0, 1.0);
     RayTracerChallenge::Intersection intersection(5.0, sphere);
     RayTracerChallenge::Computations computations = intersection.prepareComputations(ray);
     CHECK(computations.overPoint.z < 0.0001 / 2.0);
     CHECK(computations.point.z > computations.overPoint.z);
   }
 }
+
 TEST_CASE("Normals") {
   using namespace raytracerchallenge;
   SUBCASE("The normal on a sphere at a point on the x axis") {
-    RayTracerChallenge::Sphere sphere;
-    auto n = sphere.normalAt(RayTracerChallenge::Tuple::point(1.0, 0.0, 0.0));
+    auto sphere = RayTracerChallenge::Sphere::create();
+    auto n = sphere->normalAt(RayTracerChallenge::Tuple::point(1.0, 0.0, 0.0));
     CHECK(n == RayTracerChallenge::Tuple::vector(1.0, 0.0, 0.0));
   }
   SUBCASE("The normal on a sphere at a point on the y axis") {
-    RayTracerChallenge::Sphere sphere;
-    auto n = sphere.normalAt(RayTracerChallenge::Tuple::point(0.0, 1.0, 0.0));
+    auto sphere = RayTracerChallenge::Sphere::create();
+    auto n = sphere->normalAt(RayTracerChallenge::Tuple::point(0.0, 1.0, 0.0));
     CHECK(n == RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0));
   }
   SUBCASE("The normal on a sphere at a point on the z axis") {
-    RayTracerChallenge::Sphere sphere;
-    auto n = sphere.normalAt(RayTracerChallenge::Tuple::point(0.0, 0.0, 1.0));
+    auto sphere = RayTracerChallenge::Sphere::create();
+    auto n = sphere->normalAt(RayTracerChallenge::Tuple::point(0.0, 0.0, 1.0));
     CHECK(n == RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0));
   }
   SUBCASE("The normal on a sphere at a nonaxial point") {
-    RayTracerChallenge::Sphere sphere;
-    auto n = sphere.normalAt(
+    auto sphere = RayTracerChallenge::Sphere::create();
+    auto n = sphere->normalAt(
         RayTracerChallenge::Tuple::point(sqrt(3.0) / 3.0, sqrt(3.0) / 3.0, sqrt(3.0) / 3.0));
     CHECK(n
           == RayTracerChallenge::Tuple::vector(sqrt(3.0) / 3.0, sqrt(3.0) / 3.0, sqrt(3.0) / 3.0));
   }
   SUBCASE("The normal is a normalized vector") {
-    RayTracerChallenge::Sphere sphere;
-    auto n = sphere.normalAt(
+    auto sphere = RayTracerChallenge::Sphere::create();
+    auto n = sphere->normalAt(
         RayTracerChallenge::Tuple::point(sqrt(3.0) / 3.0, sqrt(3.0) / 3.0, sqrt(3.0) / 3.0));
     CHECK(n == n.normalize());
   }
   SUBCASE("Computing the normal on a translated sphere") {
-    RayTracerChallenge::Sphere sphere;
-    sphere.transform = RayTracerChallenge::Matrix::translation(0.0, 1.0, 0.0);
-    auto n = sphere.normalAt(RayTracerChallenge::Tuple::point(0.0, 1.70711, -0.70711));
+    auto sphere = RayTracerChallenge::Sphere::create();
+    sphere->transform = RayTracerChallenge::Matrix::translation(0.0, 1.0, 0.0);
+    auto n = sphere->normalAt(RayTracerChallenge::Tuple::point(0.0, 1.70711, -0.70711));
     CHECK(n == RayTracerChallenge::Tuple::vector(0.0, 0.70711, -0.70711));
   }
   SUBCASE("Computing the normal on a transformed sphere") {
-    RayTracerChallenge::Sphere sphere;
-    sphere.transform = (RayTracerChallenge::Matrix::scaling(1.0, 0.5, 1.0)
-                        * RayTracerChallenge::Matrix::rotationZ(M_PI / 5.0));
-    auto n
-        = sphere.normalAt(RayTracerChallenge::Tuple::point(0.0, sqrt(2.0) / 2.0, -sqrt(2.0) / 2.0));
+    auto sphere = RayTracerChallenge::Sphere::create();
+    sphere->transform = (RayTracerChallenge::Matrix::scaling(1.0, 0.5, 1.0)
+                         * RayTracerChallenge::Matrix::rotationZ(M_PI / 5.0));
+    auto n = sphere->normalAt(
+        RayTracerChallenge::Tuple::point(0.0, sqrt(2.0) / 2.0, -sqrt(2.0) / 2.0));
     CHECK(n == RayTracerChallenge::Tuple::vector(0.0, 0.97014, -0.24254));
   }
 }
 TEST_CASE("Planes") {
   using namespace raytracerchallenge;
   SUBCASE("The normal of a plane is constant everywhere") {
-    RayTracerChallenge::Plane plane;
-    auto n1 = plane.localNormalAt({0.0, 0.0, 0.0, 0.0});
-    auto n2 = plane.localNormalAt({10.0, 0.0, -10.0, 0.0});
-    auto n3 = plane.localNormalAt({-5.0, 0.0, 150.0, 0.0});
+    auto plane = RayTracerChallenge::Plane::create();
+    auto n1 = plane->localNormalAt({0.0, 0.0, 0.0, 0.0});
+    auto n2 = plane->localNormalAt({10.0, 0.0, -10.0, 0.0});
+    auto n3 = plane->localNormalAt({-5.0, 0.0, 150.0, 0.0});
     CHECK(n1 == RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0));
     CHECK(n2 == RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0));
     CHECK(n3 == RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0));
@@ -935,24 +936,24 @@ TEST_CASE("Planes") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 10.0, 1.0);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0);
     RayTracerChallenge::Ray ray(origin, direction);
-    RayTracerChallenge::Plane plane;
-    auto xs = plane.localIntersect(ray);
+    auto plane = RayTracerChallenge::Plane::create();
+    auto xs = plane->localIntersect(ray);
     CHECK(xs.size() == 0);
   }
   SUBCASE("Intersect with a coplanar ray") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0);
     RayTracerChallenge::Ray ray(origin, direction);
-    RayTracerChallenge::Plane plane;
-    auto xs = plane.localIntersect(ray);
+    auto plane = RayTracerChallenge::Plane::create();
+    auto xs = plane->localIntersect(ray);
     CHECK(xs.size() == 0);
   }
   SUBCASE("A ray intersecting a plane from above") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, 1.0, 0.0);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, -1.0, 0.0);
     RayTracerChallenge::Ray ray(origin, direction);
-    RayTracerChallenge::Plane plane;
-    auto xs = plane.localIntersect(ray);
+    auto plane = RayTracerChallenge::Plane::create();
+    auto xs = plane->localIntersect(ray);
     CHECK(xs.size() == 1);
     CHECK(xs[0].t == 1);
     CHECK(xs[0].object == plane);
@@ -961,13 +962,14 @@ TEST_CASE("Planes") {
     RayTracerChallenge::Tuple origin = RayTracerChallenge::Tuple::point(0.0, -1.0, 0.0);
     RayTracerChallenge::Tuple direction = RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0);
     RayTracerChallenge::Ray ray(origin, direction);
-    RayTracerChallenge::Plane plane;
-    auto xs = plane.localIntersect(ray);
+    auto plane = RayTracerChallenge::Plane::create();
+    auto xs = plane->localIntersect(ray);
     CHECK(xs.size() == 1);
     CHECK(xs[0].t == 1);
     CHECK(xs[0].object == plane);
   }
 }
+
 TEST_CASE("Reflecting vectors") {
   using namespace raytracerchallenge;
   SUBCASE("Reflecting a vector approaching at 45 degrees") {
@@ -996,7 +998,7 @@ TEST_CASE("Point Lights") {
 TEST_CASE("Lighting") {
   using namespace raytracerchallenge;
   SUBCASE("Lighting with the eye between the light and the surface") {
-    RayTracerChallenge::Sphere s;
+    auto s = RayTracerChallenge::Sphere::create();
     auto position = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
     auto eyeVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto normalVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
@@ -1006,7 +1008,7 @@ TEST_CASE("Lighting") {
     CHECK(result == RayTracerChallenge::Color(1.9, 1.9, 1.9));
   }
   SUBCASE("Lighting with the eye between the light and the surface, eye offset 45 degrees") {
-    RayTracerChallenge::Sphere s;
+    auto s = RayTracerChallenge::Sphere::create();
     auto position = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
     auto eyeVector = RayTracerChallenge::Tuple::vector(0.0, sqrt(2.0) / 2.0, -sqrt(2.0) / 2.0);
     auto normalVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
@@ -1016,7 +1018,7 @@ TEST_CASE("Lighting") {
     CHECK(result == RayTracerChallenge::Color(1.0, 1.0, 1.0));
   }
   SUBCASE("Lighting with the eye opposite surface, light offset 45 degrees") {
-    RayTracerChallenge::Sphere s;
+    auto s = RayTracerChallenge::Sphere::create();
     auto position = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
     auto eyeVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto normalVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
@@ -1026,7 +1028,7 @@ TEST_CASE("Lighting") {
     CHECK(result == RayTracerChallenge::Color(0.7364, 0.7364, 0.7364));
   }
   SUBCASE("Lighting with eye in the path of the reflection vector") {
-    RayTracerChallenge::Sphere s;
+    auto s = RayTracerChallenge::Sphere::create();
     auto position = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
     auto eyeVector = RayTracerChallenge::Tuple::vector(0.0, -sqrt(2.0) / 2.0, -sqrt(2.0) / 2.0);
     auto normalVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
@@ -1036,7 +1038,7 @@ TEST_CASE("Lighting") {
     CHECK(result == RayTracerChallenge::Color(1.63638, 1.63638, 1.63638));
   }
   SUBCASE("Lighting with the light behind the surface") {
-    RayTracerChallenge::Sphere s;
+    auto s = RayTracerChallenge::Sphere::create();
     auto position = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
     auto eyeVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto normalVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
@@ -1046,7 +1048,7 @@ TEST_CASE("Lighting") {
     CHECK(result == RayTracerChallenge::Color(0.1, 0.1, 0.1));
   }
   SUBCASE("Lighting with the surface in shadow") {
-    RayTracerChallenge::Sphere s;
+    auto s = RayTracerChallenge::Sphere::create();
     auto position = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
     auto eyeVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto normalVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
@@ -1056,13 +1058,13 @@ TEST_CASE("Lighting") {
     CHECK(result == RayTracerChallenge::Color(0.1, 0.1, 0.1));
   }
   SUBCASE("Lighting with a pattern applied") {
-    RayTracerChallenge::Sphere s;
+    auto s = RayTracerChallenge::Sphere::create();
     auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
                                                      RayTracerChallenge::Color::BLACK);
-    s.material.pattern = &pattern;
-    s.material.ambient = 1.0;
-    s.material.diffuse = 0.0;
-    s.material.specular = 0.0;
+    s->material.pattern = &pattern;
+    s->material.ambient = 1.0;
+    s->material.diffuse = 0.0;
+    s->material.specular = 0.0;
     auto eyeVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto normalVector = RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0);
     auto light = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0, 0.0, -10.0),
@@ -1084,16 +1086,16 @@ TEST_CASE("World") {
   }
   SUBCASE("The default world") {
     auto world = RayTracerChallenge::World::defaultWorld();
-    auto sphere1 = RayTracerChallenge::Sphere();
-    sphere1.material.color = RayTracerChallenge::Color(0.8, 1.0, 0.6);
-    sphere1.material.diffuse = 0.7;
-    sphere1.material.specular = 0.2;
-    auto sphere2 = RayTracerChallenge::Sphere();
-    sphere2.transform = RayTracerChallenge::Matrix::scaling(0.5, 0.5, 0.5);
+    auto sphere1 = RayTracerChallenge::Sphere::create();
+    sphere1->material.color = RayTracerChallenge::Color(0.8, 1.0, 0.6);
+    sphere1->material.diffuse = 0.7;
+    sphere1->material.specular = 0.2;
+    auto sphere2 = RayTracerChallenge::Sphere::create();
+    sphere2->transform = RayTracerChallenge::Matrix::scaling(0.5, 0.5, 0.5);
     CHECK(world.light->position == RayTracerChallenge::Tuple::point(-10.0, 10.0, -10.0));
     CHECK(world.light->intensity == RayTracerChallenge::Color(1.0, 1.0, 1.0));
-    CHECK(world.contains(sphere1));
-    CHECK(world.contains(sphere2));
+    CHECK(*sphere1 == *world.objects[0]);
+    CHECK(*sphere2 == *world.objects[1]);
   }
   SUBCASE("Intersecting a ray with the world") {
     auto world = RayTracerChallenge::World::defaultWorld();
@@ -1132,10 +1134,10 @@ TEST_CASE("World") {
     auto world = RayTracerChallenge::World();
     world.light = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(0.0, 0.0, 10.0),
                                                  RayTracerChallenge::Color(1.0, 1.0, 1.0));
-    auto sphere = RayTracerChallenge::Sphere();
+    auto sphere = RayTracerChallenge::Sphere::create();
     world.add(sphere);
-    auto sphere2 = RayTracerChallenge::Sphere();
-    sphere2.transform = RayTracerChallenge::Matrix::translation(0.0, 0.0, 10.0);
+    auto sphere2 = RayTracerChallenge::Sphere::create();
+    sphere2->transform = RayTracerChallenge::Matrix::translation(0.0, 0.0, 10.0);
     world.add(sphere2);
     auto ray = RayTracerChallenge::Ray(RayTracerChallenge::Tuple::point(0.0, 0.0, 5.0),
                                        RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0));
@@ -1160,12 +1162,12 @@ TEST_CASE("World") {
   }
   SUBCASE("The color with an intersection behind the ray") {
     auto world = RayTracerChallenge::World::defaultWorld();
-    world.objects[0].material.ambient = 1.0;
-    world.objects[1].material.ambient = 1.0;
+    world.objects[0]->material.ambient = 1.0;
+    world.objects[1]->material.ambient = 1.0;
     auto ray = RayTracerChallenge::Ray(RayTracerChallenge::Tuple::point(0.0, 0.0, 0.75),
                                        RayTracerChallenge::Tuple::vector(0.0, 0.0, -1.0));
     auto color = world.colorAt(ray);
-    CHECK(color == world.objects[1].material.color);
+    CHECK(color == world.objects[1]->material.color);
   }
   SUBCASE("There is no shadow when nothing is collinear with the point and light") {
     auto world = RayTracerChallenge::World::defaultWorld();
@@ -1240,7 +1242,7 @@ TEST_CASE("Camera") {
 TEST_CASE("Patterns") {
   using namespace raytracerchallenge;
   SUBCASE("A stripe pattern is constant in y") {
-    auto shape = RayTracerChallenge::Sphere();
+    auto shape = RayTracerChallenge::Sphere::create();
     auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
                                                      RayTracerChallenge::Color::BLACK);
     CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
@@ -1248,7 +1250,7 @@ TEST_CASE("Patterns") {
     CHECK(pattern.colorAt(shape, {0.0, 2.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
   }
   SUBCASE("A stripe pattern is constant in z") {
-    auto shape = RayTracerChallenge::Sphere();
+    auto shape = RayTracerChallenge::Sphere::create();
     auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
                                                      RayTracerChallenge::Color::BLACK);
     CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
@@ -1258,7 +1260,7 @@ TEST_CASE("Patterns") {
   SUBCASE("A stripe pattern alternates in x") {
     auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
                                                      RayTracerChallenge::Color::BLACK);
-    auto shape = RayTracerChallenge::Sphere();
+    auto shape = RayTracerChallenge::Sphere::create();
     CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
     CHECK(pattern.colorAt(shape, {0.9, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
     CHECK(pattern.colorAt(shape, {1.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
@@ -1267,29 +1269,29 @@ TEST_CASE("Patterns") {
     CHECK(pattern.colorAt(shape, {-1.1, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
   }
   SUBCASE("Stripes with an object transformation") {
-    auto object = RayTracerChallenge::Sphere();
-    object.transform = RayTracerChallenge::Matrix::scaling(2.0, 2.0, 2.0);
+    auto object = RayTracerChallenge::Sphere::create();
+    object->transform = RayTracerChallenge::Matrix::scaling(2.0, 2.0, 2.0);
     auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
                                                      RayTracerChallenge::Color::BLACK);
     CHECK(pattern.colorAt(object, {1.5, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
   }
   SUBCASE("Stripes with an pattern transformation") {
-    auto object = RayTracerChallenge::Sphere();
+    auto object = RayTracerChallenge::Sphere::create();
     auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
                                                      RayTracerChallenge::Color::BLACK);
     pattern.transform = RayTracerChallenge::Matrix::scaling(2.0, 2.0, 2.0);
     CHECK(pattern.colorAt(object, {1.5, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
   }
   SUBCASE("Stripes with both an object and pattern transformation") {
-    auto object = RayTracerChallenge::Sphere();
+    auto object = RayTracerChallenge::Sphere::create();
     auto pattern = RayTracerChallenge::StripePattern(RayTracerChallenge::Color::WHITE,
                                                      RayTracerChallenge::Color::BLACK);
-    object.transform = RayTracerChallenge::Matrix::scaling(2.0, 2.0, 2.0);
+    object->transform = RayTracerChallenge::Matrix::scaling(2.0, 2.0, 2.0);
     pattern.transform = RayTracerChallenge::Matrix::translation(0.5, 0.0, 0.0);
     CHECK(pattern.colorAt(object, {2.5, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
   }
   SUBCASE("A gradient linearly interpolates between colors") {
-    auto shape = RayTracerChallenge::Sphere();
+    auto shape = RayTracerChallenge::Sphere::create();
     auto pattern = RayTracerChallenge::GradientPattern(RayTracerChallenge::Color::WHITE,
                                                        RayTracerChallenge::Color::BLACK);
     CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
@@ -1300,7 +1302,7 @@ TEST_CASE("Patterns") {
           == RayTracerChallenge::Color(0.25, 0.25, 0.25));
   }
   SUBCASE("A ring should extend in both x and z") {
-    auto shape = RayTracerChallenge::Sphere();
+    auto shape = RayTracerChallenge::Sphere::create();
     auto pattern = RayTracerChallenge::RingPattern(RayTracerChallenge::Color::WHITE,
                                                    RayTracerChallenge::Color::BLACK);
     CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
@@ -1309,7 +1311,7 @@ TEST_CASE("Patterns") {
     CHECK(pattern.colorAt(shape, {0.708, 0.0, 0.708, 1.0}) == RayTracerChallenge::Color::BLACK);
   }
   SUBCASE("Checkers should repeat in x") {
-    auto shape = RayTracerChallenge::Sphere();
+    auto shape = RayTracerChallenge::Sphere::create();
     auto pattern = RayTracerChallenge::CheckersPattern(RayTracerChallenge::Color::WHITE,
                                                        RayTracerChallenge::Color::BLACK);
     CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
@@ -1317,7 +1319,7 @@ TEST_CASE("Patterns") {
     CHECK(pattern.colorAt(shape, {1.01, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
   }
   SUBCASE("Checkers should repeat in y") {
-    auto shape = RayTracerChallenge::Sphere();
+    auto shape = RayTracerChallenge::Sphere::create();
     auto pattern = RayTracerChallenge::CheckersPattern(RayTracerChallenge::Color::WHITE,
                                                        RayTracerChallenge::Color::BLACK);
     CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);
@@ -1325,7 +1327,7 @@ TEST_CASE("Patterns") {
     CHECK(pattern.colorAt(shape, {0.0, 1.01, 0.0, 1.0}) == RayTracerChallenge::Color::BLACK);
   }
   SUBCASE("Checkers should repeat in z") {
-    auto shape = RayTracerChallenge::Sphere();
+    auto shape = RayTracerChallenge::Sphere::create();
     auto pattern = RayTracerChallenge::CheckersPattern(RayTracerChallenge::Color::WHITE,
                                                        RayTracerChallenge::Color::BLACK);
     CHECK(pattern.colorAt(shape, {0.0, 0.0, 0.0, 1.0}) == RayTracerChallenge::Color::WHITE);

@@ -385,13 +385,14 @@ RayTracerChallenge::Shape::Shape() {
                                  .count();
   this->id = fmt::to_string(current_time_us);
   this->transform = Matrix::identity(4);
+  this->sharedPtr = std::shared_ptr<Shape>(this);
 }
 RayTracerChallenge::Intersections RayTracerChallenge::Shape::intersect(
     RayTracerChallenge::Ray ray) {
   RayTracerChallenge::Ray transformed = ray.transform(this->transform.inverse());
   return localIntersect(transformed);
 }
-RayTracerChallenge::Intersections RayTracerChallenge::Shape::localIntersect(Ray ray) {
+RayTracerChallenge::Intersections RayTracerChallenge::Sphere::localIntersect(Ray ray) {
   Tuple sphereToRay = ray.origin - RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
   double a = ray.direction.dot(ray.direction);
   double b = 2.0 * ray.direction.dot(sphereToRay);
@@ -402,21 +403,21 @@ RayTracerChallenge::Intersections RayTracerChallenge::Shape::localIntersect(Ray 
   }
   double t1 = (-b - sqrt(discriminant)) / (2.0 * a);
   double t2 = (-b + sqrt(discriminant)) / (2.0 * a);
-
   return Intersections(std::vector<RayTracerChallenge::Intersection>{
-      RayTracerChallenge::Intersection(t1, *this), RayTracerChallenge::Intersection(t2, *this)});
+      RayTracerChallenge::Intersection(t1, this->sharedPtr),
+      RayTracerChallenge::Intersection(t2, this->sharedPtr)});
 }
 bool RayTracerChallenge::Shape::operator==(const Shape &object) const {
   return this->transform == object.transform && this->material == object.material;
 }
 bool RayTracerChallenge::Shape::is(const Shape &object) const { return this->id == object.id; }
-RayTracerChallenge::Intersection::Intersection(double t, const Shape &object) {
+RayTracerChallenge::Intersection::Intersection(double t, std::shared_ptr<Shape> object) {
   this->t = t;
   this->object = object;
 }
 RayTracerChallenge::Intersection::Intersection() = default;
 bool RayTracerChallenge::Intersection::operator==(const Intersection &intersection) const {
-  return this->object.is(intersection.object) && this->t == intersection.t;
+  return this->object->is(*intersection.object) && this->t == intersection.t;
 }
 bool RayTracerChallenge::Intersection::operator<(
     const RayTracerChallenge::Intersection &intersection) const {
@@ -429,7 +430,7 @@ RayTracerChallenge::Computations RayTracerChallenge::Intersection::prepareComput
   computations.object = this->object;
   computations.point = ray.position(t);
   computations.eyeVector = -ray.direction;
-  computations.normalVector = this->object.normalAt(computations.point);
+  computations.normalVector = this->object->normalAt(computations.point);
   if (computations.normalVector.dot(computations.eyeVector) < 0.0) {
     computations.inside = true;
     computations.normalVector = -computations.normalVector;
@@ -462,7 +463,7 @@ size_t RayTracerChallenge::Intersections::size() const { return this->intersecti
 void RayTracerChallenge::Intersections::sort() {
   std::sort(this->intersections.begin(), this->intersections.end());
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Shape::localNormalAt(
+RayTracerChallenge::Tuple RayTracerChallenge::Sphere::localNormalAt(
     RayTracerChallenge::Tuple point) {
   return point - RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
 }
@@ -485,7 +486,7 @@ RayTracerChallenge::Intersections RayTracerChallenge::Plane::localIntersect(Ray 
     return {};
   }
   auto t = -ray.origin.y / ray.direction.y;
-  return Intersections({RayTracerChallenge::Intersection(t, *this)});
+  return Intersections({RayTracerChallenge::Intersection(t, this->sharedPtr)});
 }
 RayTracerChallenge::PointLight::PointLight(RayTracerChallenge::Tuple position,
                                            RayTracerChallenge::Color intensity) {
@@ -496,7 +497,7 @@ bool RayTracerChallenge::Material::operator==(const RayTracerChallenge::Material
   return this->ambient == material.ambient && this->diffuse == material.diffuse
          && this->specular == material.specular && this->shininess == material.shininess;
 }
-RayTracerChallenge::Color RayTracerChallenge::lighting(const RayTracerChallenge::Shape &shape,
+RayTracerChallenge::Color RayTracerChallenge::lighting(const std::shared_ptr<Shape> &shape,
                                                        RayTracerChallenge::PointLight light,
                                                        RayTracerChallenge::Tuple position,
                                                        RayTracerChallenge::Tuple eyeVector,
@@ -506,14 +507,14 @@ RayTracerChallenge::Color RayTracerChallenge::lighting(const RayTracerChallenge:
   Color specular;
   Color ambient;
   Color color;
-  if (shape.material.pattern != nullptr) {
-    color = shape.material.pattern->colorAt(shape, position);
+  if (shape->material.pattern != nullptr) {
+    color = shape->material.pattern->colorAt(shape, position);
   } else {
-    color = shape.material.color;
+    color = shape->material.color;
   }
   auto effectiveColor = color * light.intensity;
   auto lightVector = (light.position - position).normalize();
-  ambient = effectiveColor * shape.material.ambient;
+  ambient = effectiveColor * shape->material.ambient;
   if (inShadow) {
     return ambient;
   }
@@ -522,43 +523,40 @@ RayTracerChallenge::Color RayTracerChallenge::lighting(const RayTracerChallenge:
     diffuse = Color(0.0, 0.0, 0.0);
     specular = Color(0.0, 0.0, 0.0);
   } else {
-    diffuse = effectiveColor * shape.material.diffuse * lightDotNormal;
+    diffuse = effectiveColor * shape->material.diffuse * lightDotNormal;
     auto reflectVector = (-lightVector).reflect(normalVector);
     auto reflectDotEye = reflectVector.dot(eyeVector);
     if (reflectDotEye <= 0.0) {
       specular = Color(0.0, 0.0, 0.0);
     } else {
-      auto factor = pow(reflectDotEye, shape.material.shininess);
-      specular = light.intensity * shape.material.specular * factor;
+      auto factor = pow(reflectDotEye, shape->material.shininess);
+      specular = light.intensity * shape->material.specular * factor;
     }
   }
   return ambient + diffuse + specular;
 }
 RayTracerChallenge::World::World() = default;
-bool RayTracerChallenge::World::contains(Shape &object) {
-  return std::find(this->objects.begin(), this->objects.end(), object) != this->objects.end();
-}
 bool RayTracerChallenge::World::isEmpty() const { return this->objects.empty(); }
-void RayTracerChallenge::World::add(RayTracerChallenge::Shape &object) {
+void RayTracerChallenge::World::add(const std::shared_ptr<Shape> &object) {
   this->objects.push_back(object);
 }
 RayTracerChallenge::World RayTracerChallenge::World::defaultWorld() {
   World world;
   world.light = PointLight(Tuple::point(-10.0, 10.0, -10.0), Color(1.0, 1.0, 1.0));
-  Sphere sphere1;
-  sphere1.material.color = Color(0.8, 1.0, 0.6);
-  sphere1.material.diffuse = 0.7;
-  sphere1.material.specular = 0.2;
-  Sphere sphere2;
-  sphere2.transform = Matrix::scaling(0.5, 0.5, 0.5);
+  auto sphere1 = RayTracerChallenge::Sphere::create();
+  sphere1->material.color = Color(0.8, 1.0, 0.6);
+  sphere1->material.diffuse = 0.7;
+  sphere1->material.specular = 0.2;
+  auto sphere2 = RayTracerChallenge::Sphere::create();
+  sphere2->transform = Matrix::scaling(0.5, 0.5, 0.5);
   world.add(sphere1);
   world.add(sphere2);
   return world;
 }
 RayTracerChallenge::Intersections RayTracerChallenge::World::intersect(Ray ray) {
   Intersections intersections;
-  for (Shape object : this->objects) {
-    intersections.addAll(object.intersect(ray));
+  for (const auto &object : this->objects) {
+    intersections.addAll(object->intersect(ray));
   }
   intersections.sort();
   return intersections;
@@ -629,8 +627,8 @@ RayTracerChallenge::StripePattern::StripePattern(RayTracerChallenge::Color a,
   this->b = b;
 }
 RayTracerChallenge::Color RayTracerChallenge::StripePattern::colorAt(
-    RayTracerChallenge::Shape shape, RayTracerChallenge::Tuple point) const {
-  auto objectPoint = shape.transform.inverse() * point;
+    std::shared_ptr<Shape> shape, RayTracerChallenge::Tuple point) const {
+  auto objectPoint = shape->transform.inverse() * point;
   auto patternPoint = this->transform.inverse() * objectPoint;
   if (int(floor(patternPoint.x)) % 2 == 0) {
     return this->a;
@@ -643,8 +641,8 @@ RayTracerChallenge::GradientPattern::GradientPattern(RayTracerChallenge::Color a
   this->b = b;
 }
 RayTracerChallenge::Color RayTracerChallenge::GradientPattern::colorAt(
-    RayTracerChallenge::Shape shape, RayTracerChallenge::Tuple point) const {
-  auto objectPoint = shape.transform.inverse() * point;
+    std::shared_ptr<Shape> shape, RayTracerChallenge::Tuple point) const {
+  auto objectPoint = shape->transform.inverse() * point;
   auto patternPoint = this->transform.inverse() * objectPoint;
   auto distance = this->b - this->a;
   auto fraction = patternPoint.x - floor(patternPoint.x);
@@ -656,8 +654,8 @@ RayTracerChallenge::RingPattern::RingPattern(RayTracerChallenge::Color a,
   this->b = b;
 }
 RayTracerChallenge::Color RayTracerChallenge::RingPattern::colorAt(
-    RayTracerChallenge::Shape shape, RayTracerChallenge::Tuple point) const {
-  auto objectPoint = shape.transform.inverse() * point;
+    std::shared_ptr<Shape> shape, RayTracerChallenge::Tuple point) const {
+  auto objectPoint = shape->transform.inverse() * point;
   auto patternPoint = this->transform.inverse() * objectPoint;
   auto xSquared = pow(patternPoint.x, 2);
   auto zSquared = pow(patternPoint.z, 2);
@@ -672,8 +670,8 @@ RayTracerChallenge::CheckersPattern::CheckersPattern(RayTracerChallenge::Color a
   this->b = b;
 }
 RayTracerChallenge::Color RayTracerChallenge::CheckersPattern::colorAt(
-    RayTracerChallenge::Shape shape, RayTracerChallenge::Tuple point) const {
-  auto objectPoint = shape.transform.inverse() * point;
+    std::shared_ptr<Shape> shape, RayTracerChallenge::Tuple point) const {
+  auto objectPoint = shape->transform.inverse() * point;
   auto patternPoint = this->transform.inverse() * objectPoint;
   auto vectorSum = int(floor(patternPoint.x) + floor(patternPoint.y) + floor(patternPoint.z));
   if (vectorSum % 2 == 0) {

@@ -490,7 +490,7 @@ namespace raytracerchallenge {
        * @return collection of Intersections representing positions where
        * the ray passed through this object
        */
-      virtual Intersections localIntersect(Ray ray);
+      virtual Intersections localIntersect(Ray ray) = 0;
       /**
        * @brief Return the normal vector at the specified point on an object
        * @param point
@@ -503,7 +503,7 @@ namespace raytracerchallenge {
        * @param point
        * @return the normal vector at the specified point on this object
        */
-      virtual Tuple localNormalAt(Tuple point);
+      virtual Tuple localNormalAt(Tuple point) = 0;
       /**
        * @brief Default constructor
        */
@@ -527,18 +527,33 @@ namespace raytracerchallenge {
        */
       [[nodiscard]] bool is(const Shape &object) const;
       virtual ~Shape() = default;
+
+    protected:
+      std::shared_ptr<Shape> sharedPtr;
     };
     /**
      * @brief Represents a sphere
      */
-    class [[maybe_unused]] Sphere : public Shape {
+    class Sphere : public Shape {
     public:
+      Sphere() = default;
+      static std::shared_ptr<Shape> create() {
+        auto shape = new Sphere();
+        return shape->sharedPtr;
+      }
+      Tuple localNormalAt(Tuple point) override;
+      Intersections localIntersect(Ray ray) override;
     };
     /**
      * @brief Represents a flat surface
      */
     class Plane : public Shape {
     public:
+      Plane() = default;
+      static std::shared_ptr<Shape> create() {
+        auto shape = new Plane();
+        return shape->sharedPtr;
+      }
       Tuple localNormalAt(Tuple point) override;
       Intersections localIntersect(Ray ray) override;
     };
@@ -554,7 +569,7 @@ namespace raytracerchallenge {
        * @param point
        * @return Color
        */
-      [[nodiscard]] virtual Color colorAt(Shape shape, Tuple point) const = 0;
+      [[nodiscard]] virtual Color colorAt(std::shared_ptr<Shape> shape, Tuple point) const = 0;
     };
     /**
      * Represents alternating stripes
@@ -566,7 +581,7 @@ namespace raytracerchallenge {
 
     public:
       StripePattern(Color a, Color b);
-      [[nodiscard]] Color colorAt(Shape shape, Tuple point) const override;
+      [[nodiscard]] Color colorAt(std::shared_ptr<Shape> shape, Tuple point) const override;
     };
     /**
      * Represents a gradient
@@ -578,7 +593,7 @@ namespace raytracerchallenge {
 
     public:
       GradientPattern(Color a, Color b);
-      [[nodiscard]] Color colorAt(Shape shape, Tuple point) const override;
+      [[nodiscard]] Color colorAt(std::shared_ptr<Shape> shape, Tuple point) const override;
     };
     /**
      * Represents a ring pattern
@@ -590,7 +605,7 @@ namespace raytracerchallenge {
 
     public:
       RingPattern(Color a, Color b);
-      [[nodiscard]] Color colorAt(Shape shape, Tuple point) const override;
+      [[nodiscard]] Color colorAt(std::shared_ptr<Shape> shape, Tuple point) const override;
     };
     /**
      * Represents a checkers pattern
@@ -602,7 +617,7 @@ namespace raytracerchallenge {
 
     public:
       CheckersPattern(Color a, Color b);
-      [[nodiscard]] Color colorAt(Shape shape, Tuple point) const override;
+      [[nodiscard]] Color colorAt(std::shared_ptr<Shape> shape, Tuple point) const override;
     };
     /**
      * Ray intersection computations
@@ -610,7 +625,7 @@ namespace raytracerchallenge {
     class Computations {
     public:
       double t{};
-      Shape object;
+      std::shared_ptr<Shape> object;
       Tuple point;
       Tuple overPoint;
       Tuple eyeVector;
@@ -629,13 +644,13 @@ namespace raytracerchallenge {
       /**
        * @brief the object that intersected with the ray
        */
-      Shape object;
+      std::shared_ptr<Shape> object;
       /**
        * @brief Construct a new Intersection
        * @param t the point where this intersection occurred on a ray
        * @param object the object which intersected with the ray
        */
-      Intersection(double t, const Shape &object);
+      Intersection(double t, std::shared_ptr<Shape> object);
       /**
        * @brief Default constructtor
        */
@@ -718,18 +733,12 @@ namespace raytracerchallenge {
     };
     class World {
     public:
-      std::vector<Shape> objects;
+      std::vector<std::shared_ptr<Shape>> objects;
       std::optional<PointLight> light;
       /**
        * Default constructor for a World
        */
       World();
-      /**
-       * Return true if this object is in the World
-       * @param object Object to test
-       * @return true if this object is in the World
-       */
-      bool contains(Shape &object);
       /**
        * Return true if the world contains no objects
        * @return true if the world contains no objects
@@ -739,7 +748,7 @@ namespace raytracerchallenge {
        * Add an Object to the world
        * @param object target Object
        */
-      void add(Shape &object);
+      void add(const std::shared_ptr<Shape> &object);
       /**
        * Intersect this world with a ray
        * @param ray to pass through the world
@@ -817,7 +826,7 @@ namespace raytracerchallenge {
      * @param inShadow Whether or not the position is in shadow
      * @return The color for the target position
      */
-    static Color lighting(const Shape &shape, PointLight light, Tuple position, Tuple eyeVector,
-                          Tuple normalVector, bool inShadow);
+    static Color lighting(const std::shared_ptr<Shape> &shape, PointLight light, Tuple position,
+                          Tuple eyeVector, Tuple normalVector, bool inShadow);
   };
 }  // namespace raytracerchallenge
