@@ -413,7 +413,7 @@ bool RayTracerChallenge::Shape::operator==(const Shape &object) const {
 bool RayTracerChallenge::Shape::is(const Shape &object) const { return this->id == object.id; }
 RayTracerChallenge::Intersection::Intersection(double t, std::shared_ptr<Shape> object) {
   this->t = t;
-  this->object = object;
+  this->object = std::move(object);
 }
 RayTracerChallenge::Intersection::Intersection() = default;
 bool RayTracerChallenge::Intersection::operator==(const Intersection &intersection) const {
@@ -424,7 +424,7 @@ bool RayTracerChallenge::Intersection::operator<(
   return this->t < intersection.t;
 }
 RayTracerChallenge::Computations RayTracerChallenge::Intersection::prepareComputations(
-    RayTracerChallenge::Ray ray) {
+    RayTracerChallenge::Ray ray) const {
   auto computations = RayTracerChallenge::Computations();
   computations.t = this->t;
   computations.object = this->object;
@@ -435,10 +435,41 @@ RayTracerChallenge::Computations RayTracerChallenge::Intersection::prepareComput
     computations.inside = true;
     computations.normalVector = -computations.normalVector;
   }
+  computations.reflectionVector = ray.direction.reflect(computations.normalVector);
   computations.overPoint = computations.point + (computations.normalVector * EPS);
+  computations.underPoint = computations.point - (computations.normalVector * EPS);
   return computations;
 }
-std::optional<RayTracerChallenge::Intersection> RayTracerChallenge::Intersections::hit() {
+RayTracerChallenge::Computations RayTracerChallenge::Intersection::prepareComputations(
+    RayTracerChallenge::Ray ray, const RayTracerChallenge::Intersections &intersections) const {
+  auto computations = prepareComputations(ray);
+  std::vector<std::shared_ptr<Shape>> containers;
+  for (const Intersection &i : intersections.intersections) {
+    if (i == *this) {
+      if (containers.empty()) {
+        computations.n1 = 1.0;
+      } else {
+        computations.n1 = containers.back()->material.refractiveIndex;
+      }
+    }
+    auto position = std::find(containers.begin(), containers.end(), i.object);
+    if (position != containers.end()) {
+      containers.erase(position);
+    } else {
+      containers.push_back(i.object);
+    }
+    if (i == *this) {
+      if (containers.empty()) {
+        computations.n2 = 1.0;
+      } else {
+        computations.n2 = containers.back()->material.refractiveIndex;
+      }
+      break;
+    }
+  }
+  return computations;
+}
+std::optional<RayTracerChallenge::Intersection> RayTracerChallenge::Intersections::hit() const {
   std::vector<RayTracerChallenge::Intersection> nonNegative;
   std::copy_if(intersections.cbegin(), intersections.cend(), std::back_inserter(nonNegative),
                [](const Intersection &i) { return i.t >= 0.0; });
@@ -561,18 +592,48 @@ RayTracerChallenge::Intersections RayTracerChallenge::World::intersect(Ray ray) 
   intersections.sort();
   return intersections;
 }
-RayTracerChallenge::Color RayTracerChallenge::World::shadeHit(const Computations &computations) {
+RayTracerChallenge::Color RayTracerChallenge::World::shadeHit(const Computations &computations,
+                                                              int remaining) {
   bool shadowed = isShadowed(computations.overPoint);
-  return lighting(computations.object, this->light.value(), computations.overPoint,
-                  computations.eyeVector, computations.normalVector, shadowed);
+  auto surface = lighting(computations.object, this->light.value(), computations.overPoint,
+                          computations.eyeVector, computations.normalVector, shadowed);
+  auto reflected = this->reflectedColorAt(computations, remaining);
+  auto refracted = this->refractedColorAt(computations, remaining);
+  return surface + reflected + refracted;
 }
-RayTracerChallenge::Color RayTracerChallenge::World::colorAt(Ray ray) {
+RayTracerChallenge::Color RayTracerChallenge::World::colorAt(Ray ray, int remaining) {
   Intersections intersections = this->intersect(ray);
   std::optional<Intersection> hit = intersections.hit();
   if (!hit.has_value()) {
     return {0.0, 0.0, 0.0};
   }
-  return shadeHit(hit.value().prepareComputations(ray));
+  return shadeHit(hit.value().prepareComputations(ray, intersections), remaining);
+}
+RayTracerChallenge::Color RayTracerChallenge::World::reflectedColorAt(
+    const Computations &computations, int remaining) {
+  if (computations.object->material.reflective == 0.0 || remaining == 0) {
+    return Color::BLACK;
+  }
+  auto reflectRay = Ray(computations.overPoint, computations.reflectionVector);
+  return this->colorAt(reflectRay, remaining - 1) * computations.object->material.reflective;
+}
+RayTracerChallenge::Color RayTracerChallenge::World::refractedColorAt(
+    const Computations &computations, int remaining) {
+  if (computations.object->material.transparency == 0.0 || remaining == 0) {
+    return Color::BLACK;
+  }
+  auto nRatio = computations.n1 / computations.n2;
+  auto cosI = computations.eyeVector.dot(computations.normalVector);
+  auto sin2T = pow(nRatio, 2) * (1 - pow(cosI, 2));
+  if (sin2T > 1.0) {
+    return Color::BLACK;
+  }
+  auto cosT = sqrt(1.0 - sin2T);
+  auto direction
+      = computations.normalVector * (nRatio * cosI - cosT) - computations.eyeVector * nRatio;
+  auto refractRay = Ray(computations.underPoint, direction);
+  auto color = colorAt(refractRay, remaining - 1) * computations.object->material.transparency;
+  return color;
 }
 bool RayTracerChallenge::World::isShadowed(RayTracerChallenge::Tuple point) {
   auto distance = (light->position - point).magnitude();
@@ -615,7 +676,7 @@ RayTracerChallenge::Canvas RayTracerChallenge::Camera::render(World world) const
   for (int y = 0; y < vSize; y++) {
     for (int x = 0; x < hSize; x++) {
       auto ray = rayForPixel(x, y);
-      auto color = world.colorAt(ray);
+      auto color = world.colorAt(ray, 4);
       image.writePixel(x, y, color);
     }
   }
@@ -678,4 +739,19 @@ RayTracerChallenge::Color RayTracerChallenge::CheckersPattern::colorAt(
     return this->a;
   }
   return this->b;
+}
+double RayTracerChallenge::Computations::schlick(
+    const RayTracerChallenge::Computations &computations) {
+  auto cos = computations.eyeVector.dot(computations.normalVector);
+  if (computations.n1 > computations.n2) {
+    auto n = computations.n1 / computations.n2;
+    auto sin2T = pow(n, 2.0) * (1.0 - pow(cos, 2.0));
+    if (sin2T > 1.0) {
+      return 1.0;
+    }
+    auto cosT = sqrt(1.0 - sin2T);
+    cos = cosT;
+  }
+  auto r0 = pow(((computations.n1 - computations.n2) / (computations.n1 + computations.n2)), 2.0);
+  return r0 + (1 - r0) * pow((1 - cos), 5.0);
 }

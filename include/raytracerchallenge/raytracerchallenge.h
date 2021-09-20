@@ -453,6 +453,9 @@ namespace raytracerchallenge {
       double diffuse = 0.9;
       double specular = 0.9;
       double shininess = 200.0;
+      double reflective = 0.0;
+      double transparency = 0.0;
+      double refractiveIndex = 1.0;
       Color color = Color(1.0, 1.0, 1.0);
       bool operator==(const Material &material) const;
     };
@@ -545,6 +548,20 @@ namespace raytracerchallenge {
       Intersections localIntersect(Ray ray) override;
     };
     /**
+     * @brief A glass sphere
+     */
+    class GlassSphere : public Sphere {
+    public:
+      GlassSphere() {
+        this->material.transparency = 1.0;
+        this->material.refractiveIndex = 1.5;
+      }
+      static std::shared_ptr<Shape> create() {
+        auto shape = new GlassSphere();
+        return shape->sharedPtr;
+      }
+    };
+    /**
      * @brief Represents a flat surface
      */
     class Plane : public Shape {
@@ -628,9 +645,19 @@ namespace raytracerchallenge {
       std::shared_ptr<Shape> object;
       Tuple point;
       Tuple overPoint;
+      Tuple underPoint;
       Tuple eyeVector;
       Tuple normalVector;
+      Tuple reflectionVector;
+      double n1;
+      double n2;
       bool inside{};
+      /**
+       * Calculate the schlick approximation for the provided computations
+       * @param computations
+       * @return schlick refraction value
+       */
+      static double schlick(const Computations &computations);
     };
     /**
      * @brief Represents an intersection between a ray an object
@@ -660,7 +687,13 @@ namespace raytracerchallenge {
        * @param ray
        * @return Computations
        */
-      Computations prepareComputations(Ray ray);
+      Computations prepareComputations(Ray ray) const;
+      /**
+       * @brief Prepare ray intersection computations
+       * @param ray
+       * @return Computations
+       */
+      Computations prepareComputations(Ray ray, const Intersections &intersections) const;
       /**
        * @brief Equality operator
        * @param intersection intersection to compare with this one
@@ -683,7 +716,7 @@ namespace raytracerchallenge {
        * @brief Return the smallest non-negative intersection in the collection
        * @return the smallest non-negative intersection in the collection
        */
-      std::optional<Intersection> hit();
+      std::optional<Intersection> hit() const;
       /**
        * @brief Construct a new Intersections
        * @param intersections to be wrapped by this container
@@ -714,7 +747,6 @@ namespace raytracerchallenge {
        */
       [[nodiscard]] size_t size() const;
 
-    private:
       std::vector<Intersection> intersections;
     };
     /**
@@ -767,14 +799,16 @@ namespace raytracerchallenge {
        * @param computations
        * @return color
        */
-      Color shadeHit(const Computations &computations);
+      Color shadeHit(const Computations &computations, int remaining);
       /**
        * Intersect the world with the given ray and return
        * the color at the resulting intersection
        * @param ray Ray to intersect with this World
        * @return Color at the resulting intersection
        */
-      Color colorAt(Ray ray);
+      Color colorAt(Ray ray, int remaining);
+      Color reflectedColorAt(const Computations &computations, int remaining);
+      Color refractedColorAt(const Computations &computations, int remaining);
       /**
        * Return True if this point is in shadow
        * @param point to check for shadow
