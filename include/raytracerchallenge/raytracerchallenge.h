@@ -5,7 +5,6 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <memory>
 
 namespace raytracerchallenge {
   /**
@@ -553,7 +552,7 @@ namespace raytracerchallenge {
      */
     class GlassSphere : public Sphere {
     public:
-      GlassSphere() {
+      GlassSphere(){
         this->material.transparency = 1.0;
         this->material.refractiveIndex = 1.5;
       }
@@ -653,12 +652,7 @@ namespace raytracerchallenge {
       double n1;
       double n2;
       bool inside{};
-      /**
-       * Calculate the schlick approximation for the provided computations
-       * @param computations
-       * @return schlick refraction value
-       */
-      static double schlick(const Computations &computations);
+      static double schlick(const Computations& computations);
     };
     /**
      * @brief Represents an intersection between a ray an object
@@ -694,7 +688,7 @@ namespace raytracerchallenge {
        * @param ray
        * @return Computations
        */
-      Computations prepareComputations(Ray ray, const Intersections &intersections) const;
+      Computations prepareComputations(Ray ray, const Intersections& intersections) const;
       /**
        * @brief Equality operator
        * @param intersection intersection to compare with this one
@@ -808,8 +802,8 @@ namespace raytracerchallenge {
        * @return Color at the resulting intersection
        */
       Color colorAt(Ray ray, int remaining);
-      Color reflectedColorAt(const Computations &computations, int remaining);
-      Color refractedColorAt(const Computations &computations, int remaining);
+      Color reflectedColorAt(const Computations& computations, int remaining);
+      Color refractedColorAt(const Computations& computations, int remaining);
       /**
        * Return True if this point is in shadow
        * @param point to check for shadow

@@ -8,7 +8,7 @@ auto main() -> int {
   world.light = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(2.0, 10.0, -5),
                                                RayTracerChallenge::Color(0.9, 0.9, 0.9));
 
-  auto camera = RayTracerChallenge::Camera(100, 100, 0.45);
+  auto camera = RayTracerChallenge::Camera(200, 200, 0.45);
   auto from = RayTracerChallenge::Tuple::point(0.0, 0.0, -5.0);
   auto to = RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
   auto up = RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0);

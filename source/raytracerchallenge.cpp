@@ -441,25 +441,25 @@ RayTracerChallenge::Computations RayTracerChallenge::Intersection::prepareComput
   return computations;
 }
 RayTracerChallenge::Computations RayTracerChallenge::Intersection::prepareComputations(
-    RayTracerChallenge::Ray ray, const RayTracerChallenge::Intersections &intersections) const {
+    RayTracerChallenge::Ray ray, const RayTracerChallenge::Intersections& intersections) const {
   auto computations = prepareComputations(ray);
   std::vector<std::shared_ptr<Shape>> containers;
-  for (const Intersection &i : intersections.intersections) {
-    if (i == *this) {
-      if (containers.empty()) {
+  for (const Intersection& i : intersections.intersections) {
+    if (i == *this){
+      if(containers.empty()){
         computations.n1 = 1.0;
       } else {
         computations.n1 = containers.back()->material.refractiveIndex;
       }
     }
     auto position = std::find(containers.begin(), containers.end(), i.object);
-    if (position != containers.end()) {
+    if (position != containers.end()){
       containers.erase(position);
     } else {
       containers.push_back(i.object);
     }
-    if (i == *this) {
-      if (containers.empty()) {
+    if (i == *this){
+      if (containers.empty()){
         computations.n2 = 1.0;
       } else {
         computations.n2 = containers.back()->material.refractiveIndex;
@@ -592,13 +592,17 @@ RayTracerChallenge::Intersections RayTracerChallenge::World::intersect(Ray ray) 
   intersections.sort();
   return intersections;
 }
-RayTracerChallenge::Color RayTracerChallenge::World::shadeHit(const Computations &computations,
-                                                              int remaining) {
+RayTracerChallenge::Color RayTracerChallenge::World::shadeHit(const Computations &computations, int remaining) {
   bool shadowed = isShadowed(computations.overPoint);
   auto surface = lighting(computations.object, this->light.value(), computations.overPoint,
-                          computations.eyeVector, computations.normalVector, shadowed);
+                  computations.eyeVector, computations.normalVector, shadowed);
   auto reflected = this->reflectedColorAt(computations, remaining);
   auto refracted = this->refractedColorAt(computations, remaining);
+  auto material = computations.object->material;
+  if(material.reflective > 0.0 && material.transparency > 0.0){
+    auto reflectance = RayTracerChallenge::Computations::schlick(computations);
+    return surface + reflected * reflectance + refracted * (1 - reflectance);
+  }
   return surface + reflected + refracted;
 }
 RayTracerChallenge::Color RayTracerChallenge::World::colorAt(Ray ray, int remaining) {
@@ -609,30 +613,29 @@ RayTracerChallenge::Color RayTracerChallenge::World::colorAt(Ray ray, int remain
   }
   return shadeHit(hit.value().prepareComputations(ray, intersections), remaining);
 }
-RayTracerChallenge::Color RayTracerChallenge::World::reflectedColorAt(
-    const Computations &computations, int remaining) {
-  if (computations.object->material.reflective == 0.0 || remaining == 0) {
+RayTracerChallenge::Color RayTracerChallenge::World::reflectedColorAt(const Computations& computations, int remaining) {
+  if (computations.object->material.reflective == 0.0 || remaining == 0){
     return Color::BLACK;
   }
   auto reflectRay = Ray(computations.overPoint, computations.reflectionVector);
   return this->colorAt(reflectRay, remaining - 1) * computations.object->material.reflective;
 }
-RayTracerChallenge::Color RayTracerChallenge::World::refractedColorAt(
-    const Computations &computations, int remaining) {
-  if (computations.object->material.transparency == 0.0 || remaining == 0) {
+RayTracerChallenge::Color RayTracerChallenge::World::refractedColorAt(const Computations &computations, int remaining){
+  if (computations.object->material.transparency == 0.0 || remaining == 0){
     return Color::BLACK;
   }
   auto nRatio = computations.n1 / computations.n2;
   auto cosI = computations.eyeVector.dot(computations.normalVector);
   auto sin2T = pow(nRatio, 2) * (1 - pow(cosI, 2));
-  if (sin2T > 1.0) {
+  if (sin2T > 1.0){
     return Color::BLACK;
   }
   auto cosT = sqrt(1.0 - sin2T);
-  auto direction
-      = computations.normalVector * (nRatio * cosI - cosT) - computations.eyeVector * nRatio;
+  auto direction = computations.normalVector * (nRatio * cosI - cosT)
+                   - computations.eyeVector * nRatio;
   auto refractRay = Ray(computations.underPoint, direction);
-  auto color = colorAt(refractRay, remaining - 1) * computations.object->material.transparency;
+  auto color = colorAt(refractRay, remaining - 1) *
+               computations.object->material.transparency;
   return color;
 }
 bool RayTracerChallenge::World::isShadowed(RayTracerChallenge::Tuple point) {
@@ -743,10 +746,10 @@ RayTracerChallenge::Color RayTracerChallenge::CheckersPattern::colorAt(
 double RayTracerChallenge::Computations::schlick(
     const RayTracerChallenge::Computations &computations) {
   auto cos = computations.eyeVector.dot(computations.normalVector);
-  if (computations.n1 > computations.n2) {
+  if(computations.n1 > computations.n2){
     auto n = computations.n1 / computations.n2;
     auto sin2T = pow(n, 2.0) * (1.0 - pow(cos, 2.0));
-    if (sin2T > 1.0) {
+    if(sin2T > 1.0){
       return 1.0;
     }
     auto cosT = sqrt(1.0 - sin2T);

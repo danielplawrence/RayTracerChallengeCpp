@@ -1335,24 +1335,29 @@ TEST_CASE("Patterns") {
     CHECK(pattern.colorAt(shape, {0.0, 0.0, 1.01, 1.0}) == RayTracerChallenge::Color::BLACK);
   }
 }
-TEST_CASE("Reflection") {
+TEST_CASE("Reflection"){
   using namespace raytracerchallenge;
-  SUBCASE("Refectivity for the default material") {
+  SUBCASE("Refectivity for the default material"){
     RayTracerChallenge::Material material;
     CHECK(material.reflective == 0.0);
   }
-  SUBCASE("Precomputing the reflection vector") {
+  SUBCASE("Precomputing the reflection vector"){
     auto shape = RayTracerChallenge::Plane::create();
-    auto r = RayTracerChallenge::Ray({0.0, 1.0, -1.0, 1.0},
-                                     {0.0, -sqrt(2.0) / 2.0, sqrt(2.0) / 2.0, 0.0});
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 1.0, -1.0, 1.0},
+        {0.0, -sqrt(2.0)/2.0, sqrt(2.0)/2.0, 0.0}
+    );
     auto i = RayTracerChallenge::Intersection(sqrt(2.0), shape);
     auto comps = i.prepareComputations(r);
-    CHECK(comps.reflectionVector
-          == RayTracerChallenge::Tuple::vector(0.0, sqrt(2.0) / 2.0, sqrt(2.0) / 2.0));
+    CHECK(comps.reflectionVector ==
+          RayTracerChallenge::Tuple::vector(0.0, sqrt(2.0)/2.0, sqrt(2.0)/2.0));
   }
-  SUBCASE("The reflected color for a nonreflective material") {
+  SUBCASE("The reflected color for a nonreflective material"){
     auto w = RayTracerChallenge::World::defaultWorld();
-    auto r = RayTracerChallenge::Ray({0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0});
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.0, 0.0, 1.0},
+        {0.0, 0.0, 1.0, 0.0}
+    );
     auto shape = w.objects[1];
     shape->material.ambient = 1.0;
     auto i = RayTracerChallenge::Intersection(1.0, shape);
@@ -1360,35 +1365,42 @@ TEST_CASE("Reflection") {
     auto color = w.reflectedColorAt(comps, 4);
     CHECK(color == RayTracerChallenge::Color(0.0, 0.0, 0.0));
   }
-  SUBCASE("The reflected color for a reflective material") {
+  SUBCASE("The reflected color for a reflective material"){
     auto w = RayTracerChallenge::World::defaultWorld();
     auto shape = RayTracerChallenge::Plane::create();
     shape->material.reflective = 0.5;
     shape->transform = shape->transform.translated(0.0, -1.0, 0.0);
     w.add(shape);
-    auto r = RayTracerChallenge::Ray({0.0, 0.0, -3.0, 1.0},
-                                     {0.0, -sqrt(2.0) / 2.0, sqrt(2.0) / 2.0, 0.0});
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.0, -3.0, 1.0},
+        {0.0, -sqrt(2.0)/2.0, sqrt(2.0)/2.0, 0.0}
+    );
     auto i = RayTracerChallenge::Intersection(sqrt(2.0), shape);
     auto comps = i.prepareComputations(r);
     auto color = w.reflectedColorAt(comps, 4);
     CHECK(color == RayTracerChallenge::Color(0.19032, 0.2379, 0.14274));
   }
-  SUBCASE("Shading a hit for a reflective material") {
+  SUBCASE("Shading a hit for a reflective material"){
     auto w = RayTracerChallenge::World::defaultWorld();
     auto shape = RayTracerChallenge::Plane::create();
     shape->material.reflective = 0.5;
     shape->transform = shape->transform.translated(0.0, -1.0, 0.0);
     w.add(shape);
-    auto r = RayTracerChallenge::Ray({0.0, 0.0, -3.0, 1.0},
-                                     {0.0, -sqrt(2.0) / 2.0, sqrt(2.0) / 2.0, 0.0});
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.0, -3.0, 1.0},
+        {0.0, -sqrt(2.0)/2.0, sqrt(2.0)/2.0, 0.0}
+    );
     auto i = RayTracerChallenge::Intersection(sqrt(2.0), shape);
     auto comps = i.prepareComputations(r);
     auto color = w.shadeHit(comps, 4);
     CHECK(color == RayTracerChallenge::Color(0.87677, 0.92436, 0.82918));
   }
-  SUBCASE("Coloring mutually reflective surfaces") {
+  SUBCASE("Coloring mutually reflective surfaces"){
     auto w = RayTracerChallenge::World::defaultWorld();
-    w.light = RayTracerChallenge::PointLight({0.0, 0.0, 0.0, 1.0}, {1.0, 1.0, 1.0});
+    w.light = RayTracerChallenge::PointLight(
+        {0.0, 0.0, 0.0, 1.0},
+        {1.0, 1.0, 1.0}
+    );
     auto lower = RayTracerChallenge::Plane::create();
     lower->material.reflective = 1.0;
     lower->transform = lower->transform.translated(0.0, -1.0, 0.0);
@@ -1397,36 +1409,41 @@ TEST_CASE("Reflection") {
     upper->material.reflective = 1.0;
     upper->transform = upper->transform.translated(0.0, 1.0, 0.0);
     w.add(upper);
-    auto r = RayTracerChallenge::Ray({0.0, 0.0, 0.0, 1.0}, {0.0, 1.0, 0.0, 0.0});
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.0, 0.0, 1.0},
+        {0.0, 1.0, 0.0, 0.0}
+    );
     w.colorAt(r, 4);
   }
-  SUBCASE("The reflected color for a reflective material at maximum recursion depth") {
+  SUBCASE("The reflected color for a reflective material at maximum recursion depth"){
     auto w = RayTracerChallenge::World::defaultWorld();
     auto shape = RayTracerChallenge::Plane::create();
     shape->material.reflective = 0.5;
     shape->transform = shape->transform.translated(0.0, -1.0, 0.0);
     w.add(shape);
-    auto r = RayTracerChallenge::Ray({0.0, 0.0, -3.0, 1.0},
-                                     {0.0, -sqrt(2.0) / 2.0, sqrt(2.0) / 2.0, 0.0});
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.0, -3.0, 1.0},
+        {0.0, -sqrt(2.0)/2.0, sqrt(2.0)/2.0, 0.0}
+    );
     auto i = RayTracerChallenge::Intersection(sqrt(2.0), shape);
     auto comps = i.prepareComputations(r);
     auto color = w.reflectedColorAt(comps, 0);
     CHECK(color == RayTracerChallenge::Color(0.0, 0.0, 0.0));
   }
 }
-TEST_CASE("Transparency and refraction") {
+TEST_CASE("Transparency and refraction"){
   using namespace raytracerchallenge;
-  SUBCASE("Transparency and refractive index for the default material") {
+  SUBCASE("Transparency and refractive index for the default material"){
     RayTracerChallenge::Material material;
     CHECK(material.transparency == 0.0);
     CHECK(material.refractiveIndex == 1.0);
   }
-  SUBCASE("A helper for producting a sphere with a glassy material") {
+  SUBCASE("A helper for producting a sphere with a glassy material"){
     auto glassSphere = RayTracerChallenge::GlassSphere::create();
     CHECK(glassSphere->material.transparency == 1.0);
     CHECK(glassSphere->material.refractiveIndex == 1.5);
   }
-  SUBCASE("Finding n1 and n2 at various intersections") {
+  SUBCASE("Finding n1 and n2 at various intersections"){
     auto a = RayTracerChallenge::GlassSphere::create();
     a->transform = a->transform.scaled(2.0, 2.0, 2.0);
     auto b = RayTracerChallenge::GlassSphere::create();
@@ -1435,7 +1452,10 @@ TEST_CASE("Transparency and refraction") {
     auto c = RayTracerChallenge::GlassSphere::create();
     c->transform = c->transform.translated(0.0, 0.0, 0.25);
     c->material.refractiveIndex = 2.5;
-    auto r = RayTracerChallenge::Ray({0.0, 0.0, -4.0, 1.0}, {0.0, 0.0, 1.0, 0.0});
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.0, -4.0, 1.0},
+        {0.0, 0.0, 1.0, 0.0}
+    );
     auto xs = RayTracerChallenge::Intersections({
         {2.0, a},
         {2.75, b},
@@ -1457,51 +1477,63 @@ TEST_CASE("Transparency and refraction") {
     CHECK(xs[5].prepareComputations(r, xs).n1 == 1.5);
     CHECK(xs[5].prepareComputations(r, xs).n2 == 1.0);
   }
-  SUBCASE("The under point is offset below the surface") {
-    auto r = RayTracerChallenge::Ray({0.0, 0.0, -5.0, 1.0}, {0.0, 0.0, 1.0, 0.0});
+  SUBCASE("The under point is offset below the surface"){
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.0, -5.0, 1.0},
+        {0.0, 0.0, 1.0, 0.0}
+    );
     auto shape = RayTracerChallenge::GlassSphere::create();
     shape->transform = shape->transform.translated(0.0, 0.0, 1.0);
     auto intersection = RayTracerChallenge::Intersection(5.0, shape);
     auto comps = intersection.prepareComputations(r);
-    CHECK(comps.underPoint.z > 0.0001 / 2.0);
+    CHECK(comps.underPoint.z > 0.0001/2.0);
     CHECK(comps.point.z < comps.underPoint.z);
   }
-  SUBCASE("The refracted color with an opaque surface") {
+  SUBCASE("The refracted color with an opaque surface"){
     auto w = RayTracerChallenge::World::defaultWorld();
     auto shape = w.objects[0];
-    auto r = RayTracerChallenge::Ray({0.0, 0.0, -5.0, 1.0}, {0.0, 0.0, 1.0, 0.0});
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.0, -5.0, 1.0},
+        {0.0, 0.0, 1.0, 0.0}
+    );
     auto xs = RayTracerChallenge::Intersections({{4.0, shape}, {6.0, shape}});
     auto comps = xs[0].prepareComputations(r, xs);
     CHECK(w.refractedColorAt(comps, 5) == RayTracerChallenge::Color(0.0, 0.0, 0.0));
   }
-  SUBCASE("The refracted color at the maximum recursive depth") {
+  SUBCASE("The refracted color at the maximum recursive depth"){
     auto w = RayTracerChallenge::World::defaultWorld();
     auto shape = w.objects[0];
     shape->material.refractiveIndex = 1.5;
     shape->material.transparency = 1.0;
-    auto r = RayTracerChallenge::Ray({0.0, 0.0, -5.0, 1.0}, {0.0, 0.0, 1.0, 0.0});
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.0, -5.0, 1.0},
+        {0.0, 0.0, 1.0, 0.0}
+    );
     auto xs = RayTracerChallenge::Intersections({{4.0, shape}, {6.0, shape}});
     auto comps = xs[0].prepareComputations(r, xs);
     CHECK(w.refractedColorAt(comps, 0) == RayTracerChallenge::Color(0.0, 0.0, 0.0));
   }
-  SUBCASE("The refracted color under total internal reflection") {
+  SUBCASE("The refracted color under total internal reflection"){
     auto w = RayTracerChallenge::World::defaultWorld();
     auto shape = w.objects[0];
     shape->material.refractiveIndex = 1.5;
     shape->material.transparency = 1.0;
-    auto r = RayTracerChallenge::Ray({0.0, 0.0, sqrt(2.0 / 2.0), 1.0}, {0.0, 1.0, 0.0, 0.0});
-    auto xs
-        = RayTracerChallenge::Intersections({{-sqrt(2.0) / 2.0, shape}, {sqrt(2.0) / 2.0, shape}});
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.0, sqrt(2.0/2.0), 1.0},
+        {0.0, 1.0, 0.0, 0.0}
+    );
+    auto xs = RayTracerChallenge::Intersections(
+        {{-sqrt(2.0)/2.0, shape}, {sqrt(2.0)/2.0, shape}});
     auto comps = xs[1].prepareComputations(r, xs);
     CHECK(w.refractedColorAt(comps, 5) == RayTracerChallenge::Color(0.0, 0.0, 0.0));
   }
-  SUBCASE("The refracted color with a refracted ray") {
+  SUBCASE("The refracted color with a refracted ray"){
     class TestPattern : public RayTracerChallenge::Pattern {
     public:
       [[nodiscard]] RayTracerChallenge::Color colorAt(
           std::shared_ptr<RayTracerChallenge::Shape> shape,
           RayTracerChallenge::Tuple point) const override {
-        (void)shape;
+        (void) shape;
         return {point.x, point.y, point.z};
       }
     };
@@ -1513,7 +1545,10 @@ TEST_CASE("Transparency and refraction") {
     auto b = w.objects[1];
     b->material.transparency = 1.0;
     b->material.refractiveIndex = 1.5;
-    auto r = RayTracerChallenge::Ray({0.0, 0.0, 0.1, 1.0}, {0.0, 1.0, 0.0, 0.0});
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.0, 0.1, 1.0},
+        {0.0, 1.0, 0.0, 0.0}
+    );
     auto xs = RayTracerChallenge::Intersections({
         {-0.9899, a},
         {-0.4899, b},
@@ -1521,9 +1556,10 @@ TEST_CASE("Transparency and refraction") {
         {0.9899, a},
     });
     auto comps = xs[2].prepareComputations(r, xs);
-    CHECK(w.refractedColorAt(comps, 5) == RayTracerChallenge::Color(0.0, 0.99888, 0.04725));
+    CHECK(w.refractedColorAt(comps, 5) ==
+          RayTracerChallenge::Color(0.0, 0.99888, 0.04725));
   }
-  SUBCASE("Shading a hit on a transparent material") {
+  SUBCASE("Shading a hit on a transparent material"){
     auto w = RayTracerChallenge::World::defaultWorld();
     auto floor = RayTracerChallenge::Plane::create();
     floor->transform = RayTracerChallenge::Matrix::translation(0.0, -1.0, 0.0);
@@ -1535,36 +1571,73 @@ TEST_CASE("Transparency and refraction") {
     ball->material.ambient = 0.5;
     ball->transform = RayTracerChallenge::Matrix::translation(0.0, -3.5, -0.5);
     w.add(ball);
-    auto r
-        = RayTracerChallenge::Ray({0.0, 0.0, -3.0, 1.0}, {0.0, -sqrt(2.0) / 2, sqrt(2.0) / 2, 0.0});
-    auto xs = RayTracerChallenge::Intersections({{sqrt(2.0), floor}});
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.0, -3.0, 1.0},
+        {0.0, -sqrt(2.0)/2, sqrt(2.0)/2, 0.0}
+    );
+    auto xs = RayTracerChallenge::Intersections(
+        {{sqrt(2.0), floor}});
     auto comps = xs[0].prepareComputations(r, xs);
     auto color = w.shadeHit(comps, 5);
     CHECK(color == RayTracerChallenge::Color(0.93642, 0.68642, 0.68642));
   }
-  SUBCASE("The Schlick approximation under total internal reflection") {
+  SUBCASE("The Schlick approximation under total internal reflection"){
     auto shape = RayTracerChallenge::GlassSphere::create();
-    auto r = RayTracerChallenge::Ray({0.0, 0.0, sqrt(2.0) / 2.0, 1.0}, {0.0, 1.0, 0.0, 0.0});
-    auto xs
-        = RayTracerChallenge::Intersections({{-sqrt(2.0) / 2.0, shape}, {sqrt(2.0) / 2.0, shape}});
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.0, sqrt(2.0)/2.0, 1.0},
+        {0.0, 1.0, 0.0, 0.0}
+    );
+    auto xs = RayTracerChallenge::Intersections(
+        {{-sqrt(2.0)/2.0, shape}, {sqrt(2.0)/2.0, shape}});
     auto comps = xs[1].prepareComputations(r, xs);
     auto reflectance = RayTracerChallenge::Computations::schlick(comps);
     CHECK(reflectance == 1.0);
   }
-  SUBCASE("The Schlick approximation with a perpendicular viewing angle") {
+  SUBCASE("The Schlick approximation with a perpendicular viewing angle"){
     auto shape = RayTracerChallenge::GlassSphere::create();
-    auto r = RayTracerChallenge::Ray({0.0, 0.0, 0.0, 1.0}, {0.0, 1.0, 0.0, 0.0});
-    auto xs = RayTracerChallenge::Intersections({{-1.0, shape}, {1.0, shape}});
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.0, 0.0, 1.0},
+        {0.0, 1.0, 0.0, 0.0}
+    );
+    auto xs = RayTracerChallenge::Intersections(
+        {{-1.0, shape}, {1.0, shape}});
     auto comps = xs[1].prepareComputations(r, xs);
     auto reflectance = RayTracerChallenge::Computations::schlick(comps);
     CHECK(abs(reflectance - 0.04) < 0.0001);
   }
-  SUBCASE("The Schlick approximation with a small angle and n2 > n1") {
+  SUBCASE("The Schlick approximation with a small angle and n2 > n1"){
     auto shape = RayTracerChallenge::GlassSphere::create();
-    auto r = RayTracerChallenge::Ray({0.0, 0.99, -2.0, 1.0}, {0.0, 0.0, 1.0, 0.0});
-    auto xs = RayTracerChallenge::Intersections({{1.8589, shape}});
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.99, -2.0, 1.0},
+        {0.0, 0.0, 1.0, 0.0}
+    );
+    auto xs = RayTracerChallenge::Intersections(
+        {{1.8589, shape}});
     auto comps = xs[0].prepareComputations(r, xs);
     auto reflectance = RayTracerChallenge::Computations::schlick(comps);
     CHECK(abs(reflectance - 0.48873) < 0.0001);
+  }
+  SUBCASE("Shading a hit on a reflective, transparent material"){
+    auto w = RayTracerChallenge::World::defaultWorld();
+    auto floor = RayTracerChallenge::Plane::create();
+    floor->transform = RayTracerChallenge::Matrix::translation(0.0, -1.0, 0.0);
+    floor->material.refractiveIndex = 1.5;
+    floor->material.reflective = 0.5;
+    floor->material.transparency = 0.5;
+    w.add(floor);
+    auto ball = RayTracerChallenge::Sphere::create();
+    ball->material.color = RayTracerChallenge::Color(1.0, 0.0, 0.0);
+    ball->material.ambient = 0.5;
+    ball->transform = RayTracerChallenge::Matrix::translation(0.0, -3.5, -0.5);
+    w.add(ball);
+    auto r = RayTracerChallenge::Ray(
+        {0.0, 0.0, -3.0, 1.0},
+        {0.0, -sqrt(2.0)/2, sqrt(2.0)/2, 0.0}
+    );
+    auto xs = RayTracerChallenge::Intersections(
+        {{sqrt(2.0), floor}});
+    auto comps = xs[0].prepareComputations(r, xs);
+    auto color = w.shadeHit(comps, 5);
+    CHECK(color == RayTracerChallenge::Color(0.93391, 0.69643, 0.69243));
   }
 }
