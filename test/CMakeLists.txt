@@ -38,6 +38,7 @@ endif()
 
 file(GLOB sources CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
 add_executable(RayTracerChallengeTests ${sources})
+add_compile_options(-pthread)
 target_link_libraries(
   RayTracerChallengeTests doctest::doctest RayTracerChallenge::RayTracerChallenge
 )
