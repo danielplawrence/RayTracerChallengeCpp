@@ -41,7 +41,7 @@ set_target_properties(
   RayTracerChallengeStandalone PROPERTIES CXX_STANDARD 17 OUTPUT_NAME "RayTracerChallenge"
 )
 
-SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-pthread")
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-pthread")
 
 target_link_libraries(
   RayTracerChallengeStandalone RayTracerChallenge::RayTracerChallenge Eigen cxxopts
