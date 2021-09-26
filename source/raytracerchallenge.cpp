@@ -7,6 +7,7 @@
 #include <cmath>
 #include <functional>
 #include <memory>
+#include <thread>
 #include <utility>
 
 using Eigen::MatrixXd;
@@ -15,6 +16,27 @@ using Eigen::VectorXd;
 using namespace raytracerchallenge;
 
 const double EPS = 0.0001;
+
+/**
+ * Execute the provided function in parallel
+ * @param nElements Number of elements which will be iterated over
+ * @param functor Function <int start, int end> which will process a given chunk of the loop
+ */
+static void parallelFor(int nElements, std::function<void(int start, int end)> functor) {
+  int nbThreadsHint = (int)std::thread::hardware_concurrency();
+  int nbThreads = nbThreadsHint == 0 ? 8 : (nbThreadsHint);
+  int batchSize = nElements / nbThreads;
+  int batchRemainder = nElements % nbThreads;
+  std::vector<std::thread> threads(nbThreads);
+  for (int i = 0; i < nbThreads; ++i) {
+    int start = i * batchSize;
+    threads[i] = std::thread(functor, start, start + batchSize);
+  }
+  int start = (int)(nbThreads * batchSize);
+  int end = (int)start + batchRemainder;
+  functor(start, end);
+  std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+}
 
 RayTracerChallenge::Tuple::Tuple() {
   this->x = 0.0;
@@ -601,13 +623,15 @@ RayTracerChallenge::Ray RayTracerChallenge::Camera::rayForPixel(int x, int y) co
 }
 RayTracerChallenge::Canvas RayTracerChallenge::Camera::render(World world) const {
   auto image = Canvas(hSize, vSize);
-  for (int y = 0; y < vSize; y++) {
-    for (int x = 0; x < hSize; x++) {
-      auto ray = rayForPixel(x, y);
-      auto color = world.colorAt(ray, 4);
-      image.writePixel(x, y, color);
+  parallelFor(vSize, [this, &world, &image](int s, int e) {
+    for (int y = s; y < e; y++) {
+      for (int x = 0; x < hSize; x++) {
+        auto ray = rayForPixel(x, y);
+        auto color = world.colorAt(ray, 4);
+        image.writePixel(x, y, color);
+      }
     }
-  }
+  });
   return image;
 }
 RayTracerChallenge::StripePattern::StripePattern(RayTracerChallenge::Color a,
