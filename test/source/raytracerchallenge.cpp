@@ -3,8 +3,8 @@
 #include <raytracerchallenge/raytracerchallenge.h>
 
 #include <cmath>
-#include <sstream>
 #include <memory>
+#include <sstream>
 
 TEST_CASE("Tuples") {
   using namespace raytracerchallenge;

@@ -3,11 +3,11 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <set>
 #include <string>
 #include <vector>
-#include <memory>
 
 using Eigen::MatrixXd;
 

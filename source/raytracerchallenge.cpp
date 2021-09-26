@@ -6,8 +6,8 @@
 #include <chrono>
 #include <cmath>
 #include <functional>
-#include <utility>
 #include <memory>
+#include <utility>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;

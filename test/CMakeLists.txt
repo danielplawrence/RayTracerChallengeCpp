@@ -7,7 +7,6 @@ project(RayTracerChallengeTests LANGUAGES CXX)
 option(ENABLE_TEST_COVERAGE "Enable test coverage" OFF)
 option(TEST_INSTALLED_VERSION "Test the version found by find_package" OFF)
 
-
 # --- Import tools ----
 
 include(../cmake/tools.cmake)
@@ -19,11 +18,11 @@ include(../cmake/CPM.cmake)
 CPMAddPackage("gh:onqtam/doctest#2.4.5")
 CPMAddPackage("gh:TheLartians/Format.cmake@1.7.0")
 CPMAddPackage(
-    NAME Eigen
-    VERSION 3.2.8
-    URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
-    # Eigen's CMakelists are not intended for library use
-    DOWNLOAD_ONLY YES
+  NAME Eigen
+  VERSION 3.2.8
+  URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+  # Eigen's CMakelists are not intended for library use
+  DOWNLOAD_ONLY YES
 )
 if(Eigen_ADDED)
   add_library(Eigen INTERFACE IMPORTED)
