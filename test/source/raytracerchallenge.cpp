@@ -4,7 +4,6 @@
 
 #include <cmath>
 #include <sstream>
-#include <string>
 #include <memory>
 
 TEST_CASE("Tuples") {

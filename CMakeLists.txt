@@ -62,6 +62,9 @@ set_target_properties(RayTracerChallenge PROPERTIES CXX_STANDARD 17)
 # being a cross-platform target, we enforce standards conformance on MSVC
 target_compile_options(RayTracerChallenge PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
 
+# ---- Disable warnings from dependencies ----
+  if(CMAKE_C_COMPILER_ID MATCHES "MSVC")
+    set(MSVC_DISABLED_WARNINGS_LIST "C4127") # conditional expression is constant
 # Link dependencies
 target_link_libraries(RayTracerChallenge Eigen fmt::fmt)
 
