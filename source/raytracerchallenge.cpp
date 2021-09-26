@@ -2,7 +2,7 @@
 #include <fmt/format.h>
 #include <raytracerchallenge/raytracerchallenge.h>
 
-#include <Eigen/dense>
+#include <Eigen/Dense>
 #include <chrono>
 #include <cmath>
 #include <functional>
