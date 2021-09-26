@@ -7,6 +7,7 @@
 #include <cmath>
 #include <functional>
 #include <utility>
+#include <memory>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
