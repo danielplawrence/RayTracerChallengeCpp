@@ -45,14 +45,14 @@ target_link_libraries(
 set_target_properties(RayTracerChallengeTests PROPERTIES CXX_STANDARD 17)
 
 # enable compiler warnings
-#if(NOT TEST_INSTALLED_VERSION)
-#  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-#    target_compile_options(RayTracerChallenge PRIVATE -Wall -Wpedantic -Wextra -Werror)
-#  elseif(MSVC)
-#    target_compile_options(RayTracerChallenge PRIVATE /W4 /WX)
-#    target_compile_definitions(RayTracerChallengeTests PUBLIC DOCTEST_CONFIG_USE_STD_HEADERS)
-#  endif()
-#endif()
+if(NOT TEST_INSTALLED_VERSION)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    target_compile_options(RayTracerChallenge PRIVATE -Wall -Wpedantic -Wextra -Werror)
+  elseif(MSVC)
+    target_compile_options(RayTracerChallenge PRIVATE /W4 /WX /ignore:4127)
+    target_compile_definitions(RayTracerChallengeTests PUBLIC DOCTEST_CONFIG_USE_STD_HEADERS)
+  endif()
+endif()
 
 # ---- Add RayTracerChallengeTests ----
 
