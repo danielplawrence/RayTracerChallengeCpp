@@ -2,9 +2,14 @@
 #include <fmt/format.h>
 #include <raytracerchallenge/raytracerchallenge.h>
 
+#include <Eigen/dense>
 #include <chrono>
 #include <cmath>
+#include <functional>
 #include <utility>
+
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
 
 using namespace raytracerchallenge;
 
@@ -152,178 +157,95 @@ std::string RayTracerChallenge::Canvas::toPortablePixmap() {
   return header;
 }
 
-RayTracerChallenge::Matrix::Row::Row(std::vector<double> r) : row(std::move(r)) {}
-double RayTracerChallenge::Matrix::Row::operator[](unsigned int y) { return row.at(y); }
 RayTracerChallenge::Matrix::Matrix(unsigned int x, unsigned int y,
                                    std::vector<std::vector<double>> m) {
-  this->m.resize(x, std::vector<double>(y, false));
-  this->m = std::move(m);
+  MatrixXd mat(x, y);
+  for (auto i = 0U; i < x; i++) {
+    mat.row(i) = VectorXd::Map(&m[i][0], (long)m[i].size());
+  }
+  this->m = mat;
 }
 RayTracerChallenge::Matrix::Matrix() = default;
-RayTracerChallenge::Matrix::Row RayTracerChallenge::Matrix::operator[](const unsigned int x) const {
-  return RayTracerChallenge::Matrix::Row(m.at(x));
-}
-bool RayTracerChallenge::Matrix::doubleEquals(double x, double y) { return abs(x - y) < EPS; }
+RayTracerChallenge::Matrix::Matrix(Eigen::MatrixXd m) { this->m = std::move(m); }
 bool RayTracerChallenge::Matrix::operator==(const Matrix &matrix) const {
-  for (int x = 0; x < (int)this->m.size(); x++) {
-    for (int y = 0; y < (int)this->m[0].size(); y++) {
-      if (!doubleEquals(this->m[x][y], matrix.m[x][y])) {
-        return false;
-      }
-    }
-  }
-  return true;
+  return this->m.isApprox(matrix.m, EPS);
 }
 bool RayTracerChallenge::Matrix::operator!=(const Matrix &matrix) const {
   return this->m != matrix.m;
 }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::operator*(
     const RayTracerChallenge::Matrix &matrix) const {
-  std::vector<std::vector<double>> res(this->m.size());
-  for (int x = 0; x < (int)this->m.size(); x++) {
-    res[x] = std::vector<double>(this->m[0].size());
-    for (int y = 0; y < (int)this->m[0].size(); y++) {
-      double cellVal = double();
-      for (int z = 0; z < (int)this->m.size(); z++) {
-        cellVal += this->m[x][z] * matrix.m[z][y];
-      }
-      res[x][y] = cellVal;
-    }
-  }
-  return {static_cast<unsigned int>(res.size()), static_cast<unsigned int>(res[0].size()), res};
+  return Matrix(this->m * matrix.m);
 }
 RayTracerChallenge::Tuple RayTracerChallenge::Matrix::operator*(
     const RayTracerChallenge::Tuple &tuple) const {
   Tuple res = Tuple(0, 0, 0, 0);
-  res.x = Tuple(this->m[0][0], this->m[0][1], this->m[0][2], this->m[0][3]).dot(tuple);
-  res.y = Tuple(this->m[1][0], this->m[1][1], this->m[1][2], this->m[1][3]).dot(tuple);
-  res.z = Tuple(this->m[2][0], this->m[2][1], this->m[2][2], this->m[2][3]).dot(tuple);
-  res.w = Tuple(this->m[3][0], this->m[3][1], this->m[3][2], this->m[3][3]).dot(tuple);
+  res.x = Tuple(this->m(0, 0), this->m(0, 1), this->m(0, 2), this->m(0, 3)).dot(tuple);
+  res.y = Tuple(this->m(1, 0), this->m(1, 1), this->m(1, 2), this->m(1, 3)).dot(tuple);
+  res.z = Tuple(this->m(2, 0), this->m(2, 1), this->m(2, 2), this->m(2, 3)).dot(tuple);
+  res.w = Tuple(this->m(3, 0), this->m(3, 1), this->m(3, 2), this->m(3, 3)).dot(tuple);
   return res;
 }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::identity(unsigned int size) {
-  std::vector<std::vector<double>> res(size);
-  unsigned int diagX = 0;
-  unsigned int diagY = 0;
-  for (unsigned int x = 0; x < size; x++) {
-    res[x] = std::vector<double>(size);
-    for (unsigned int y = 0; y < size; y++) {
-      if (x == diagX && y == diagY) {
-        res[x][y] = 1.0;
-        diagX++;
-        diagY++;
-      } else {
-        res[x][y] = 0.0;
-      }
-    }
-  }
-  return {size, size, res};
+  return Matrix(MatrixXd::Identity(size, size));
 }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::transposed() {
-  std::vector<std::vector<double>> res(this->m.size());
-  for (unsigned int x = 0; x < this->m.size(); x++) {
-    res[x] = std::vector<double>(this->m.size());
-  }
-  for (unsigned int x = 0; x < this->m.size(); x++) {
-    for (unsigned int y = 0; y < this->m.size(); y++) {
-      res[y][x] = this->m[x][y];
-    }
-  }
-  return {static_cast<unsigned int>(this->m.size()), static_cast<unsigned int>(this->m.size()),
-          res};
+  return Matrix(this->m.transpose());
 }
 
-double RayTracerChallenge::Matrix::determinant() const {
-  if (this->m.size() == 2) {
-    return this->m[0][0] * this->m[1][1] - this->m[0][1] * this->m[1][0];
-  }
-  double det = 0;
-  for (int col = 0; col < (int)m.size(); col++) {
-    det += m[0][col] * cofactor(0, col);
-  }
-  return det;
-}
-RayTracerChallenge::Matrix RayTracerChallenge::Matrix::submatrix(unsigned int x,
-                                                                 unsigned int y) const {
-  std::vector<std::vector<double>> res(this->m.size());
-  res = m;
-  for (auto &re : res) {
-    re.erase(re.cbegin() + y);
-  }
-  res.erase(res.cbegin() + x);
-  return {static_cast<unsigned int>(res.size()), static_cast<unsigned int>(res.size()), res};
-}
-double RayTracerChallenge::Matrix::minor(unsigned int x, unsigned int y) const {
-  return this->submatrix(x, y).determinant();
-}
-double RayTracerChallenge::Matrix::cofactor(unsigned int x, unsigned int y) const {
-  double det = this->submatrix(x, y).determinant();
-  if ((x + y) % 2 == 0) {
-    return det;
-  }
-  return -det;
-}
+double RayTracerChallenge::Matrix::determinant() const { return this->m.determinant(); }
 bool RayTracerChallenge::Matrix::invertible() const { return determinant() != 0.0; }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::inverse() const {
-  std::vector<std::vector<double>> res(this->m.size());
-  for (unsigned int x = 0; x < this->m.size(); x++) {
-    res[x] = std::vector<double>(this->m.size());
-  }
-  for (unsigned int row = 0; row < this->m.size(); row++) {
-    for (unsigned int col = 0; col < this->m.size(); col++) {
-      res[col][row] = this->cofactor(row, col) / determinant();
-    }
-  }
-  return {static_cast<unsigned int>(res.size()), static_cast<unsigned int>(res.size()), res};
+  return Matrix(this->m.inverse());
 }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::translation(double x, double y, double z) {
   RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
-  res.m[0][3] = x;
-  res.m[1][3] = y;
-  res.m[2][3] = z;
+  res.m(0, 3) = x;
+  res.m(1, 3) = y;
+  res.m(2, 3) = z;
   return res;
 }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::scaling(double x, double y, double z) {
   RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
-  res.m[0][0] = x;
-  res.m[1][1] = y;
-  res.m[2][2] = z;
-  res.m[3][3] = 1;
+  res.m(0, 0) = x;
+  res.m(1, 1) = y;
+  res.m(2, 2) = z;
+  res.m(3, 3) = 1;
   return res;
 }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotationX(double radians) {
   RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
-  res.m[1][1] = cos(radians);
-  res.m[1][2] = -sin(radians);
-  res.m[2][1] = sin(radians);
-  res.m[2][2] = cos(radians);
+  res.m(1, 1) = cos(radians);
+  res.m(1, 2) = -sin(radians);
+  res.m(2, 1) = sin(radians);
+  res.m(2, 2) = cos(radians);
   return res;
 }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotationY(double radians) {
   RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
-  res.m[0][0] = cos(radians);
-  res.m[0][2] = sin(radians);
-  res.m[2][0] = -sin(radians);
-  res.m[2][2] = cos(radians);
+  res.m(0, 0) = cos(radians);
+  res.m(0, 2) = sin(radians);
+  res.m(2, 0) = -sin(radians);
+  res.m(2, 2) = cos(radians);
   return res;
 }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::rotationZ(double radians) {
   RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
-  res.m[0][0] = cos(radians);
-  res.m[0][1] = -sin(radians);
-  res.m[1][0] = sin(radians);
-  res.m[1][1] = cos(radians);
+  res.m(0, 0) = cos(radians);
+  res.m(0, 1) = -sin(radians);
+  res.m(1, 0) = sin(radians);
+  res.m(1, 1) = cos(radians);
   return res;
 }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::shearing(double xy, double xz, double yx,
                                                                 double yz, double zx, double zy) {
   RayTracerChallenge::Matrix res = RayTracerChallenge::Matrix::identity(4);
-  res.m[0][1] = xy;
-  res.m[0][2] = xz;
-  res.m[1][0] = yx;
-  res.m[1][2] = yz;
-  res.m[2][0] = zx;
-  res.m[2][1] = zy;
+  res.m(0, 1) = xy;
+  res.m(0, 2) = xz;
+  res.m(1, 0) = yx;
+  res.m(1, 2) = yz;
+  res.m(2, 0) = zx;
+  res.m(2, 1) = zy;
   return res;
 }
 RayTracerChallenge::Matrix RayTracerChallenge::Matrix::translated(double x, double y,
@@ -441,25 +363,25 @@ RayTracerChallenge::Computations RayTracerChallenge::Intersection::prepareComput
   return computations;
 }
 RayTracerChallenge::Computations RayTracerChallenge::Intersection::prepareComputations(
-    RayTracerChallenge::Ray ray, const RayTracerChallenge::Intersections& intersections) const {
+    RayTracerChallenge::Ray ray, const RayTracerChallenge::Intersections &intersections) const {
   auto computations = prepareComputations(ray);
   std::vector<std::shared_ptr<Shape>> containers;
-  for (const Intersection& i : intersections.intersections) {
-    if (i == *this){
-      if(containers.empty()){
+  for (const Intersection &i : intersections.intersections) {
+    if (i == *this) {
+      if (containers.empty()) {
         computations.n1 = 1.0;
       } else {
         computations.n1 = containers.back()->material.refractiveIndex;
       }
     }
     auto position = std::find(containers.begin(), containers.end(), i.object);
-    if (position != containers.end()){
+    if (position != containers.end()) {
       containers.erase(position);
     } else {
       containers.push_back(i.object);
     }
-    if (i == *this){
-      if (containers.empty()){
+    if (i == *this) {
+      if (containers.empty()) {
         computations.n2 = 1.0;
       } else {
         computations.n2 = containers.back()->material.refractiveIndex;
@@ -592,14 +514,15 @@ RayTracerChallenge::Intersections RayTracerChallenge::World::intersect(Ray ray) 
   intersections.sort();
   return intersections;
 }
-RayTracerChallenge::Color RayTracerChallenge::World::shadeHit(const Computations &computations, int remaining) {
+RayTracerChallenge::Color RayTracerChallenge::World::shadeHit(const Computations &computations,
+                                                              int remaining) {
   bool shadowed = isShadowed(computations.overPoint);
   auto surface = lighting(computations.object, this->light.value(), computations.overPoint,
-                  computations.eyeVector, computations.normalVector, shadowed);
+                          computations.eyeVector, computations.normalVector, shadowed);
   auto reflected = this->reflectedColorAt(computations, remaining);
   auto refracted = this->refractedColorAt(computations, remaining);
   auto material = computations.object->material;
-  if(material.reflective > 0.0 && material.transparency > 0.0){
+  if (material.reflective > 0.0 && material.transparency > 0.0) {
     auto reflectance = RayTracerChallenge::Computations::schlick(computations);
     return surface + reflected * reflectance + refracted * (1 - reflectance);
   }
@@ -613,29 +536,30 @@ RayTracerChallenge::Color RayTracerChallenge::World::colorAt(Ray ray, int remain
   }
   return shadeHit(hit.value().prepareComputations(ray, intersections), remaining);
 }
-RayTracerChallenge::Color RayTracerChallenge::World::reflectedColorAt(const Computations& computations, int remaining) {
-  if (computations.object->material.reflective == 0.0 || remaining == 0){
+RayTracerChallenge::Color RayTracerChallenge::World::reflectedColorAt(
+    const Computations &computations, int remaining) {
+  if (computations.object->material.reflective == 0.0 || remaining == 0) {
     return Color::BLACK;
   }
   auto reflectRay = Ray(computations.overPoint, computations.reflectionVector);
   return this->colorAt(reflectRay, remaining - 1) * computations.object->material.reflective;
 }
-RayTracerChallenge::Color RayTracerChallenge::World::refractedColorAt(const Computations &computations, int remaining){
-  if (computations.object->material.transparency == 0.0 || remaining == 0){
+RayTracerChallenge::Color RayTracerChallenge::World::refractedColorAt(
+    const Computations &computations, int remaining) {
+  if (computations.object->material.transparency == 0.0 || remaining == 0) {
     return Color::BLACK;
   }
   auto nRatio = computations.n1 / computations.n2;
   auto cosI = computations.eyeVector.dot(computations.normalVector);
   auto sin2T = pow(nRatio, 2) * (1 - pow(cosI, 2));
-  if (sin2T > 1.0){
+  if (sin2T > 1.0) {
     return Color::BLACK;
   }
   auto cosT = sqrt(1.0 - sin2T);
-  auto direction = computations.normalVector * (nRatio * cosI - cosT)
-                   - computations.eyeVector * nRatio;
+  auto direction
+      = computations.normalVector * (nRatio * cosI - cosT) - computations.eyeVector * nRatio;
   auto refractRay = Ray(computations.underPoint, direction);
-  auto color = colorAt(refractRay, remaining - 1) *
-               computations.object->material.transparency;
+  auto color = colorAt(refractRay, remaining - 1) * computations.object->material.transparency;
   return color;
 }
 bool RayTracerChallenge::World::isShadowed(RayTracerChallenge::Tuple point) {
@@ -746,10 +670,10 @@ RayTracerChallenge::Color RayTracerChallenge::CheckersPattern::colorAt(
 double RayTracerChallenge::Computations::schlick(
     const RayTracerChallenge::Computations &computations) {
   auto cos = computations.eyeVector.dot(computations.normalVector);
-  if(computations.n1 > computations.n2){
+  if (computations.n1 > computations.n2) {
     auto n = computations.n1 / computations.n2;
     auto sin2T = pow(n, 2.0) * (1.0 - pow(cos, 2.0));
-    if(sin2T > 1.0){
+    if (sin2T > 1.0) {
       return 1.0;
     }
     auto cosT = sqrt(1.0 - sin2T);

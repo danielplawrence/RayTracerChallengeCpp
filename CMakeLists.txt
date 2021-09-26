@@ -32,6 +32,19 @@ CPMAddPackage(
   OPTIONS "FMT_INSTALL YES" # create an installable target
 )
 
+CPMAddPackage(
+  NAME Eigen
+  VERSION 3.2.8
+  URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+  # Eigen's CMakelists are not intended for library use
+  DOWNLOAD_ONLY YES
+)
+
+if(Eigen_ADDED)
+  add_library(Eigen INTERFACE IMPORTED)
+  target_include_directories(Eigen INTERFACE ${Eigen_SOURCE_DIR})
+endif()
+
 # ---- Add source files ----
 
 # Note: globbing sources is considered bad practice as CMake's generators may not detect new files
@@ -50,7 +63,7 @@ set_target_properties(RayTracerChallenge PROPERTIES CXX_STANDARD 17)
 target_compile_options(RayTracerChallenge PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
 
 # Link dependencies
-target_link_libraries(RayTracerChallenge PRIVATE fmt::fmt)
+target_link_libraries(RayTracerChallenge Eigen fmt::fmt)
 
 target_include_directories(
   RayTracerChallenge PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

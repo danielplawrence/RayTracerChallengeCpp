@@ -1,10 +1,14 @@
 #pragma once
 
+#include <Eigen/Dense>
 #include <cmath>
+#include <functional>
 #include <optional>
 #include <set>
 #include <string>
 #include <vector>
+
+using Eigen::MatrixXd;
 
 namespace raytracerchallenge {
   /**
@@ -197,33 +201,20 @@ namespace raytracerchallenge {
       std::vector<std::vector<Color>> pixels;
     };
     /**
-     * @brief Represents a matrix of floating-point numbers
+     * @brief Represents a matrix of doubles
      */
     class Matrix {
-      std::vector<std::vector<double>> m;
-
     public:
-      /**
-       * @brief The row of a Matrix
-       */
-      class Row {
-        std::vector<double> row;
-
-      public:
-        /**
-         * @brief Row index
-         */
-        double operator[](unsigned int y);
-        /**
-         * @brief Construct a row from a vector of floating-point numbers
-         * @param r Vector to create this row from
-         */
-        explicit Row(std::vector<double> r);
-      };
+      MatrixXd m;
       /**
        * Default constructor
        */
       Matrix();
+      /**
+       * Copy constructor from MatrixXd
+       * @param m base MatrixXd
+       */
+      explicit Matrix(MatrixXd m);
       /**
        * @brief Construct a Matrix given a 2D vector and its dimensions
        * @param x height of the input vector
@@ -231,12 +222,6 @@ namespace raytracerchallenge {
        * @param m a 2D vector providing initial values for the Matrix
        */
       Matrix(unsigned int x, unsigned int y, std::vector<std::vector<double>> m);
-      /**
-       * @brief return a Row of the Matrix at index x
-       * @param x row index
-       * @return Row
-       */
-      Row operator[](unsigned int x) const;
       /**
        * @brief Matrix equality operator
        * @param matrix Matrix for comparison
@@ -277,28 +262,6 @@ namespace raytracerchallenge {
        * @return the determinant
        */
       [[nodiscard]] double determinant() const;
-      /**
-       * @brief Return the submatrix which results fromm removing
-       * the column at index xy
-       * @param x row to remove
-       * @param y column to remove
-       * @return this Matrix with row x and column y removed
-       */
-      [[nodiscard]] RayTracerChallenge::Matrix submatrix(unsigned int x, unsigned int y) const;
-      /**
-       * @brief Return the minor of the element at index x,y
-       * @param x x index
-       * @param y index
-       * @return the minor of the element at index x,y
-       */
-      [[nodiscard]] double minor(unsigned int x, unsigned int y) const;
-      /**
-       * @brief Return the cofactor of the element at index x,y
-       * @param x x index
-       * @param y index
-       * @return the cofactor of the element at index x,y
-       */
-      [[nodiscard]] double cofactor(unsigned int x, unsigned int y) const;
       /**
        * @brief Return true if the Matrix is invertible
        * @return true if the Matrix is invertible
@@ -408,9 +371,6 @@ namespace raytracerchallenge {
        * @return View transform
        */
       static Matrix view(Tuple from, Tuple to, Tuple up);
-
-    private:
-      static bool doubleEquals(double x, double y);
     };
     /**
      * @brief Represents a ray of light
@@ -552,7 +512,7 @@ namespace raytracerchallenge {
      */
     class GlassSphere : public Sphere {
     public:
-      GlassSphere(){
+      GlassSphere() {
         this->material.transparency = 1.0;
         this->material.refractiveIndex = 1.5;
       }
@@ -652,7 +612,12 @@ namespace raytracerchallenge {
       double n1;
       double n2;
       bool inside{};
-      static double schlick(const Computations& computations);
+      /**
+       * Calculate the Schlick approximation for these computations
+       * @param computations
+       * @return schlick approximation
+       */
+      static double schlick(const Computations &computations);
     };
     /**
      * @brief Represents an intersection between a ray an object
@@ -682,13 +647,14 @@ namespace raytracerchallenge {
        * @param ray
        * @return Computations
        */
-      Computations prepareComputations(Ray ray) const;
+      [[nodiscard]] Computations prepareComputations(Ray ray) const;
       /**
        * @brief Prepare ray intersection computations
        * @param ray
        * @return Computations
        */
-      Computations prepareComputations(Ray ray, const Intersections& intersections) const;
+      [[nodiscard]] Computations prepareComputations(Ray ray,
+                                                     const Intersections &intersections) const;
       /**
        * @brief Equality operator
        * @param intersection intersection to compare with this one
@@ -711,7 +677,7 @@ namespace raytracerchallenge {
        * @brief Return the smallest non-negative intersection in the collection
        * @return the smallest non-negative intersection in the collection
        */
-      std::optional<Intersection> hit() const;
+      [[nodiscard]] std::optional<Intersection> hit() const;
       /**
        * @brief Construct a new Intersections
        * @param intersections to be wrapped by this container
@@ -802,8 +768,20 @@ namespace raytracerchallenge {
        * @return Color at the resulting intersection
        */
       Color colorAt(Ray ray, int remaining);
-      Color reflectedColorAt(const Computations& computations, int remaining);
-      Color refractedColorAt(const Computations& computations, int remaining);
+      /**
+       * Calculate the reflected color for a set of Computations
+       * @param computations
+       * @param remaining recursion limit
+       * @return reflected color
+       */
+      Color reflectedColorAt(const Computations &computations, int remaining);
+      /**
+       * Calculated the refracted color for a set of Computations
+       * @param computations
+       * @param remaining recursion limit
+       * @return refracted Color
+       */
+      Color refractedColorAt(const Computations &computations, int remaining);
       /**
        * Return True if this point is in shadow
        * @param point to check for shadow
