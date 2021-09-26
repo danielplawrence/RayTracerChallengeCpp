@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <chrono>
 
 using namespace raytracerchallenge;
 auto main() -> int {
