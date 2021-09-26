@@ -6,8 +6,6 @@ project(RayTracerChallengeTests LANGUAGES CXX)
 
 option(ENABLE_TEST_COVERAGE "Enable test coverage" OFF)
 option(TEST_INSTALLED_VERSION "Test the version found by find_package" OFF)
-# ---- Disable warnings from dependencies ----
-set(MSVC_DISABLED_WARNINGS_LIST "C4127") # conditional expression is constant
 
 
 # --- Import tools ----
@@ -49,9 +47,9 @@ set_target_properties(RayTracerChallengeTests PROPERTIES CXX_STANDARD 17)
 # enable compiler warnings
 if(NOT TEST_INSTALLED_VERSION)
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    target_compile_options(RayTracerChallenge PUBLIC -Wall -Wpedantic -Wextra -Werror)
+    target_compile_options(RayTracerChallenge PRIVATE -Wall -Wpedantic -Wextra -Werror)
   elseif(MSVC)
-    target_compile_options(RayTracerChallenge PUBLIC /W4 /WX)
+    target_compile_options(RayTracerChallenge PRIVATE /W4 /WX)
     target_compile_definitions(RayTracerChallengeTests PUBLIC DOCTEST_CONFIG_USE_STD_HEADERS)
   endif()
 endif()
