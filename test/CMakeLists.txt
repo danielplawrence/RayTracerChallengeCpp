@@ -6,6 +6,9 @@ project(RayTracerChallengeTests LANGUAGES CXX)
 
 option(ENABLE_TEST_COVERAGE "Enable test coverage" OFF)
 option(TEST_INSTALLED_VERSION "Test the version found by find_package" OFF)
+# ---- Disable warnings from dependencies ----
+set(MSVC_DISABLED_WARNINGS_LIST "C4127") # conditional expression is constant
+
 
 # --- Import tools ----
 

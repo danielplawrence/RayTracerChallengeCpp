@@ -63,10 +63,8 @@ set_target_properties(RayTracerChallenge PROPERTIES CXX_STANDARD 17)
 target_compile_options(RayTracerChallenge PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
 
 # ---- Disable warnings from dependencies ----
-message(STATUS "Using [${CMAKE_C_COMPILER_ID}] compiler")
-  if(CMAKE_C_COMPILER_ID MATCHES "MSVC" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-    set(MSVC_DISABLED_WARNINGS_LIST "C4127") # conditional expression is constant
-  endif()
+set(MSVC_DISABLED_WARNINGS_LIST "C4127") # conditional expression is constant
+
 # Link dependencies
 target_link_libraries(RayTracerChallenge Eigen fmt::fmt)
 
