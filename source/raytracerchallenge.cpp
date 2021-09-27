@@ -464,6 +464,46 @@ RayTracerChallenge::Intersections RayTracerChallenge::Plane::localIntersect(Ray 
   auto t = -ray.origin.y / ray.direction.y;
   return Intersections({RayTracerChallenge::Intersection(t, this->sharedPtr)});
 }
+std::array<double, 2> checkAxis(double origin, double direction) {
+  auto tminNumerator = (-1.0 - origin);
+  auto tmaxNumerator = (1.0 - origin);
+  double tmin;
+  double tmax;
+  if (abs(direction) >= EPS) {
+    tmin = tminNumerator / direction;
+    tmax = tmaxNumerator / direction;
+  } else {
+    tmin = tminNumerator * INFINITY;
+    tmax = tmaxNumerator * INFINITY;
+  }
+  if (tmin > tmax) {
+    std::swap(tmin, tmax);
+  }
+  return {tmin, tmax};
+}
+RayTracerChallenge::Intersections RayTracerChallenge::Cube::localIntersect(Ray ray) {
+  auto xMinMax = checkAxis(ray.origin.x, ray.direction.x);
+  auto yMinMax = checkAxis(ray.origin.y, ray.direction.y);
+  auto zMinMax = checkAxis(ray.origin.z, ray.direction.z);
+  auto tMin = std::max({xMinMax[0], yMinMax[0], zMinMax[0]});
+  auto tMax = std::min({xMinMax[1], yMinMax[1], zMinMax[1]});
+  if (tMin > tMax) {
+    return {};
+  }
+  return Intersections(std::vector<RayTracerChallenge::Intersection>{
+      RayTracerChallenge::Intersection(tMin, this->sharedPtr),
+      RayTracerChallenge::Intersection(tMax, this->sharedPtr)});
+}
+RayTracerChallenge::Tuple RayTracerChallenge::Cube::localNormalAt(RayTracerChallenge::Tuple point) {
+  auto maxC = std::max({abs(point.x), abs(point.y), abs(point.z)});
+  if (maxC == abs(point.x)) {
+    return {point.x, 0.0, 0.0, 0.0};
+  }
+  if (maxC == abs(point.y)) {
+    return {0.0, point.y, 0.0, 0.0};
+  }
+  return {0.0, 0.0, point.z, 0.0};
+}
 RayTracerChallenge::PointLight::PointLight(RayTracerChallenge::Tuple position,
                                            RayTracerChallenge::Color intensity) {
   this->position = position;

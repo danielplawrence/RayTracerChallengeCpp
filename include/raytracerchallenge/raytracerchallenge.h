@@ -536,6 +536,19 @@ namespace raytracerchallenge {
       Intersections localIntersect(Ray ray) override;
     };
     /**
+     * @brief Represents a cube
+     */
+    class Cube : public Shape {
+    public:
+      Cube() = default;
+      static std::shared_ptr<Shape> create() {
+        auto shape = new Cube();
+        return shape->sharedPtr;
+      }
+      Tuple localNormalAt(Tuple point) override;
+      Intersections localIntersect(Ray ray) override;
+    };
+    /**
      * A Pattern accepts a point in space and returns a color
      */
     class Pattern {
