@@ -553,10 +553,6 @@ namespace raytracerchallenge {
     class Cylinder : public Shape {
     public:
       Cylinder() = default;
-      static std::shared_ptr<Shape> create() {
-        auto shape = new Cylinder();
-        return shape->sharedPtr;
-      }
       static std::shared_ptr<Shape> create(double min = double(-INFINITY), double max = INFINITY,
                                            bool closed = false) {
         auto shape = new Cylinder();
