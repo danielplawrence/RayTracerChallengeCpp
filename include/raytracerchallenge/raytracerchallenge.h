@@ -422,6 +422,7 @@ namespace raytracerchallenge {
     };
     class Intersection;
     class Intersections;
+    class Group;
     /**
      * @brief Base class for objects
      */
@@ -439,6 +440,10 @@ namespace raytracerchallenge {
        * @brief Material for this object
        */
       Material material;
+      /**
+       * @brief The parent of this object
+       */
+      std::shared_ptr<Shape> parent = nullptr;
       /**
        * @brief Return all intersections between this object
        * and the provided ray
@@ -463,11 +468,24 @@ namespace raytracerchallenge {
       Tuple normalAt(Tuple point);
       /**
        * Implementation-specific logic for returning the normal at a specific
-       * point on this object. Defaults to Sphere behavior.
+       * point on this object.
        * @param point
        * @return the normal vector at the specified point on this object
        */
       virtual Tuple localNormalAt(Tuple point) = 0;
+      /**
+       * Helper for converting from world space to object space
+       * @param point Point in world space
+       * @return point in object space
+       */
+      [[nodiscard]] Tuple worldToObject(Tuple point) const;
+      /**
+       * Helper for converting a normal vector in object space to
+       * a normal vector in world space
+       * @param normal Normal vector in object space
+       * @return Normal vector in world space
+       */
+      [[nodiscard]] Tuple normalToWorld(Tuple normal) const;
       /**
        * @brief Default constructor
        */
@@ -493,6 +511,17 @@ namespace raytracerchallenge {
       virtual ~Shape() = default;
 
       std::shared_ptr<Shape> sharedPtr;
+    };
+    class Group : public Shape {
+    public:
+      static std::shared_ptr<Shape> create() {
+        auto shape = new Group();
+        return shape->sharedPtr;
+      }
+      std::vector<std::shared_ptr<Shape>> objects;
+      void add(const std::shared_ptr<Shape> &object);
+      Tuple localNormalAt(Tuple point) override;
+      Intersections localIntersect(Ray ray) override;
     };
     /**
      * @brief Represents a sphere

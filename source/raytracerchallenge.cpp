@@ -444,11 +444,9 @@ RayTracerChallenge::Tuple RayTracerChallenge::Sphere::localNormalAt(
   return point - RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
 }
 RayTracerChallenge::Tuple RayTracerChallenge::Shape::normalAt(RayTracerChallenge::Tuple point) {
-  auto objectPoint = this->transform.inverse() * point;
-  auto objectNormal = localNormalAt(objectPoint);
-  auto worldNormal = (this->transform.inverse().transposed()) * objectNormal;
-  worldNormal.w = 0.0;
-  return worldNormal.normalize();
+  auto localPoint = this->worldToObject(point);
+  auto localNormal = this->localNormalAt(localPoint);
+  return this->normalToWorld(localNormal);
 }
 bool RayTracerChallenge::Shape::operator<(const RayTracerChallenge::Shape &object) const {
   return this->id < object.id;
@@ -681,7 +679,7 @@ RayTracerChallenge::StripePattern::StripePattern(RayTracerChallenge::Color a,
 }
 RayTracerChallenge::Color RayTracerChallenge::StripePattern::colorAt(
     std::shared_ptr<Shape> shape, RayTracerChallenge::Tuple point) const {
-  auto objectPoint = shape->transform.inverse() * point;
+  auto objectPoint = shape->worldToObject(point);
   auto patternPoint = this->transform.inverse() * objectPoint;
   if (int(floor(patternPoint.x)) % 2 == 0) {
     return this->a;
@@ -853,4 +851,38 @@ RayTracerChallenge::Intersections RayTracerChallenge::Cone::localIntersect(
     xs.intersections.emplace_back(t, this->sharedPtr);
   }
   return xs;
+}
+void RayTracerChallenge::Group::add(const std::shared_ptr<Shape> &object) {
+  object->parent = this->sharedPtr;
+  this->objects.push_back(object);
+}
+RayTracerChallenge::Tuple RayTracerChallenge::Group::localNormalAt(
+    RayTracerChallenge::Tuple point) {
+  (void)point;
+  return RayTracerChallenge::Tuple();
+}
+RayTracerChallenge::Intersections RayTracerChallenge::Group::localIntersect(
+    RayTracerChallenge::Ray ray) {
+  auto xs = RayTracerChallenge::Intersections();
+  for (auto &object : this->objects) {
+    xs.addAll(object->intersect(ray));
+  }
+  xs.sort();
+  return xs;
+}
+RayTracerChallenge::Tuple RayTracerChallenge::Shape::worldToObject(Tuple point) const {
+  RayTracerChallenge::Tuple p = point;
+  if (this->parent != nullptr) {
+    p = this->parent->worldToObject(p);
+  }
+  return this->transform.inverse() * p;
+}
+RayTracerChallenge::Tuple RayTracerChallenge::Shape::normalToWorld(Tuple normal) const {
+  normal = this->transform.inverse().transposed() * normal;
+  normal.w = 0.0;
+  normal = normal.normalize();
+  if (this->parent != nullptr) {
+    normal = this->parent->normalToWorld(normal);
+  }
+  return normal;
 }
