@@ -492,7 +492,6 @@ namespace raytracerchallenge {
       [[nodiscard]] bool is(const Shape &object) const;
       virtual ~Shape() = default;
 
-    protected:
       std::shared_ptr<Shape> sharedPtr;
     };
     /**
@@ -543,6 +542,46 @@ namespace raytracerchallenge {
       Cube() = default;
       static std::shared_ptr<Shape> create() {
         auto shape = new Cube();
+        return shape->sharedPtr;
+      }
+      Tuple localNormalAt(Tuple point) override;
+      Intersections localIntersect(Ray ray) override;
+    };
+    /**
+     * @brief Represents a cylinder
+     */
+    class Cylinder : public Shape {
+    public:
+      Cylinder() = default;
+      static std::shared_ptr<Shape> create() {
+        auto shape = new Cylinder();
+        return shape->sharedPtr;
+      }
+      static std::shared_ptr<Shape> create(double min = double(-INFINITY), double max = INFINITY,
+                                           bool closed = false) {
+        auto shape = new Cylinder();
+        shape->maximum = max;
+        shape->minimum = min;
+        shape->closed = closed;
+        return shape->sharedPtr;
+      }
+      Tuple localNormalAt(Tuple point) override;
+      Intersections localIntersect(Ray ray) override;
+      double minimum = double(-INFINITY);
+      double maximum = double(INFINITY);
+      bool closed = false;
+    };
+    /**
+     * @brief Represents a cone
+     */
+    class Cone : public Cylinder {
+    public:
+      static std::shared_ptr<Shape> create(double min = double(-INFINITY), double max = INFINITY,
+                                           bool closed = false) {
+        auto shape = new Cone();
+        shape->maximum = max;
+        shape->minimum = min;
+        shape->closed = closed;
         return shape->sharedPtr;
       }
       Tuple localNormalAt(Tuple point) override;
