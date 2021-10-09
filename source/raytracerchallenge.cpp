@@ -16,6 +16,7 @@ using Eigen::VectorXd;
 using namespace raytracerchallenge;
 
 const double EPS = 0.0001;
+const double NEGATIVE_INFINITY = -1.0 * INFINITY;
 
 /**
  * Execute the provided function in parallel
@@ -97,7 +98,15 @@ RayTracerChallenge::Tuple RayTracerChallenge::Tuple::point(double x, double y, d
 RayTracerChallenge::Tuple RayTracerChallenge::Tuple::vector(double x, double y, double z) {
   return {x, y, z, 0.0};
 }
-bool RayTracerChallenge::Tuple::doubleEquals(double x, double y) { return abs(x - y) < EPS; }
+bool RayTracerChallenge::Tuple::doubleEquals(double x, double y) {
+  if (x == INFINITY && y == INFINITY) {
+    return true;
+  }
+  if (x == -1.0 * INFINITY && y == -1.0 * INFINITY) {
+    return true;
+  }
+  return abs(x - y) < EPS;
+}
 
 RayTracerChallenge::Color::Color() {
   this->red = 0.0;
@@ -443,6 +452,9 @@ RayTracerChallenge::Tuple RayTracerChallenge::Sphere::localNormalAt(
     RayTracerChallenge::Tuple point) {
   return point - RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
 }
+RayTracerChallenge::BoundingBox RayTracerChallenge::Sphere::bounds() {
+  return {{-1.0, -1.0, -1.0, 1.0}, {1.0, 1.0, 1.0, 1.0}};
+}
 RayTracerChallenge::Tuple RayTracerChallenge::Shape::normalAt(RayTracerChallenge::Tuple point) {
   auto localPoint = this->worldToObject(point);
   auto localNormal = this->localNormalAt(localPoint);
@@ -462,9 +474,14 @@ RayTracerChallenge::Intersections RayTracerChallenge::Plane::localIntersect(Ray 
   auto t = -ray.origin.y / ray.direction.y;
   return Intersections({RayTracerChallenge::Intersection(t, this->sharedPtr)});
 }
-std::array<double, 2> checkAxis(double origin, double direction) {
-  auto tminNumerator = (-1.0 - origin);
-  auto tmaxNumerator = (1.0 - origin);
+RayTracerChallenge::BoundingBox RayTracerChallenge::Plane::bounds() {
+  return {Tuple(NEGATIVE_INFINITY, 0.0, NEGATIVE_INFINITY, 1.0),
+          Tuple(INFINITY, 0.0, INFINITY, 1.0)};
+}
+std::array<double, 2> checkAxis(double origin, double direction, double min = -1.0,
+                                double max = 1.0) {
+  auto tminNumerator = (min - origin);
+  auto tmaxNumerator = (max - origin);
   double tmin;
   double tmax;
   if (abs(direction) >= EPS) {
@@ -501,6 +518,9 @@ RayTracerChallenge::Tuple RayTracerChallenge::Cube::localNormalAt(RayTracerChall
     return {0.0, point.y, 0.0, 0.0};
   }
   return {0.0, 0.0, point.z, 0.0};
+}
+RayTracerChallenge::BoundingBox RayTracerChallenge::Cube::bounds() {
+  return {{-1.0, -1.0, -1.0, 1.0}, {1.0, 1.0, 1.0, 1.0}};
 }
 RayTracerChallenge::PointLight::PointLight(RayTracerChallenge::Tuple position,
                                            RayTracerChallenge::Color intensity) {
@@ -796,6 +816,12 @@ RayTracerChallenge::Intersections RayTracerChallenge::Cylinder::localIntersect(
   }
   return xs;
 }
+RayTracerChallenge::BoundingBox RayTracerChallenge::Cylinder::bounds() {
+  if (this->closed) {
+    return {{-1.0, this->minimum, -1.0, 1.0}, {1.0, this->maximum, 1.0, 1.0}};
+  }
+  return {{-1.0, NEGATIVE_INFINITY, -1.0, 1.0}, {1.0, INFINITY, 1.0, 1.0}};
+}
 RayTracerChallenge::Tuple RayTracerChallenge::Cone::localNormalAt(RayTracerChallenge::Tuple point) {
   auto dist = pow(point.x, 2) + pow(point.x, 2);
   if (dist < 1.0 && point.y >= this->maximum - EPS) {
@@ -852,6 +878,19 @@ RayTracerChallenge::Intersections RayTracerChallenge::Cone::localIntersect(
   }
   return xs;
 }
+RayTracerChallenge::BoundingBox RayTracerChallenge::Cone::bounds() {
+  if (closed) {
+    auto a = abs(this->minimum);
+    auto b = abs(this->maximum);
+    auto limit = fmax(a, b);
+    return {
+        {-limit, this->minimum, -limit, 1.0},
+        {limit, this->maximum, limit, 1.0},
+    };
+  }
+  return {{NEGATIVE_INFINITY, NEGATIVE_INFINITY, NEGATIVE_INFINITY, 1.0},
+          {INFINITY, INFINITY, INFINITY, 1.0}};
+}
 void RayTracerChallenge::Group::add(const std::shared_ptr<Shape> &object) {
   object->parent = this->sharedPtr;
   this->objects.push_back(object);
@@ -859,16 +898,27 @@ void RayTracerChallenge::Group::add(const std::shared_ptr<Shape> &object) {
 RayTracerChallenge::Tuple RayTracerChallenge::Group::localNormalAt(
     RayTracerChallenge::Tuple point) {
   (void)point;
-  return RayTracerChallenge::Tuple();
+  return {};
 }
 RayTracerChallenge::Intersections RayTracerChallenge::Group::localIntersect(
     RayTracerChallenge::Ray ray) {
   auto xs = RayTracerChallenge::Intersections();
+  if (!this->bounds().intersects(ray)) {
+    return xs;
+  }
   for (auto &object : this->objects) {
     xs.addAll(object->intersect(ray));
   }
   xs.sort();
   return xs;
+}
+RayTracerChallenge::BoundingBox RayTracerChallenge::Group::bounds() {
+  auto box = RayTracerChallenge::BoundingBox();
+  for (auto &object : this->objects) {
+    auto cbox = object->parentSpaceBounds();
+    box.add(cbox);
+  }
+  return box;
 }
 RayTracerChallenge::Tuple RayTracerChallenge::Shape::worldToObject(Tuple point) const {
   RayTracerChallenge::Tuple p = point;
@@ -885,4 +935,67 @@ RayTracerChallenge::Tuple RayTracerChallenge::Shape::normalToWorld(Tuple normal)
     normal = this->parent->normalToWorld(normal);
   }
   return normal;
+}
+RayTracerChallenge::BoundingBox RayTracerChallenge::Shape::parentSpaceBounds() {
+  return this->bounds().transform(this->transform);
+}
+void RayTracerChallenge::BoundingBox::add(RayTracerChallenge::Tuple point) {
+  if (point.x < this->min.x) {
+    this->min.x = point.x;
+  }
+  if (point.y < this->min.y) {
+    this->min.y = point.y;
+  }
+  if (point.z < this->min.z) {
+    this->min.z = point.z;
+  }
+  if (point.x > this->max.x) {
+    this->max.x = point.x;
+  }
+  if (point.y > this->max.y) {
+    this->max.y = point.y;
+  }
+  if (point.z > this->max.z) {
+    this->max.z = point.z;
+  }
+}
+void RayTracerChallenge::BoundingBox::add(RayTracerChallenge::BoundingBox box) {
+  this->add(box.min);
+  this->add(box.max);
+}
+bool RayTracerChallenge::BoundingBox::contains(Tuple point) const {
+  return point.x >= this->min.x && point.x <= this->max.x && point.y >= this->min.y
+         && point.y <= this->max.y && point.z >= this->min.z && point.z <= this->max.z;
+}
+bool RayTracerChallenge::BoundingBox::contains(RayTracerChallenge::BoundingBox box) const {
+  return this->contains(box.max) && this->contains(box.min);
+}
+RayTracerChallenge::BoundingBox RayTracerChallenge::BoundingBox::transform(Matrix matrix) const {
+  auto p1 = this->min;
+  auto p2 = RayTracerChallenge::Tuple(this->min.x, this->min.y, this->max.z, 1.0);
+  auto p3 = RayTracerChallenge::Tuple(this->min.x, this->max.y, this->min.z, 1.0);
+  auto p4 = RayTracerChallenge::Tuple(this->min.x, this->max.y, this->max.z, 1.0);
+  auto p5 = RayTracerChallenge::Tuple(this->max.x, this->min.y, this->min.z, 1.0);
+  auto p6 = RayTracerChallenge::Tuple(this->max.x, this->min.y, this->max.z, 1.0);
+  auto p7 = RayTracerChallenge::Tuple(this->min.x, this->min.y, this->max.z, 1.0);
+  auto p8 = RayTracerChallenge::Tuple(this->max.x, this->max.y, this->min.z, 1.0);
+  auto newBox = RayTracerChallenge::BoundingBox();
+  for (Tuple p : {p1, p2, p3, p4, p5, p6, p7, p8}) {
+    newBox.add(matrix * p);
+  }
+  return newBox;
+}
+bool RayTracerChallenge::BoundingBox::intersects(RayTracerChallenge::Ray ray) {
+  auto xMinMax = checkAxis(ray.origin.x, ray.direction.x, this->min.x, this->max.x);
+  auto yMinMax = checkAxis(ray.origin.y, ray.direction.y, this->min.y, this->max.y);
+  auto zMinMax = checkAxis(ray.origin.z, ray.direction.z, this->min.z, this->max.z);
+  auto tMin = std::max({xMinMax[0], yMinMax[0], zMinMax[0]});
+  auto tMax = std::min({xMinMax[1], yMinMax[1], zMinMax[1]});
+  if (tMin > tMax) {
+    return false;
+  }
+  if (tMin > 0 || tMax > 0) {
+    return true;
+  }
+  return false;
 }

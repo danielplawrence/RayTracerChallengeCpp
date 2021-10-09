@@ -423,6 +423,7 @@ namespace raytracerchallenge {
     class Intersection;
     class Intersections;
     class Group;
+    class BoundingBox;
     /**
      * @brief Base class for objects
      */
@@ -467,12 +468,22 @@ namespace raytracerchallenge {
        */
       Tuple normalAt(Tuple point);
       /**
-       * Implementation-specific logic for returning the normal at a specific
+       * @brief Implementation-specific logic for returning the normal at a specific
        * point on this object.
        * @param point
        * @return the normal vector at the specified point on this object
        */
       virtual Tuple localNormalAt(Tuple point) = 0;
+      /**
+       * @brief Return the bounds for this shape
+       * @return bounds for this shape
+       */
+      virtual BoundingBox bounds() = 0;
+      /**
+       * @brief Return the bounding box of this object in parent space
+       * @return The bounding box of this object
+       */
+      BoundingBox parentSpaceBounds();
       /**
        * Helper for converting from world space to object space
        * @param point Point in world space
@@ -512,14 +523,87 @@ namespace raytracerchallenge {
 
       std::shared_ptr<Shape> sharedPtr;
     };
+    /**
+     * @brief Describes the bounding box of an object
+     */
+    class BoundingBox {
+    public:
+      /* Point representing the minimum bound */
+      Tuple min = Tuple::point(INFINITY, INFINITY, INFINITY);
+      /* Point representing the maximum bound */
+      Tuple max = Tuple::point(double(-INFINITY), double(-INFINITY), double(-INFINITY));
+      /**
+       * @brief Default constructor
+       */
+      BoundingBox() = default;
+      /**
+       * @brief Constructor from min and max points
+       * @param min Min point of the box
+       * @param max Max point of the box
+       */
+      BoundingBox(Tuple min, Tuple max) {
+        this->min = min;
+        this->max = max;
+      }
+      /**
+       * @brief Add a new point to the box, extending
+       * min and max bounds as necessary
+       */
+      void add(Tuple point);
+      /**
+       * @brief Add a new box to the box, extending
+       * min and max bounds as necessary
+       * @param box
+       */
+      void add(BoundingBox box);
+      /**
+       * @brief Returns true if the provided point
+       * is inside the bounding box
+       * @param point
+       * @return true if point is inside this box
+       */
+      [[nodiscard]] bool contains(Tuple point) const;
+      /**
+       * @brief Returns true if the provided box
+       * is contained within this box
+       * @param box
+       * @return true if box is inside this box
+       */
+      [[nodiscard]] bool contains(BoundingBox box) const;
+      /**
+       * @brief Apply a transform to this box
+       * @param matrix Transformation matrix
+       * @return Transformed box
+       */
+      BoundingBox transform(Matrix matrix) const;
+      /**
+       * @brief Check if a ray intersects this boc
+       * @param ray
+       * @return True if ray intersects this box
+       */
+      bool intersects(Ray ray);
+    };
+    /**
+     * @brief Represents a group of objects
+     */
     class Group : public Shape {
     public:
+      /* Objects contained in this group */
+      std::vector<std::shared_ptr<Shape>> objects;
+      /**
+       * @brief Factory method
+       * @return a pointer to a new Group
+       */
       static std::shared_ptr<Shape> create() {
         auto shape = new Group();
         return shape->sharedPtr;
       }
-      std::vector<std::shared_ptr<Shape>> objects;
+      /**
+       * @brief Add an object to the group
+       * @param object pointer to target object
+       */
       void add(const std::shared_ptr<Shape> &object);
+      BoundingBox bounds() override;
       Tuple localNormalAt(Tuple point) override;
       Intersections localIntersect(Ray ray) override;
     };
@@ -535,6 +619,7 @@ namespace raytracerchallenge {
       }
       Tuple localNormalAt(Tuple point) override;
       Intersections localIntersect(Ray ray) override;
+      BoundingBox bounds() override;
     };
     /**
      * @brief A glass sphere
@@ -562,6 +647,7 @@ namespace raytracerchallenge {
       }
       Tuple localNormalAt(Tuple point) override;
       Intersections localIntersect(Ray ray) override;
+      BoundingBox bounds() override;
     };
     /**
      * @brief Represents a cube
@@ -575,6 +661,7 @@ namespace raytracerchallenge {
       }
       Tuple localNormalAt(Tuple point) override;
       Intersections localIntersect(Ray ray) override;
+      BoundingBox bounds() override;
     };
     /**
      * @brief Represents a cylinder
@@ -592,6 +679,7 @@ namespace raytracerchallenge {
       }
       Tuple localNormalAt(Tuple point) override;
       Intersections localIntersect(Ray ray) override;
+      BoundingBox bounds() override;
       double minimum = double(-INFINITY);
       double maximum = double(INFINITY);
       bool closed = false;
@@ -611,6 +699,7 @@ namespace raytracerchallenge {
       }
       Tuple localNormalAt(Tuple point) override;
       Intersections localIntersect(Ray ray) override;
+      BoundingBox bounds() override;
     };
     /**
      * A Pattern accepts a point in space and returns a color

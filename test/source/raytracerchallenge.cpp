@@ -8,6 +8,8 @@
 
 using namespace raytracerchallenge;
 
+double INF = INFINITY;
+
 TEST_CASE("Tuples") {
   using namespace raytracerchallenge;
   SUBCASE("The default tuple initializes with all values set to zero") {
@@ -1868,5 +1870,146 @@ TEST_CASE("Groups") {
     std::dynamic_pointer_cast<RayTracerChallenge::Group>(g2)->add(s);
     auto n = s->normalAt({1.7321, 1.1547, -5.5774, 1.0});
     CHECK(n == RayTracerChallenge::Tuple(0.2857, 0.4286, -0.8571, 0.0));
+  }
+}
+TEST_CASE("Bounding boxes") {
+  SUBCASE("Creating a bounding box with volume") {
+    auto b = RayTracerChallenge::BoundingBox({-1.0, -2.0, -3.0, 1.0}, {3.0, 2.0, 1.0, 1.0});
+    CHECK(b.min == RayTracerChallenge::Tuple(-1.0, -2.0, -3.0, 1.0));
+    CHECK(b.max == RayTracerChallenge::Tuple(3.0, 2.0, 1.0, 1.0));
+  }
+  SUBCASE("Adding points to an empty bounding box") {
+    auto b = RayTracerChallenge::BoundingBox();
+    b.add({-5.0, 2.0, 0.0, 1.0});
+    b.add({7.0, 0.0, -3.0, 1.0});
+    CHECK(b.min == RayTracerChallenge::Tuple(-5.0, -0.0, -3.0, 1.0));
+    CHECK(b.max == RayTracerChallenge::Tuple(7.0, 2.0, 0.0, 1.0));
+  }
+  SUBCASE("A sphere has a bounding box") {
+    auto sphere = RayTracerChallenge::Sphere::create();
+    auto b = sphere->bounds();
+    CHECK(b.min == RayTracerChallenge::Tuple(-1.0, -1.0, -1.0, 1.0));
+    CHECK(b.max == RayTracerChallenge::Tuple(1.0, 1.0, 1.0, 1.0));
+  }
+  SUBCASE("A plane has a bounding box") {
+    auto plane = RayTracerChallenge::Plane::create();
+    auto b = plane->bounds();
+    CHECK(b.min == RayTracerChallenge::Tuple(-INFINITY, 0.0, -INFINITY, 1.0));
+    CHECK(b.max == RayTracerChallenge::Tuple(INFINITY, 0.0, INFINITY, 1.0));
+  }
+  SUBCASE("A cube has a bounding box") {
+    auto cube = RayTracerChallenge::Cube::create();
+    auto b = cube->bounds();
+    CHECK(b.min == RayTracerChallenge::Tuple(-1.0, -1.0, -1.0, 1.0));
+    CHECK(b.max == RayTracerChallenge::Tuple(1.0, 1.0, 1.0, 1.0));
+  }
+  SUBCASE("An unbounded cylinder has a bounding box") {
+    auto cyl = RayTracerChallenge::Cylinder::create();
+    auto b = cyl->bounds();
+    CHECK(b.min == RayTracerChallenge::Tuple(-1.0, -INFINITY, -1.0, 1.0));
+    CHECK(b.max == RayTracerChallenge::Tuple(1.0, INFINITY, 1.0, 1.0));
+  }
+  SUBCASE("A bounded cylinder has a bounding box") {
+    auto cyl = RayTracerChallenge::Cylinder::create(-5.0, 3.0, true);
+    auto b = cyl->bounds();
+    CHECK(b.min == RayTracerChallenge::Tuple(-1.0, -5.0, -1.0, 1.0));
+    CHECK(b.max == RayTracerChallenge::Tuple(1.0, 3.0, 1.0, 1.0));
+  }
+  SUBCASE("An unbounded cone has a bounding box") {
+    auto cone = RayTracerChallenge::Cone::create();
+    auto b = cone->bounds();
+    CHECK(b.min == RayTracerChallenge::Tuple(-INFINITY, -INFINITY, -INFINITY, 1.0));
+    CHECK(b.max == RayTracerChallenge::Tuple(INFINITY, INFINITY, INFINITY, 1.0));
+  }
+  SUBCASE("A bounded cone has a bounding box") {
+    auto cone = RayTracerChallenge::Cone::create(-5.0, 3.0, true);
+    auto b = cone->bounds();
+    CHECK(b.min == RayTracerChallenge::Tuple(-5.0, -5.0, -5.0, 1.0));
+    CHECK(b.max == RayTracerChallenge::Tuple(5.0, 3.0, 5.0, 1.0));
+  }
+  SUBCASE("Adding one bounding box to another") {
+    auto box1 = RayTracerChallenge::BoundingBox({-5.0, -2.0, 0.0, 1.0}, {7.0, 4.0, 4.0, 1.0});
+    auto box2 = RayTracerChallenge::BoundingBox({8.0, -7.0, -2.0, 1.0}, {14.0, 2.0, 8.0, 1.0});
+    box1.add(box2);
+    CHECK(box1.min == RayTracerChallenge::Tuple(-5.0, -7.0, -2.0, 1.0));
+    CHECK(box1.max == RayTracerChallenge::Tuple(14.0, 4.0, 8.0, 1.0));
+  }
+  SUBCASE("Checking to see if a box contains a given point") {
+    auto box = RayTracerChallenge::BoundingBox({5.0, -2.0, 0.0, 1.0}, {11.0, 4.0, 7.0, 1.0});
+    CHECK(box.contains({5.0, -2.0, 0.0, 1.0}));
+    CHECK(box.contains({11.0, 4.0, 7.0, 1.0}));
+    CHECK(box.contains({8.0, 1.0, 3.0, 1.0}));
+    CHECK(!box.contains({3.0, 0.0, 3.0, 1.0}));
+    CHECK(!box.contains({8.0, -4.0, 3.0, 1.0}));
+    CHECK(!box.contains({8.0, 1.0, -1.0, 1.0}));
+    CHECK(!box.contains({13.0, 1.0, 3.0, 1.0}));
+    CHECK(!box.contains({8.0, 5.0, 3.0, 1.0}));
+    CHECK(!box.contains({8.0, 1.0, 8.0, 1.0}));
+  }
+  SUBCASE("Checking to see if box contains another box") {
+    auto box1 = RayTracerChallenge::BoundingBox({5.0, -2.0, 0.0, 1.0}, {11.0, 4.0, 7.0, 1.0});
+    CHECK(box1.contains({{5.0, -2.0, 0.0, 1.0}, {11.0, 4.0, 7.0, 1.0}}));
+    CHECK(box1.contains({{6.0, -1.0, 1.0, 1.0}, {10.0, 3.0, 6.0, 1.0}}));
+    CHECK(!box1.contains({{4.0, -3.0, 0 - 10, 1.0}, {10.0, 3.0, 6.0, 1.0}}));
+    CHECK(!box1.contains({{6.0, -1.0, 1.0, 1.0}, {12.0, 5.0, 8.0, 1.0}}));
+  }
+  SUBCASE("Transforming bounding boxes") {
+    auto box = RayTracerChallenge::BoundingBox({-1.0, -1.0, -1.0, 1.0}, {1.0, 1.0, 1.0, 1.0});
+    auto matrix = RayTracerChallenge::Matrix::rotationX(M_PI / 4.0)
+                  * RayTracerChallenge::Matrix::rotationY(M_PI / 4.0);
+    auto box2 = box.transform(matrix);
+    CHECK(box2.min == RayTracerChallenge::Tuple(-1.4142, -1.7071, -1.7071, 1.0));
+    CHECK(box2.max == RayTracerChallenge::Tuple(1.4142, 1.7071, 1.7071, 1.0));
+  }
+  SUBCASE("Querying a shape's bounding box in its parent's space") {
+    auto shape = RayTracerChallenge::Sphere::create();
+    shape->transform = shape->transform.scaled(0.5, 2.0, 4.0).translated(1.0, -3.0, 5.0);
+    auto box = shape->parentSpaceBounds();
+    CHECK(box.min == RayTracerChallenge::Tuple(0.5, -5.0, 1.0, 1.0));
+    CHECK(box.max == RayTracerChallenge::Tuple(1.5, -1.0, 9.0, 1.0));
+  }
+  SUBCASE("A group has a bounding box which contains its children") {
+    auto s = RayTracerChallenge::Sphere::create();
+    s->transform = s->transform.scaled(2.0, 2.0, 2.0).translated(2.0, 5.0, -3.0);
+    auto cyl = RayTracerChallenge::Cylinder::create(-2.0, 2.0, true);
+    cyl->transform = cyl->transform.scaled(0.5, 1.0, 0.5).translated(-4.0, -1.0, 4.0);
+    auto shape = RayTracerChallenge::Group();
+    shape.add(s);
+    shape.add(cyl);
+    auto box = shape.bounds();
+    CHECK(box.min == RayTracerChallenge::Tuple(-4.5, -3.0, -5.0, 1.0));
+    CHECK(box.max == RayTracerChallenge::Tuple(4.0, 7.0, 4.5, 1.0));
+  }
+  SUBCASE("Intersecting a ray with a bounding box at the origin") {
+    auto box = RayTracerChallenge::BoundingBox({-1.0, -1.0, -1.0, 1.0}, {1.0, 1.0, 1.0, 1.0});
+    CHECK(box.intersects({{5.0, 0.5, 0.0, 1.0}, {-1.0, 0.0, 0.0, 0.0}}));
+    CHECK(box.intersects({{-5.0, 0.5, 0.0, 1.0}, {1.0, 0.0, 0.0, 0.0}}));
+    CHECK(box.intersects({{0.5, 5.0, 0.0, 1.0}, {0.0, -1.0, 0.0, 0.0}}));
+    CHECK(box.intersects({{0.5, -5.0, 0.0, 1.0}, {0.0, 1.0, 0.0, 0.0}}));
+    CHECK(box.intersects({{0.5, 0.0, 5.0, 1.0}, {0.0, 0.0, -1.0, 0.0}}));
+    CHECK(box.intersects({{0.5, 0.0, -5.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}));
+    CHECK(box.intersects({{0.0, 0.5, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}));
+    CHECK(!box.intersects({{-2.0, 0.0, 0.0, 1.0}, {2.0, 4.0, 6.0, 0.0}}));
+    CHECK(!box.intersects({{0.0, -2.0, 0.0, 1.0}, {6.0, 2.0, 4.0, 0.0}}));
+    CHECK(!box.intersects({{0.0, 0.0, -2.0, 1.0}, {4.0, 6.0, 2.0, 0.0}}));
+    CHECK(!box.intersects({{2.0, 0.0, 2.0, 1.0}, {0.0, 0.0, -1.0, 0.0}}));
+    CHECK(!box.intersects({{0.0, 2.0, 2.0, 1.0}, {0.0, -1.0, 0.0, 0.0}}));
+    CHECK(!box.intersects({{2.0, 2.0, 0.0, 1.0}, {-1.0, 0.0, 0.0, 0.0}}));
+  }
+  SUBCASE("Intersecting a ray with a non-cubic bounding box") {
+    auto box = RayTracerChallenge::BoundingBox({5.0, -2.0, 0.0, 1.0}, {11.0, 4.0, 7.0, 1.0});
+    CHECK(box.intersects({{15.0, 1.0, 2.0, 1.0}, {-1.0, 0.0, 0.0, 0.0}}));
+    CHECK(box.intersects({{-5.0, -1.0, 4.0, 1.0}, {1.0, 0.0, 0.0, 0.0}}));
+    CHECK(box.intersects({{7.0, 6.0, 5.0, 1.0}, {0.0, -1.0, 0.0, 0.0}}));
+    CHECK(box.intersects({{9.0, -5.0, 6.0, 1.0}, {0.0, 1.0, 0.0, 0.0}}));
+    CHECK(box.intersects({{8.0, 2.0, 12.0, 1.0}, {0.0, 0.0, -1.0, 0.0}}));
+    CHECK(box.intersects({{6.0, 0.0, -5.0, 1.0}, {0.0, 0.0, 1.0, 0.0}}));
+    CHECK(box.intersects({{8.0, 1.0, 3.5, 1.0}, {0.0, 0.0, 1.0, 0.0}}));
+    CHECK(!box.intersects({{9.0, -1.0, -8.0, 1.0}, {2.0, 4.0, 6.0, 0.0}}));
+    CHECK(!box.intersects({{8.0, 3.0, -4.0, 1.0}, {6.0, 2.0, 4.0, 0.0}}));
+    CHECK(!box.intersects({{9.0, -1.0, -2.0, 1.0}, {4.0, 6.0, 2.0, 0.0}}));
+    CHECK(!box.intersects({{4.0, 0.0, 9.0, 1.0}, {0.0, 0.0, -1.0, 0.0}}));
+    CHECK(!box.intersects({{8.0, 6.0, -1.0, 1.0}, {0.0, -1.0, 0.0, 0.0}}));
+    CHECK(!box.intersects({{12.0, 5.0, 4.0, 1.0}, {-1.0, 0.0, 0.0, 0.0}}));
   }
 }
