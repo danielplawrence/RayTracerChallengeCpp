@@ -702,6 +702,32 @@ namespace raytracerchallenge {
       BoundingBox bounds() override;
     };
     /**
+     * @brief Represents a triangle
+     */
+    class Triangle : public Shape {
+    public:
+      Tuple p1;
+      [[maybe_unused]] Tuple p2;
+      [[maybe_unused]] Tuple p3;
+      Tuple e1;
+      Tuple e2;
+      Tuple normal;
+      Triangle(Tuple p1, Tuple p2, Tuple p3) {
+        this->p1 = p1;
+        this->p2 = p2;
+        this->p3 = p3;
+        this->e1 = p2 - p1;
+        this->e2 = p3 - p1;
+        this->normal = e2.cross(e1).normalize();
+      }
+      static std::shared_ptr<Shape> create(Tuple p1, Tuple p2, Tuple p3) {
+        return (new Triangle(p1, p2, p3))->sharedPtr;
+      }
+      Tuple localNormalAt(Tuple point) override;
+      Intersections localIntersect(Ray ray) override;
+      BoundingBox bounds() override;
+    };
+    /**
      * A Pattern accepts a point in space and returns a color
      */
     class Pattern {

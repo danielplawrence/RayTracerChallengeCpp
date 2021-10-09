@@ -999,3 +999,32 @@ bool RayTracerChallenge::BoundingBox::intersects(RayTracerChallenge::Ray ray) {
   }
   return false;
 }
+RayTracerChallenge::Tuple RayTracerChallenge::Triangle::localNormalAt(
+    RayTracerChallenge::Tuple point) {
+  (void)point;
+  return this->normal;
+}
+RayTracerChallenge::Intersections RayTracerChallenge::Triangle::localIntersect(
+    RayTracerChallenge::Ray ray) {
+  auto dirCrossE2 = ray.direction.cross(this->e2);
+  auto det = this->e1.dot(dirCrossE2);
+  if (abs(det) < EPS) {
+    return {};
+  }
+  auto f = 1.0 / det;
+  auto p1ToOrigin = ray.origin - this->p1;
+  auto u = f * p1ToOrigin.dot(dirCrossE2);
+  if (u < 0.0 || u > 1.0) {
+    return {};
+  }
+  auto originCrossE1 = p1ToOrigin.cross(this->e1);
+  auto v = f * ray.direction.dot(originCrossE1);
+  if (v < 0.0 || (u + v) > 1.0) {
+    return {};
+  }
+  auto t = f * this->e2.dot(originCrossE1);
+  return RayTracerChallenge::Intersections({RayTracerChallenge::Intersection(t, this->sharedPtr)});
+}
+RayTracerChallenge::BoundingBox RayTracerChallenge::Triangle::bounds() {
+  return RayTracerChallenge::BoundingBox();
+}
