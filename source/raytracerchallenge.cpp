@@ -1026,5 +1026,9 @@ RayTracerChallenge::Intersections RayTracerChallenge::Triangle::localIntersect(
   return RayTracerChallenge::Intersections({RayTracerChallenge::Intersection(t, this->sharedPtr)});
 }
 RayTracerChallenge::BoundingBox RayTracerChallenge::Triangle::bounds() {
-  return RayTracerChallenge::BoundingBox();
+  auto b = RayTracerChallenge::BoundingBox();
+  b.add(this->p1);
+  b.add(this->p2);
+  b.add(this->p3);
+  return b;
 }

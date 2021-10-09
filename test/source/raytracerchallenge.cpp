@@ -2058,4 +2058,13 @@ TEST_CASE("Triangles") {
     CHECK(xs.size() == 1);
     CHECK(xs[0].t == 2.0);
   }
+  SUBCASE("A triangle has a bounding box") {
+    auto p1 = RayTracerChallenge::Tuple::point(-3.0, 7.0, 2.0);
+    auto p2 = RayTracerChallenge::Tuple::point(6.0, 2.0, -4.0);
+    auto p3 = RayTracerChallenge::Tuple::point(2.0, -1.0, -1.0);
+    auto t = RayTracerChallenge::Triangle::create(p1, p2, p3);
+    auto box = t->bounds();
+    CHECK(box.max == RayTracerChallenge::Tuple::point(6.0, 7.0, 2.0));
+    CHECK(box.min == RayTracerChallenge::Tuple::point(-3.0, -1.0, -4.0));
+  }
 }
