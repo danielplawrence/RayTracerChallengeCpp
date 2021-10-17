@@ -8,6 +8,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 using Eigen::MatrixXd;
@@ -520,6 +521,14 @@ namespace raytracerchallenge {
        * @return true if the objects share the same ID
        */
       [[nodiscard]] bool is(const Shape &object) const;
+      /**
+       * Return true if this shape includes another shape.
+       * The default definition of 'includes' is equality,
+       * but subtypes may differ in their implementation.
+       * @param object Object for comparison
+       * @return true if this shape includes the target.
+       */
+      virtual bool includes(const Shape &object) const;
       virtual ~Shape() = default;
 
       std::shared_ptr<Shape> sharedPtr;
@@ -607,6 +616,7 @@ namespace raytracerchallenge {
       BoundingBox bounds() override;
       Tuple localNormalAt(Tuple point, Intersection hit) override;
       Intersections localIntersect(Ray ray) override;
+      bool includes(const RayTracerChallenge::Shape &object) const override;
     };
     /**
      * @brief Represents a sphere
@@ -750,6 +760,31 @@ namespace raytracerchallenge {
       }
       Tuple localNormalAt(Tuple point, Intersection hit) override;
       BoundingBox bounds() override;
+    };
+    class CSG : public Shape {
+    public:
+      enum Operation { Union, Intersection, Difference };
+      Operation operation;
+      std::shared_ptr<Shape> left;
+      std::shared_ptr<Shape> right;
+      CSG(std::shared_ptr<Shape> &shape1, std::shared_ptr<Shape> &shape2, Operation operation) {
+        this->left = shape1;
+        this->right = shape2;
+        shape1->parent = this->sharedPtr;
+        shape2->parent = this->sharedPtr;
+        this->operation = operation;
+      }
+      static std::shared_ptr<Shape> create(std::shared_ptr<Shape> &shape1,
+                                           std::shared_ptr<Shape> &shape2,
+                                           Operation operation = Union) {
+        return (new CSG(shape1, shape2, operation))->sharedPtr;
+      }
+      Tuple localNormalAt(Tuple point, class Intersection hit) override;
+      Intersections localIntersect(Ray ray) override;
+      BoundingBox bounds() override;
+      Intersections filterIntersections(Intersections intersections) const;
+      bool includes(const Shape &object) const override;
+      static bool intersectionAllowed(Operation op, bool leftHit, bool inLeft, bool inRight);
     };
     /**
      * A Pattern accepts a point in space and returns a color
