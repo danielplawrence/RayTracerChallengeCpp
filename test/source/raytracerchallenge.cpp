@@ -1157,6 +1157,12 @@ TEST_CASE("World") {
     auto point = RayTracerChallenge::Tuple::point(-2.0, 0.0, -2.0);
     CHECK(world.isShadowed(point) == false);
   }
+  SUBCASE("There is no shadow when the object does not cast shadows") {
+    auto world = RayTracerChallenge::World::defaultWorld();
+    world.objects[0]->material.castShadow = false;
+    auto point = RayTracerChallenge::Tuple::point(10.0, -10.0, 10.0);
+    CHECK(world.isShadowed(point) == false);
+  }
 }
 TEST_CASE("Camera") {
   using namespace raytracerchallenge;

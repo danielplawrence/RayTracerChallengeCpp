@@ -653,7 +653,7 @@ bool RayTracerChallenge::World::isShadowed(RayTracerChallenge::Tuple point) {
   auto direction = (light->position - point).normalize();
   auto ray = RayTracerChallenge::Ray(point, direction);
   auto hit = intersect(ray).hit();
-  if (hit.has_value() && hit.value().t < distance) {
+  if (hit.has_value() && hit.value().t < distance && hit.value().object->material.castShadow) {
     return true;
   }
   return false;

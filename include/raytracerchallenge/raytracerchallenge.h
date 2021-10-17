@@ -419,6 +419,7 @@ namespace raytracerchallenge {
       double reflective = 0.0;
       double transparency = 0.0;
       double refractiveIndex = 1.0;
+      bool castShadow = true;
       Color color = Color(1.0, 1.0, 1.0);
       bool operator==(const Material &material) const;
     };
