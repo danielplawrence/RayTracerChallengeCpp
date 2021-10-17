@@ -928,12 +928,8 @@ RayTracerChallenge::BoundingBox RayTracerChallenge::Group::bounds() {
   return box;
 }
 bool RayTracerChallenge::Group::includes(const RayTracerChallenge::Shape &object) const {
-  for (const auto &currentObject : this->objects) {
-    if (currentObject->includes(object)) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(this->objects.cbegin(), this->objects.cend(),
+                     [&object](auto target) { return target->includes(object); });
 }
 RayTracerChallenge::Tuple RayTracerChallenge::Shape::worldToObject(Tuple point) const {
   RayTracerChallenge::Tuple p = point;
@@ -985,7 +981,8 @@ bool RayTracerChallenge::BoundingBox::contains(Tuple point) const {
 bool RayTracerChallenge::BoundingBox::contains(RayTracerChallenge::BoundingBox box) const {
   return this->contains(box.max) && this->contains(box.min);
 }
-RayTracerChallenge::BoundingBox RayTracerChallenge::BoundingBox::transform(Matrix matrix) const {
+RayTracerChallenge::BoundingBox RayTracerChallenge::BoundingBox::transform(
+    const Matrix &matrix) const {
   auto p1 = this->min;
   auto p2 = RayTracerChallenge::Tuple(this->min.x, this->min.y, this->max.z, 1.0);
   auto p3 = RayTracerChallenge::Tuple(this->min.x, this->max.y, this->min.z, 1.0);
@@ -1000,7 +997,7 @@ RayTracerChallenge::BoundingBox RayTracerChallenge::BoundingBox::transform(Matri
   }
   return newBox;
 }
-bool RayTracerChallenge::BoundingBox::intersects(RayTracerChallenge::Ray ray) {
+bool RayTracerChallenge::BoundingBox::intersects(RayTracerChallenge::Ray ray) const {
   auto xMinMax = checkAxis(ray.origin.x, ray.direction.x, this->min.x, this->max.x);
   auto yMinMax = checkAxis(ray.origin.y, ray.direction.y, this->min.y, this->max.y);
   auto zMinMax = checkAxis(ray.origin.z, ray.direction.z, this->min.z, this->max.z);
@@ -1215,7 +1212,7 @@ bool RayTracerChallenge::CSG::intersectionAllowed(RayTracerChallenge::CSG::Opera
   }
 }
 RayTracerChallenge::Intersections RayTracerChallenge::CSG::filterIntersections(
-    Intersections intersections) const {
+    const Intersections &intersections) const {
   bool inLeft = false;
   bool inRight = false;
   auto result = RayTracerChallenge::Intersections();

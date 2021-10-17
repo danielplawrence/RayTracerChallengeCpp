@@ -529,7 +529,7 @@ namespace raytracerchallenge {
        * @param object Object for comparison
        * @return true if this shape includes the target.
        */
-      virtual bool includes(const Shape &object) const;
+      [[nodiscard]] virtual bool includes(const Shape &object) const;
       virtual ~Shape() = default;
 
       std::shared_ptr<Shape> sharedPtr;
@@ -586,13 +586,13 @@ namespace raytracerchallenge {
        * @param matrix Transformation matrix
        * @return Transformed box
        */
-      BoundingBox transform(Matrix matrix) const;
+      [[nodiscard]] BoundingBox transform(const Matrix &matrix) const;
       /**
        * @brief Check if a ray intersects this boc
        * @param ray
        * @return True if ray intersects this box
        */
-      bool intersects(Ray ray);
+      [[nodiscard]] bool intersects(Ray ray) const;
     };
     /**
      * @brief Represents a group of objects
@@ -617,7 +617,7 @@ namespace raytracerchallenge {
       BoundingBox bounds() override;
       Tuple localNormalAt(Tuple point, Intersection hit) override;
       Intersections localIntersect(Ray ray) override;
-      bool includes(const RayTracerChallenge::Shape &object) const override;
+      [[nodiscard]] bool includes(const RayTracerChallenge::Shape &object) const override;
     };
     /**
      * @brief Represents a sphere
@@ -783,8 +783,8 @@ namespace raytracerchallenge {
       Tuple localNormalAt(Tuple point, class Intersection hit) override;
       Intersections localIntersect(Ray ray) override;
       BoundingBox bounds() override;
-      Intersections filterIntersections(Intersections intersections) const;
-      bool includes(const Shape &object) const override;
+      [[nodiscard]] Intersections filterIntersections(const Intersections &intersections) const;
+      [[nodiscard]] bool includes(const Shape &object) const override;
       static bool intersectionAllowed(Operation op, bool leftHit, bool inLeft, bool inRight);
     };
     /**
