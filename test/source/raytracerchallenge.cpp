@@ -1986,6 +1986,15 @@ TEST_CASE("Bounding boxes") {
     CHECK(box.min == RayTracerChallenge::Tuple(-4.5, -3.0, -5.0, 1.0));
     CHECK(box.max == RayTracerChallenge::Tuple(4.0, 7.0, 4.5, 1.0));
   }
+  SUBCASE("A CSG has a bounding box which contains its children") {
+    auto left = RayTracerChallenge::Sphere::create();
+    auto right = RayTracerChallenge::Sphere::create();
+    right->transform = right->transform.translated(2.0, 3.0, 4.0);
+    auto shape = RayTracerChallenge::CSG::create(left, right, RayTracerChallenge::CSG::Difference);
+    auto box = shape->bounds();
+    CHECK(box.min == RayTracerChallenge::Tuple::point(-1.0, -1.0, -1.0));
+    CHECK(box.max == RayTracerChallenge::Tuple::point(3.0, 4.0, 5.0));
+  }
   SUBCASE("Intersecting a ray with a bounding box at the origin") {
     auto box = RayTracerChallenge::BoundingBox({-1.0, -1.0, -1.0, 1.0}, {1.0, 1.0, 1.0, 1.0});
     CHECK(box.intersects({{5.0, 0.5, 0.0, 1.0}, {-1.0, 0.0, 0.0, 0.0}}));

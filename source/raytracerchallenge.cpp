@@ -1181,14 +1181,22 @@ RayTracerChallenge::Tuple RayTracerChallenge::CSG::localNormalAt(
   (void)hit;
   return {};
 }
-RayTracerChallenge::BoundingBox RayTracerChallenge::CSG::bounds() { return {}; }
+RayTracerChallenge::BoundingBox RayTracerChallenge::CSG::bounds() {
+  auto box = RayTracerChallenge::BoundingBox();
+  box.add(this->left->parentSpaceBounds());
+  box.add(this->right->parentSpaceBounds());
+  return box;
+}
 RayTracerChallenge::Intersections RayTracerChallenge::CSG::localIntersect(
     RayTracerChallenge::Ray ray) {
-  auto leftIntersections = this->left->intersect(ray);
-  auto rightIntersections = this->right->intersect(ray);
-  leftIntersections.addAll(rightIntersections);
-  leftIntersections.sort();
-  return filterIntersections(leftIntersections);
+  auto xs = Intersections();
+  if (!this->bounds().intersects(ray)) {
+    return xs;
+  }
+  xs.addAll(this->left->intersect(ray));
+  xs.addAll(this->right->intersect(ray));
+  xs.sort();
+  return filterIntersections(xs);
 }
 bool RayTracerChallenge::CSG::intersectionAllowed(RayTracerChallenge::CSG::Operation op,
                                                   bool leftHit, bool inLeft, bool inRight) {
