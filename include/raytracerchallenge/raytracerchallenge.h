@@ -7,6 +7,7 @@
 #include <optional>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 using Eigen::MatrixXd;
@@ -466,14 +467,14 @@ namespace raytracerchallenge {
        * @param point
        * @return normal vector
        */
-      Tuple normalAt(Tuple point);
+      Tuple normalAt(Tuple point, Intersection hit);
       /**
        * @brief Implementation-specific logic for returning the normal at a specific
        * point on this object.
        * @param point
        * @return the normal vector at the specified point on this object
        */
-      virtual Tuple localNormalAt(Tuple point) = 0;
+      virtual Tuple localNormalAt(Tuple point, Intersection hit) = 0;
       /**
        * @brief Return the bounds for this shape
        * @return bounds for this shape
@@ -604,7 +605,7 @@ namespace raytracerchallenge {
        */
       void add(const std::shared_ptr<Shape> &object);
       BoundingBox bounds() override;
-      Tuple localNormalAt(Tuple point) override;
+      Tuple localNormalAt(Tuple point, Intersection hit) override;
       Intersections localIntersect(Ray ray) override;
     };
     /**
@@ -617,7 +618,7 @@ namespace raytracerchallenge {
         auto shape = new Sphere();
         return shape->sharedPtr;
       }
-      Tuple localNormalAt(Tuple point) override;
+      Tuple localNormalAt(Tuple point, Intersection hit) override;
       Intersections localIntersect(Ray ray) override;
       BoundingBox bounds() override;
     };
@@ -645,7 +646,7 @@ namespace raytracerchallenge {
         auto shape = new Plane();
         return shape->sharedPtr;
       }
-      Tuple localNormalAt(Tuple point) override;
+      Tuple localNormalAt(Tuple point, Intersection hit) override;
       Intersections localIntersect(Ray ray) override;
       BoundingBox bounds() override;
     };
@@ -659,7 +660,7 @@ namespace raytracerchallenge {
         auto shape = new Cube();
         return shape->sharedPtr;
       }
-      Tuple localNormalAt(Tuple point) override;
+      Tuple localNormalAt(Tuple point, Intersection hit) override;
       Intersections localIntersect(Ray ray) override;
       BoundingBox bounds() override;
     };
@@ -677,7 +678,7 @@ namespace raytracerchallenge {
         shape->closed = closed;
         return shape->sharedPtr;
       }
-      Tuple localNormalAt(Tuple point) override;
+      Tuple localNormalAt(Tuple point, Intersection hit) override;
       Intersections localIntersect(Ray ray) override;
       BoundingBox bounds() override;
       double minimum = double(-INFINITY);
@@ -697,7 +698,7 @@ namespace raytracerchallenge {
         shape->closed = closed;
         return shape->sharedPtr;
       }
-      Tuple localNormalAt(Tuple point) override;
+      Tuple localNormalAt(Tuple point, Intersection hit) override;
       Intersections localIntersect(Ray ray) override;
       BoundingBox bounds() override;
     };
@@ -707,11 +708,12 @@ namespace raytracerchallenge {
     class Triangle : public Shape {
     public:
       Tuple p1;
-      [[maybe_unused]] Tuple p2;
-      [[maybe_unused]] Tuple p3;
+      Tuple p2;
+      Tuple p3;
       Tuple e1;
       Tuple e2;
       Tuple normal;
+      Triangle() = default;
       Triangle(Tuple p1, Tuple p2, Tuple p3) {
         this->p1 = p1;
         this->p2 = p2;
@@ -723,8 +725,30 @@ namespace raytracerchallenge {
       static std::shared_ptr<Shape> create(Tuple p1, Tuple p2, Tuple p3) {
         return (new Triangle(p1, p2, p3))->sharedPtr;
       }
-      Tuple localNormalAt(Tuple point) override;
+      Tuple localNormalAt(Tuple point, Intersection hit) override;
       Intersections localIntersect(Ray ray) override;
+      BoundingBox bounds() override;
+    };
+    class SmoothTriangle : public Triangle {
+    public:
+      Tuple n1;
+      Tuple n2;
+      Tuple n3;
+      SmoothTriangle(Tuple p1, Tuple p2, Tuple p3, Tuple n1, Tuple n2, Tuple n3) {
+        this->p1 = p1;
+        this->p2 = p2;
+        this->p3 = p3;
+        this->n1 = n1;
+        this->n2 = n2;
+        this->n3 = n3;
+        this->e1 = p2 - p1;
+        this->e2 = p3 - p1;
+      }
+      static std::shared_ptr<Shape> create(Tuple p1, Tuple p2, Tuple p3, Tuple n1, Tuple n2,
+                                           Tuple n3) {
+        return (new SmoothTriangle(p1, p2, p3, n1, n2, n3))->sharedPtr;
+      }
+      Tuple localNormalAt(Tuple point, Intersection hit) override;
       BoundingBox bounds() override;
     };
     /**
@@ -821,6 +845,8 @@ namespace raytracerchallenge {
        * @brief the point on the ray where it intersected with an object
        */
       double t{};
+      double u{};
+      double v{};
       /**
        * @brief the object that intersected with the ray
        */
@@ -832,7 +858,7 @@ namespace raytracerchallenge {
        */
       Intersection(double t, std::shared_ptr<Shape> object);
       /**
-       * @brief Default constructtor
+       * @brief Default constructor
        */
       Intersection();
       /**
@@ -1028,5 +1054,27 @@ namespace raytracerchallenge {
      */
     static Color lighting(const std::shared_ptr<Shape> &shape, PointLight light, Tuple position,
                           Tuple eyeVector, Tuple normalVector, bool inShadow);
+  };
+  /**
+   * @brief A parser for OBJ files
+   */
+  class ObjParser {
+  public:
+    std::vector<RayTracerChallenge::Tuple> vertices = std::vector<RayTracerChallenge::Tuple>();
+    std::vector<RayTracerChallenge::Tuple> normals = std::vector<RayTracerChallenge::Tuple>();
+    std::shared_ptr<RayTracerChallenge::Shape> defaultGroup = RayTracerChallenge::Group::create();
+    std::unordered_map<std::string, std::shared_ptr<RayTracerChallenge::Shape>> groups;
+    ObjParser() { this->groups["Default"] = defaultGroup; }
+    /**
+     * Create an ObjParser from an input stream
+     * @param input stream
+     * @return ObjParser instance
+     */
+    static ObjParser parse(std::stringstream &stream);
+    /**
+     * Get the objects found by this parser
+     * @return Objects from the input file parsed by this parser
+     */
+    std::shared_ptr<RayTracerChallenge::Shape> getObjects();
   };
 }  // namespace raytracerchallenge

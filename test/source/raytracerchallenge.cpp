@@ -848,36 +848,36 @@ TEST_CASE("Normals") {
   using namespace raytracerchallenge;
   SUBCASE("The normal on a sphere at a point on the x axis") {
     auto sphere = RayTracerChallenge::Sphere::create();
-    auto n = sphere->normalAt(RayTracerChallenge::Tuple::point(1.0, 0.0, 0.0));
+    auto n = sphere->normalAt(RayTracerChallenge::Tuple::point(1.0, 0.0, 0.0), {});
     CHECK(n == RayTracerChallenge::Tuple::vector(1.0, 0.0, 0.0));
   }
   SUBCASE("The normal on a sphere at a point on the y axis") {
     auto sphere = RayTracerChallenge::Sphere::create();
-    auto n = sphere->normalAt(RayTracerChallenge::Tuple::point(0.0, 1.0, 0.0));
+    auto n = sphere->normalAt(RayTracerChallenge::Tuple::point(0.0, 1.0, 0.0), {});
     CHECK(n == RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0));
   }
   SUBCASE("The normal on a sphere at a point on the z axis") {
     auto sphere = RayTracerChallenge::Sphere::create();
-    auto n = sphere->normalAt(RayTracerChallenge::Tuple::point(0.0, 0.0, 1.0));
+    auto n = sphere->normalAt(RayTracerChallenge::Tuple::point(0.0, 0.0, 1.0), {});
     CHECK(n == RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0));
   }
   SUBCASE("The normal on a sphere at a nonaxial point") {
     auto sphere = RayTracerChallenge::Sphere::create();
     auto n = sphere->normalAt(
-        RayTracerChallenge::Tuple::point(sqrt(3.0) / 3.0, sqrt(3.0) / 3.0, sqrt(3.0) / 3.0));
+        RayTracerChallenge::Tuple::point(sqrt(3.0) / 3.0, sqrt(3.0) / 3.0, sqrt(3.0) / 3.0), {});
     CHECK(n
           == RayTracerChallenge::Tuple::vector(sqrt(3.0) / 3.0, sqrt(3.0) / 3.0, sqrt(3.0) / 3.0));
   }
   SUBCASE("The normal is a normalized vector") {
     auto sphere = RayTracerChallenge::Sphere::create();
     auto n = sphere->normalAt(
-        RayTracerChallenge::Tuple::point(sqrt(3.0) / 3.0, sqrt(3.0) / 3.0, sqrt(3.0) / 3.0));
+        RayTracerChallenge::Tuple::point(sqrt(3.0) / 3.0, sqrt(3.0) / 3.0, sqrt(3.0) / 3.0), {});
     CHECK(n == n.normalize());
   }
   SUBCASE("Computing the normal on a translated sphere") {
     auto sphere = RayTracerChallenge::Sphere::create();
     sphere->transform = RayTracerChallenge::Matrix::translation(0.0, 1.0, 0.0);
-    auto n = sphere->normalAt(RayTracerChallenge::Tuple::point(0.0, 1.70711, -0.70711));
+    auto n = sphere->normalAt(RayTracerChallenge::Tuple::point(0.0, 1.70711, -0.70711), {});
     CHECK(n == RayTracerChallenge::Tuple::vector(0.0, 0.70711, -0.70711));
   }
   SUBCASE("Computing the normal on a transformed sphere") {
@@ -885,7 +885,7 @@ TEST_CASE("Normals") {
     sphere->transform = (RayTracerChallenge::Matrix::scaling(1.0, 0.5, 1.0)
                          * RayTracerChallenge::Matrix::rotationZ(M_PI / 5.0));
     auto n = sphere->normalAt(
-        RayTracerChallenge::Tuple::point(0.0, sqrt(2.0) / 2.0, -sqrt(2.0) / 2.0));
+        RayTracerChallenge::Tuple::point(0.0, sqrt(2.0) / 2.0, -sqrt(2.0) / 2.0), {});
     CHECK(n == RayTracerChallenge::Tuple::vector(0.0, 0.97014, -0.24254));
   }
 }
@@ -893,9 +893,9 @@ TEST_CASE("Planes") {
   using namespace raytracerchallenge;
   SUBCASE("The normal of a plane is constant everywhere") {
     auto plane = RayTracerChallenge::Plane::create();
-    auto n1 = plane->localNormalAt({0.0, 0.0, 0.0, 0.0});
-    auto n2 = plane->localNormalAt({10.0, 0.0, -10.0, 0.0});
-    auto n3 = plane->localNormalAt({-5.0, 0.0, 150.0, 0.0});
+    auto n1 = plane->localNormalAt({0.0, 0.0, 0.0, 0.0}, {});
+    auto n2 = plane->localNormalAt({10.0, 0.0, -10.0, 0.0}, {});
+    auto n3 = plane->localNormalAt({-5.0, 0.0, 150.0, 0.0}, {});
     CHECK(n1 == RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0));
     CHECK(n2 == RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0));
     CHECK(n3 == RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0));
@@ -1605,21 +1605,21 @@ TEST_CASE("Cubes") {
   }
   SUBCASE("The normal on the surface of a cube") {
     auto cube = RayTracerChallenge::Cube::create();
-    CHECK(cube->localNormalAt({1.0, 0.5, -0.8, 0.0})
+    CHECK(cube->localNormalAt({1.0, 0.5, -0.8, 0.0}, {})
           == RayTracerChallenge::Tuple({1.0, 0.0, 0.0, 0.0}));
-    CHECK(cube->localNormalAt({-1.0, -0.2, 0.9, 0.0})
+    CHECK(cube->localNormalAt({-1.0, -0.2, 0.9, 0.0}, {})
           == RayTracerChallenge::Tuple({-1.0, 0.0, 0.0, 0.0}));
-    CHECK(cube->localNormalAt({-0.4, 1.0, -0.1, 0.0})
+    CHECK(cube->localNormalAt({-0.4, 1.0, -0.1, 0.0}, {})
           == RayTracerChallenge::Tuple({0.0, 1.0, 0.0, 0.0}));
-    CHECK(cube->localNormalAt({0.3, -1.0, -0.7, 0.0})
+    CHECK(cube->localNormalAt({0.3, -1.0, -0.7, 0.0}, {})
           == RayTracerChallenge::Tuple({0.0, -1.0, 0.0, 0.0}));
-    CHECK(cube->localNormalAt({-0.6, 0.3, 1.0, 0.0})
+    CHECK(cube->localNormalAt({-0.6, 0.3, 1.0, 0.0}, {})
           == RayTracerChallenge::Tuple({0.0, 0.0, 1.0, 0.0}));
-    CHECK(cube->localNormalAt({0.4, 0.4, -1.0, 0.0})
+    CHECK(cube->localNormalAt({0.4, 0.4, -1.0, 0.0}, {})
           == RayTracerChallenge::Tuple({0.0, 0.0, -1.0, 0.0}));
-    CHECK(cube->localNormalAt({1.0, 1.0, 1.0, 0.0})
+    CHECK(cube->localNormalAt({1.0, 1.0, 1.0, 0.0}, {})
           == RayTracerChallenge::Tuple({1.0, 0.0, 0.0, 0.0}));
-    CHECK(cube->localNormalAt({-1.0, -1.0, -1.0, 0.0})
+    CHECK(cube->localNormalAt({-1.0, -1.0, -1.0, 0.0}, {})
           == RayTracerChallenge::Tuple({-1.0, 0.0, 0.0, 0.0}));
   }
 }
@@ -1666,13 +1666,13 @@ TEST_CASE("Cylinders") {
   }
   SUBCASE("Normal vector on a cone") {
     auto cone = RayTracerChallenge::Cylinder::create();
-    CHECK(cone->localNormalAt({1.0, 0.0, 0.0, 1.0})
+    CHECK(cone->localNormalAt({1.0, 0.0, 0.0, 1.0}, {})
           == RayTracerChallenge::Tuple(1.0, 0.0, 0.0, 0.0));
-    CHECK(cone->localNormalAt({0.0, 5.0, -1.0, 1.0})
+    CHECK(cone->localNormalAt({0.0, 5.0, -1.0, 1.0}, {})
           == RayTracerChallenge::Tuple(0.0, 0.0, -1.0, 0.0));
-    CHECK(cone->localNormalAt({0.0, -2.0, 1.0, 1.0})
+    CHECK(cone->localNormalAt({0.0, -2.0, 1.0, 1.0}, {})
           == RayTracerChallenge::Tuple(0.0, 0.0, 1.0, 0.0));
-    CHECK(cone->localNormalAt({-1.0, 1.0, 0.0, 1.0})
+    CHECK(cone->localNormalAt({-1.0, 1.0, 0.0, 1.0}, {})
           == RayTracerChallenge::Tuple(-1.0, 0.0, 0.0, 0.0));
   }
   SUBCASE("Truncated cones") {
@@ -1727,17 +1727,17 @@ TEST_CASE("Cylinders") {
   }
   SUBCASE("The normal vector on a cone's end caps") {
     auto cone = RayTracerChallenge::Cylinder::create(1.0, 2.0, true);
-    CHECK(cone->localNormalAt({0.0, 1.0, 0.0, 1.0})
+    CHECK(cone->localNormalAt({0.0, 1.0, 0.0, 1.0}, {})
           == RayTracerChallenge::Tuple(0.0, -1.0, 0.0, 0.0));
-    CHECK(cone->localNormalAt({0.5, 1.0, 0.0, 1.0})
+    CHECK(cone->localNormalAt({0.5, 1.0, 0.0, 1.0}, {})
           == RayTracerChallenge::Tuple(0.0, -1.0, 0.0, 0.0));
-    CHECK(cone->localNormalAt({0.0, 1.0, 0.5, 1.0})
+    CHECK(cone->localNormalAt({0.0, 1.0, 0.5, 1.0}, {})
           == RayTracerChallenge::Tuple(0.0, -1.0, 0.0, 0.0));
-    CHECK(cone->localNormalAt({0.0, 2.0, 0.0, 1.0})
+    CHECK(cone->localNormalAt({0.0, 2.0, 0.0, 1.0}, {})
           == RayTracerChallenge::Tuple(0.0, 1.0, 0.0, 0.0));
-    CHECK(cone->localNormalAt({0.5, 2.0, 0.0, 1.0})
+    CHECK(cone->localNormalAt({0.5, 2.0, 0.0, 1.0}, {})
           == RayTracerChallenge::Tuple(0.0, 1.0, 0.0, 0.0));
-    CHECK(cone->localNormalAt({0.0, 2.0, 0.5, 1.0})
+    CHECK(cone->localNormalAt({0.0, 2.0, 0.5, 1.0}, {})
           == RayTracerChallenge::Tuple(0.0, 1.0, 0.0, 0.0));
   }
 }
@@ -1781,11 +1781,11 @@ TEST_CASE("Cones") {
   }
   SUBCASE("Computing the normal vector on a cone") {
     auto cone = RayTracerChallenge::Cone::create();
-    CHECK(cone->localNormalAt({0.0, 0.0, 0.0, 1.0})
+    CHECK(cone->localNormalAt({0.0, 0.0, 0.0, 1.0}, {})
           == RayTracerChallenge::Tuple(0.0, 0.0, 0.0, 0.0));
-    CHECK(cone->localNormalAt({1.0, 1.0, 1.0, 1.0})
+    CHECK(cone->localNormalAt({1.0, 1.0, 1.0, 1.0}, {})
           == RayTracerChallenge::Tuple(1.0, -sqrt(2.0), 1.0, 0.0));
-    CHECK(cone->localNormalAt({-1.0, -1.0, 0.0, 1.0})
+    CHECK(cone->localNormalAt({-1.0, -1.0, 0.0, 1.0}, {})
           == RayTracerChallenge::Tuple(-1.0, 1.0, 0.0, 0.0));
   }
 }
@@ -1868,7 +1868,7 @@ TEST_CASE("Groups") {
     auto s = RayTracerChallenge::Sphere::create();
     s->transform = s->transform.translation(5.0, 0.0, 0.0);
     std::dynamic_pointer_cast<RayTracerChallenge::Group>(g2)->add(s);
-    auto n = s->normalAt({1.7321, 1.1547, -5.5774, 1.0});
+    auto n = s->normalAt({1.7321, 1.1547, -5.5774, 1.0}, {});
     CHECK(n == RayTracerChallenge::Tuple(0.2857, 0.4286, -0.8571, 0.0));
   }
 }
@@ -2018,9 +2018,9 @@ TEST_CASE("Triangles") {
   SUBCASE("Normal vector for a triangle") {
     auto t = RayTracerChallenge::Triangle::create({0.0, 1.0, 0.0, 1.0}, {-1.0, 0.0, 0.0, 1.0},
                                                   {1.0, 0.0, 0.0, 1.0});
-    auto n1 = t->localNormalAt({0.0, 0.5, 0.0, 1.0});
-    auto n2 = t->localNormalAt({-0.5, 0.75, 0.0, 1.0});
-    auto n3 = t->localNormalAt({0.5, 0.25, 0.0, 1.0});
+    auto n1 = t->localNormalAt({0.0, 0.5, 0.0, 1.0}, {});
+    auto n2 = t->localNormalAt({-0.5, 0.75, 0.0, 1.0}, {});
+    auto n3 = t->localNormalAt({0.5, 0.25, 0.0, 1.0}, {});
     auto normal = std::dynamic_pointer_cast<RayTracerChallenge::Triangle>(t)->normal;
     CHECK(n1 == normal);
     CHECK(n2 == normal);
@@ -2066,5 +2066,188 @@ TEST_CASE("Triangles") {
     auto box = t->bounds();
     CHECK(box.max == RayTracerChallenge::Tuple::point(6.0, 7.0, 2.0));
     CHECK(box.min == RayTracerChallenge::Tuple::point(-3.0, -1.0, -4.0));
+  }
+}
+TEST_CASE("OBJ file parser") {
+  SUBCASE("An OBJ file with vertex data") {
+    auto f = std::stringstream(
+        ""
+        "v -1 1 0\n"
+        "v -1.0000 0.5000 0.0000\n"
+        "v 1 0 0\n"
+        "v 1 1 0\n"
+        "");
+    auto res = ObjParser::parse(f);
+    CHECK(res.vertices[1] == RayTracerChallenge::Tuple::point(-1.0, 1.0, 0.0));
+    CHECK(res.vertices[2] == RayTracerChallenge::Tuple::point(-1.0, 0.5, 0.0));
+    CHECK(res.vertices[3] == RayTracerChallenge::Tuple::point(1.0, 0.0, 0.0));
+    CHECK(res.vertices[4] == RayTracerChallenge::Tuple::point(1.0, 1.0, 0.0));
+  }
+  SUBCASE("Parsing triangle faces") {
+    auto f = std::stringstream(
+        ""
+        "v -1 1 0\n"
+        "v -1 0 0\n"
+        "v 1 0 0\n"
+        "v 1 1 0\n"
+        "\n"
+        "f 1 2 3\n"
+        "f 1 3 4\n"
+        "");
+    auto res = ObjParser::parse(f);
+    auto g = res.defaultGroup;
+    auto objects = std::dynamic_pointer_cast<RayTracerChallenge::Group>(g)->objects;
+    auto t1 = std::dynamic_pointer_cast<RayTracerChallenge::Triangle>(objects[0]);
+    auto t2 = std::dynamic_pointer_cast<RayTracerChallenge::Triangle>(objects[1]);
+    CHECK(t1->p1 == res.vertices[1]);
+    CHECK(t1->p2 == res.vertices[2]);
+    CHECK(t1->p3 == res.vertices[3]);
+    CHECK(t2->p1 == res.vertices[1]);
+    CHECK(t2->p2 == res.vertices[3]);
+    CHECK(t2->p3 == res.vertices[4]);
+  }
+  SUBCASE("Triangulating polygons") {
+    auto f = std::stringstream(
+        ""
+        "v -1 1 0\n"
+        "v -1 0 0\n"
+        "v 1 0 0\n"
+        "v 1 1 0\n"
+        "v 0 2 0\n"
+        "\n"
+        "f 1 2 3 4 5\n"
+        "");
+    auto res = ObjParser::parse(f);
+    auto g = res.defaultGroup;
+    auto objects = std::dynamic_pointer_cast<RayTracerChallenge::Group>(g)->objects;
+    auto t1 = std::dynamic_pointer_cast<RayTracerChallenge::Triangle>(objects[0]);
+    auto t2 = std::dynamic_pointer_cast<RayTracerChallenge::Triangle>(objects[1]);
+    auto t3 = std::dynamic_pointer_cast<RayTracerChallenge::Triangle>(objects[2]);
+    CHECK(t1->p1 == res.vertices[1]);
+    CHECK(t1->p2 == res.vertices[2]);
+    CHECK(t1->p3 == res.vertices[3]);
+    CHECK(t2->p1 == res.vertices[1]);
+    CHECK(t2->p2 == res.vertices[3]);
+    CHECK(t2->p3 == res.vertices[4]);
+    CHECK(t3->p1 == res.vertices[1]);
+    CHECK(t3->p2 == res.vertices[4]);
+    CHECK(t3->p3 == res.vertices[5]);
+  }
+  SUBCASE("Triangles in groups") {
+    auto f = std::stringstream(
+        ""
+        "v -1 1 0\n"
+        "v -1 0 0\n"
+        "v 1 0 0\n"
+        "v 1 1 0\n"
+        "g FirstGroup\n"
+        "f 1 2 3\n"
+        "g SecondGroup\n"
+        "f 1 3 4\n"
+        "");
+    auto res = ObjParser::parse(f);
+    auto g1 = res.groups["FirstGroup"];
+    auto g2 = res.groups["SecondGroup"];
+    auto t1ptr = std::dynamic_pointer_cast<RayTracerChallenge::Group>(g1)->objects[0];
+    auto t2ptr = std::dynamic_pointer_cast<RayTracerChallenge::Group>(g2)->objects[0];
+    auto t1 = std::dynamic_pointer_cast<RayTracerChallenge::Triangle>(t1ptr);
+    auto t2 = std::dynamic_pointer_cast<RayTracerChallenge::Triangle>(t2ptr);
+    CHECK(t1->p1 == res.vertices[1]);
+    CHECK(t1->p2 == res.vertices[2]);
+    CHECK(t1->p3 == res.vertices[3]);
+    CHECK(t2->p1 == res.vertices[1]);
+    CHECK(t2->p2 == res.vertices[3]);
+    CHECK(t2->p3 == res.vertices[4]);
+  }
+  SUBCASE("Converting an OBJ file to a group") {
+    auto f = std::stringstream(
+        ""
+        "v -1 1 0\n"
+        "v -1 0 0\n"
+        "v 1 0 0\n"
+        "v 1 1 0\n"
+        "g FirstGroup\n"
+        "f 1 2 3\n"
+        "g SecondGroup\n"
+        "f 1 3 4\n"
+        "");
+    auto res = ObjParser::parse(f);
+    auto shape = res.getObjects();
+    auto shapeGroup = std::dynamic_pointer_cast<RayTracerChallenge::Group>(shape);
+    auto g1 = res.groups["FirstGroup"];
+    auto g2 = res.groups["SecondGroup"];
+    auto g3 = res.groups["Default"];
+    CHECK(shapeGroup->objects[0] == g2);
+    CHECK(shapeGroup->objects[1] == g1);
+    CHECK(shapeGroup->objects[2] == g3);
+  }
+  SUBCASE("Vertex normal records") {
+    auto f = std::stringstream(
+        ""
+        "vn 0 0 1\n"
+        "vn 0.707 0 -0.707\n"
+        "vn 1 2 3\n"
+        "");
+    auto res = ObjParser::parse(f);
+    CHECK(res.normals[1] == RayTracerChallenge::Tuple::vector(0.0, 0.0, 1.0));
+    CHECK(res.normals[2] == RayTracerChallenge::Tuple::vector(0.707, 0.0, -0.707));
+    CHECK(res.normals[3] == RayTracerChallenge::Tuple::vector(1.0, 2.0, 3.0));
+  }
+  SUBCASE("Faces with normals") {
+    auto f = std::stringstream(
+        ""
+        "v 0 1 0\n"
+        "v -1 0 0\n"
+        "v 1 0 0\n"
+        "vn -1 0 0\n"
+        "vn 1 0 0\n"
+        "vn 0 1 0\n"
+        "f 1//3 2//1 3//2\n"
+        "f 1/0/3 2/102/1 2/14/2\n"
+        "");
+    auto res = ObjParser::parse(f);
+    auto g = res.defaultGroup;
+    auto objects = std::dynamic_pointer_cast<RayTracerChallenge::Group>(g)->objects;
+    auto t1 = std::dynamic_pointer_cast<RayTracerChallenge::SmoothTriangle>(objects[0]);
+    auto t2 = std::dynamic_pointer_cast<RayTracerChallenge::SmoothTriangle>(objects[1]);
+    CHECK(t1->p1 == res.vertices[1]);
+    CHECK(t1->p2 == res.vertices[2]);
+    CHECK(t1->p3 == res.vertices[3]);
+    CHECK(t1->n1 == res.normals[3]);
+    CHECK(t1->n2 == res.normals[1]);
+    CHECK(t1->n3 == res.normals[2]);
+    CHECK(*t1 == *t2);
+  }
+}
+TEST_CASE("Smooth triangles") {
+  SUBCASE("An intersection with a smooth triangle stores u and v") {
+    auto t = RayTracerChallenge::SmoothTriangle::create(
+        {0.0, 1.0, 0.0, 1.0}, {-1.0, 0.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 1.0}, {0.0, 1.0, 0.0, 0.0},
+        {-1.0, 0.0, 0.0, 0.0}, {1.0, 0.0, 0.0, 0.0});
+    auto r = RayTracerChallenge::Ray({-0.2, 0.3, -2.0, 1.0}, {0.0, 0.0, 1.0, 0.0});
+    auto xs = t->localIntersect(r);
+    CHECK(abs(xs[0].u - 0.45) < 0.001);
+    CHECK(abs(xs[0].v - 0.25) < 0.001);
+  }
+  SUBCASE("A smooth triangle uses u/v to interpolate the normal") {
+    auto t = RayTracerChallenge::SmoothTriangle::create(
+        {0.0, 1.0, 0.0, 1.0}, {-1.0, 0.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 1.0}, {0.0, 1.0, 0.0, 0.0},
+        {-1.0, 0.0, 0.0, 0.0}, {1.0, 0.0, 0.0, 0.0});
+    auto i = RayTracerChallenge::Intersection(1.0, t);
+    i.u = 0.45;
+    i.v = 0.25;
+    auto n = t->normalAt({0.0, 0.0, 0.0, 1.0}, i);
+    CHECK(n == RayTracerChallenge::Tuple::vector(-0.5547, 0.83205, 0.0));
+  }
+  SUBCASE("Preparing the normal on a smooth triangle") {
+    auto t = RayTracerChallenge::SmoothTriangle::create(
+        {0.0, 1.0, 0.0, 1.0}, {-1.0, 0.0, 0.0, 1.0}, {1.0, 0.0, 0.0, 1.0}, {0.0, 1.0, 0.0, 0.0},
+        {-1.0, 0.0, 0.0, 0.0}, {1.0, 0.0, 0.0, 0.0});
+    auto i = RayTracerChallenge::Intersection(1.0, t);
+    i.u = 0.45;
+    i.v = 0.25;
+    auto r = RayTracerChallenge::Ray({-0.2, 0.3, -2.0, 1.0}, {0.0, 0.0, 1.0, 0.0});
+    auto comps = i.prepareComputations(r);
+    CHECK(comps.normalVector == RayTracerChallenge::Tuple::vector(-0.5547, 0.83205, 0.0));
   }
 }

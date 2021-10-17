@@ -6,7 +6,9 @@
 #include <chrono>
 #include <cmath>
 #include <functional>
+#include <iostream>
 #include <memory>
+#include <regex>
 #include <thread>
 #include <utility>
 
@@ -384,7 +386,7 @@ RayTracerChallenge::Computations RayTracerChallenge::Intersection::prepareComput
   computations.object = this->object;
   computations.point = ray.position(t);
   computations.eyeVector = -ray.direction;
-  computations.normalVector = this->object->normalAt(computations.point);
+  computations.normalVector = this->object->normalAt(computations.point, *this);
   if (computations.normalVector.dot(computations.eyeVector) < 0.0) {
     computations.inside = true;
     computations.normalVector = -computations.normalVector;
@@ -448,23 +450,24 @@ size_t RayTracerChallenge::Intersections::size() const { return this->intersecti
 void RayTracerChallenge::Intersections::sort() {
   std::sort(this->intersections.begin(), this->intersections.end());
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Sphere::localNormalAt(
-    RayTracerChallenge::Tuple point) {
+RayTracerChallenge::Tuple RayTracerChallenge::Sphere::localNormalAt(Tuple point, Intersection hit) {
+  (void)hit;
   return point - RayTracerChallenge::Tuple::point(0.0, 0.0, 0.0);
 }
 RayTracerChallenge::BoundingBox RayTracerChallenge::Sphere::bounds() {
   return {{-1.0, -1.0, -1.0, 1.0}, {1.0, 1.0, 1.0, 1.0}};
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Shape::normalAt(RayTracerChallenge::Tuple point) {
+RayTracerChallenge::Tuple RayTracerChallenge::Shape::normalAt(Tuple point, Intersection hit) {
   auto localPoint = this->worldToObject(point);
-  auto localNormal = this->localNormalAt(localPoint);
+  auto localNormal = this->localNormalAt(localPoint, std::move(hit));
   return this->normalToWorld(localNormal);
 }
 bool RayTracerChallenge::Shape::operator<(const RayTracerChallenge::Shape &object) const {
   return this->id < object.id;
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Plane::localNormalAt(Tuple point) {
+RayTracerChallenge::Tuple RayTracerChallenge::Plane::localNormalAt(Tuple point, Intersection hit) {
   (void)point;
+  (void)hit;
   return RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0);
 }
 RayTracerChallenge::Intersections RayTracerChallenge::Plane::localIntersect(Ray ray) {
@@ -509,7 +512,8 @@ RayTracerChallenge::Intersections RayTracerChallenge::Cube::localIntersect(Ray r
       RayTracerChallenge::Intersection(tMin, this->sharedPtr),
       RayTracerChallenge::Intersection(tMax, this->sharedPtr)});
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Cube::localNormalAt(RayTracerChallenge::Tuple point) {
+RayTracerChallenge::Tuple RayTracerChallenge::Cube::localNormalAt(Tuple point, Intersection hit) {
+  (void)hit;
   auto maxC = std::max({abs(point.x), abs(point.y), abs(point.z)});
   if (maxC == abs(point.x)) {
     return {point.x, 0.0, 0.0, 0.0};
@@ -765,8 +769,9 @@ double RayTracerChallenge::Computations::schlick(
   auto r0 = pow(((computations.n1 - computations.n2) / (computations.n1 + computations.n2)), 2.0);
   return r0 + (1 - r0) * pow((1 - cos), 5.0);
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Cylinder::localNormalAt(
-    RayTracerChallenge::Tuple point) {
+RayTracerChallenge::Tuple RayTracerChallenge::Cylinder::localNormalAt(Tuple point,
+                                                                      Intersection hit) {
+  (void)hit;
   auto dist = pow(point.x, 2) + pow(point.x, 2);
   if (dist < 1.0 && point.y >= this->maximum - EPS) {
     return {0.0, 1.0, 0.0, 0.0};
@@ -822,7 +827,8 @@ RayTracerChallenge::BoundingBox RayTracerChallenge::Cylinder::bounds() {
   }
   return {{-1.0, NEGATIVE_INFINITY, -1.0, 1.0}, {1.0, INFINITY, 1.0, 1.0}};
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Cone::localNormalAt(RayTracerChallenge::Tuple point) {
+RayTracerChallenge::Tuple RayTracerChallenge::Cone::localNormalAt(Tuple point, Intersection hit) {
+  (void)hit;
   auto dist = pow(point.x, 2) + pow(point.x, 2);
   if (dist < 1.0 && point.y >= this->maximum - EPS) {
     return {0.0, 1.0, 0.0, 0.0};
@@ -895,8 +901,8 @@ void RayTracerChallenge::Group::add(const std::shared_ptr<Shape> &object) {
   object->parent = this->sharedPtr;
   this->objects.push_back(object);
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Group::localNormalAt(
-    RayTracerChallenge::Tuple point) {
+RayTracerChallenge::Tuple RayTracerChallenge::Group::localNormalAt(Tuple point, Intersection hit) {
+  (void)hit;
   (void)point;
   return {};
 }
@@ -999,9 +1005,10 @@ bool RayTracerChallenge::BoundingBox::intersects(RayTracerChallenge::Ray ray) {
   }
   return false;
 }
-RayTracerChallenge::Tuple RayTracerChallenge::Triangle::localNormalAt(
-    RayTracerChallenge::Tuple point) {
+RayTracerChallenge::Tuple RayTracerChallenge::Triangle::localNormalAt(Tuple point,
+                                                                      Intersection hit) {
   (void)point;
+  (void)hit;
   return this->normal;
 }
 RayTracerChallenge::Intersections RayTracerChallenge::Triangle::localIntersect(
@@ -1023,9 +1030,136 @@ RayTracerChallenge::Intersections RayTracerChallenge::Triangle::localIntersect(
     return {};
   }
   auto t = f * this->e2.dot(originCrossE1);
-  return RayTracerChallenge::Intersections({RayTracerChallenge::Intersection(t, this->sharedPtr)});
+  auto i = RayTracerChallenge::Intersection(t, this->sharedPtr);
+  i.u = u;
+  i.v = v;
+  return RayTracerChallenge::Intersections({i});
 }
 RayTracerChallenge::BoundingBox RayTracerChallenge::Triangle::bounds() {
+  auto b = RayTracerChallenge::BoundingBox();
+  b.add(this->p1);
+  b.add(this->p2);
+  b.add(this->p3);
+  return b;
+}
+std::vector<std::shared_ptr<RayTracerChallenge::Shape>> fanTriangulation(
+    std::vector<RayTracerChallenge::Tuple> vertices) {
+  auto triangles = std::vector<std::shared_ptr<RayTracerChallenge::Shape>>();
+  for (int index = 2; index < int(vertices.size()) - 1; ++index) {
+    auto tri
+        = RayTracerChallenge::Triangle::create(vertices[1], vertices[index], vertices[index + 1]);
+    triangles.push_back(tri);
+  }
+  return triangles;
+}
+std::vector<std::shared_ptr<RayTracerChallenge::Shape>> fanTriangulation(
+    std::vector<RayTracerChallenge::Tuple> vertices,
+    std::vector<RayTracerChallenge::Tuple> normals) {
+  auto triangles = std::vector<std::shared_ptr<RayTracerChallenge::Shape>>();
+  for (int index = 2; index < int(vertices.size()) - 1; ++index) {
+    auto tri = RayTracerChallenge::SmoothTriangle::create(vertices[1], vertices[index],
+                                                          vertices[index + 1], normals[1],
+                                                          normals[index], normals[index + 1]);
+    triangles.push_back(tri);
+  }
+  return triangles;
+}
+ObjParser ObjParser::parse(std::stringstream &lines) {
+  auto parser = ObjParser();
+  parser.vertices.emplace_back();
+  parser.normals.emplace_back();
+  std::string oneLine;
+  std::smatch subMatch;
+  std::regex vertexLinePattern
+      = std::regex(R"((v) (-*\d(\.*\d+)*) (-*\d(\.*\d+)*) (-*\d(\.*\d+)*))");
+  std::regex vertexNormalLinePattern
+      = std::regex(R"((vn) (-*\d(\.*\d+)*) (-*\d(\.*\d+)*) (-*\d(\.*\d+)*))");
+  std::regex faceLinePattern = std::regex(R"((f) ((\d *){3,}))");
+  std::regex faceLinePatternWithNormals = std::regex(R"((f) (\d+\/\d*\/\d+ *){3,})");
+  std::regex groupLinePattern = std::regex(R"((g) ([a-zA-Z0-9]+))");
+  std::string lastMentionedGroup;
+  while (getline(lines, oneLine)) {
+    if (std::regex_match(oneLine, subMatch, groupLinePattern)) {
+      lastMentionedGroup = subMatch.str(2);
+    } else if (std::regex_match(oneLine, subMatch, vertexLinePattern)) {
+      auto x = std::stod(subMatch.str(2));
+      auto y = std::stod(subMatch.str(4));
+      auto z = std::stod(subMatch.str(6));
+      parser.vertices.push_back(RayTracerChallenge::Tuple::point(x, y, z));
+    } else if (std::regex_match(oneLine, subMatch, vertexNormalLinePattern)) {
+      auto n1 = std::stod(subMatch.str(2));
+      auto n2 = std::stod(subMatch.str(4));
+      auto n3 = std::stod(subMatch.str(6));
+      parser.normals.push_back(RayTracerChallenge::Tuple::vector(n1, n2, n3));
+    } else if (std::regex_match(oneLine, subMatch, faceLinePattern)) {
+      auto indices = subMatch.str(2);
+      std::stringstream ss(indices);
+      std::string s;
+      std::vector<RayTracerChallenge::Tuple> targetVertices;
+      targetVertices.emplace_back();
+      while (std::getline(ss, s, ' ')) {
+        targetVertices.push_back(parser.vertices[std::stoi(s)]);
+      }
+      auto triangles = fanTriangulation(targetVertices);
+      for (const auto &triangle : triangles) {
+        if (lastMentionedGroup.empty()) {
+          std::dynamic_pointer_cast<RayTracerChallenge::Group>(parser.defaultGroup)->add(triangle);
+        } else {
+          if (!parser.groups.count(lastMentionedGroup)) {
+            parser.groups[lastMentionedGroup] = RayTracerChallenge::Group::create();
+          }
+          std::dynamic_pointer_cast<RayTracerChallenge::Group>(parser.groups[lastMentionedGroup])
+              ->add(triangle);
+        }
+      }
+    } else if (std::regex_match(oneLine, faceLinePatternWithNormals)) {
+      std::stringstream ss(oneLine);
+      std::string s;
+      std::vector<RayTracerChallenge::Tuple> targetVertices;
+      std::vector<RayTracerChallenge::Tuple> targetNormals;
+      targetVertices.emplace_back();
+      targetNormals.emplace_back();
+      while (std::getline(ss, s, ' ')) {
+        if (s == "f") {
+          continue;
+        }
+        auto firstSlashIndex = s.find('/');
+        auto lastSlashIndex = s.rfind('/');
+        targetVertices.push_back(parser.vertices[std::stoi(s.substr(0, firstSlashIndex))]);
+        targetNormals.push_back(
+            parser.normals[stoi(s.substr(lastSlashIndex + 1, s.size() - lastSlashIndex - 1))]);
+      }
+      auto triangles = fanTriangulation(targetVertices, targetNormals);
+      for (const auto &triangle : triangles) {
+        if (lastMentionedGroup.empty()) {
+          std::dynamic_pointer_cast<RayTracerChallenge::Group>(parser.defaultGroup)->add(triangle);
+        } else {
+          if (!parser.groups.count(lastMentionedGroup)) {
+            parser.groups[lastMentionedGroup] = RayTracerChallenge::Group::create();
+          }
+          std::dynamic_pointer_cast<RayTracerChallenge::Group>(parser.groups[lastMentionedGroup])
+              ->add(triangle);
+        }
+      }
+    } else {
+      std::cout << "Skipped line: " << oneLine << std::endl;
+    }
+  }
+  return parser;
+}
+std::shared_ptr<RayTracerChallenge::Shape> ObjParser::getObjects() {
+  auto group = RayTracerChallenge::Group::create();
+  for (auto const &item : this->groups) {
+    std::dynamic_pointer_cast<RayTracerChallenge::Group>(group)->add(item.second);
+  }
+  return group;
+}
+RayTracerChallenge::Tuple RayTracerChallenge::SmoothTriangle::localNormalAt(Tuple point,
+                                                                            Intersection hit) {
+  (void)point;
+  return this->n2 * hit.u + this->n3 * hit.v + this->n1 * (1 - hit.u - hit.v);
+}
+RayTracerChallenge::BoundingBox RayTracerChallenge::SmoothTriangle::bounds() {
   auto b = RayTracerChallenge::BoundingBox();
   b.add(this->p1);
   b.add(this->p2);
