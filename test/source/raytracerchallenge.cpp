@@ -2177,9 +2177,12 @@ TEST_CASE("OBJ file parser") {
     auto g1 = res.groups["FirstGroup"];
     auto g2 = res.groups["SecondGroup"];
     auto g3 = res.groups["Default"];
-    CHECK(shapeGroup->objects[0] == g2);
-    CHECK(shapeGroup->objects[1] == g1);
-    CHECK(shapeGroup->objects[2] == g3);
+    CHECK(std::find(shapeGroup->objects.begin(), shapeGroup->objects.end(), g1)
+          != shapeGroup->objects.end());
+    CHECK(std::find(shapeGroup->objects.begin(), shapeGroup->objects.end(), g2)
+          != shapeGroup->objects.end());
+    CHECK(std::find(shapeGroup->objects.begin(), shapeGroup->objects.end(), g3)
+          != shapeGroup->objects.end());
   }
   SUBCASE("Vertex normal records") {
     auto f = std::stringstream(
