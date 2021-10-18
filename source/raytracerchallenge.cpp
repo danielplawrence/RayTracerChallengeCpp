@@ -773,7 +773,7 @@ double RayTracerChallenge::Computations::schlick(
 RayTracerChallenge::Tuple RayTracerChallenge::Cylinder::localNormalAt(Tuple point,
                                                                       Intersection hit) {
   (void)hit;
-  auto dist = pow(point.x, 2) + pow(point.x, 2);
+  auto dist = pow(point.x, 2.0) + pow(point.z, 2.0);
   if (dist < 1.0 && point.y >= this->maximum - EPS) {
     return {0.0, 1.0, 0.0, 0.0};
   } else if (dist < 1.0 && point.y <= this->minimum + EPS) {
@@ -785,6 +785,20 @@ bool checkCap(RayTracerChallenge::Ray ray, double t, double capRadius = 1.0) {
   auto x = ray.origin.x + t * ray.direction.x;
   auto z = ray.origin.z + t * ray.direction.z;
   return (pow(x, 2) + pow(z, 2)) <= capRadius;
+}
+void intersectCaps(RayTracerChallenge::Cylinder &cyl, RayTracerChallenge::Ray ray,
+                   RayTracerChallenge::Intersections &xs) {
+  if (!cyl.closed || abs(ray.direction.y) < EPS) {
+    return;
+  }
+  auto t = (cyl.minimum - ray.origin.y) / ray.direction.y;
+  if (checkCap(ray, t)) {
+    xs.intersections.emplace_back(t, cyl.sharedPtr);
+  }
+  t = (cyl.maximum - ray.origin.y) / ray.direction.y;
+  if (checkCap(ray, t)) {
+    xs.intersections.emplace_back(t, cyl.sharedPtr);
+  }
 }
 RayTracerChallenge::Intersections RayTracerChallenge::Cylinder::localIntersect(
     RayTracerChallenge::Ray ray) {
@@ -798,7 +812,7 @@ RayTracerChallenge::Intersections RayTracerChallenge::Cylinder::localIntersect(
   auto t0 = (-b - sqrt(disc)) / (2.0 * a);
   auto t1 = (-b + sqrt(disc)) / (2.0 * a);
   if (t0 > t1) {
-    std::swap(t1, t0);
+    std::swap(t0, t1);
   }
   auto xs = Intersections();
   auto y0 = ray.origin.y + t0 * ray.direction.y;
@@ -809,17 +823,7 @@ RayTracerChallenge::Intersections RayTracerChallenge::Cylinder::localIntersect(
   if (this->minimum < y1 && y1 < this->maximum) {
     xs.intersections.emplace_back(t1, this->sharedPtr);
   }
-  if (!this->closed || abs(ray.direction.y - 0) < EPS) {
-    return xs;
-  }
-  auto t = (this->minimum - ray.origin.y) / ray.direction.y;
-  if (checkCap(ray, t)) {
-    xs.intersections.emplace_back(t, this->sharedPtr);
-  }
-  t = (this->maximum - ray.origin.y) / ray.direction.y;
-  if (checkCap(ray, t)) {
-    xs.intersections.emplace_back(t, this->sharedPtr);
-  }
+  intersectCaps(*this, ray, xs);
   return xs;
 }
 RayTracerChallenge::BoundingBox RayTracerChallenge::Cylinder::bounds() {

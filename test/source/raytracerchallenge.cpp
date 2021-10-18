@@ -1630,14 +1630,14 @@ TEST_CASE("Cubes") {
   }
 }
 static RayTracerChallenge::Intersections getIntersectionsForCylinder(
-    const std::shared_ptr<RayTracerChallenge::Shape>& cone, RayTracerChallenge::Tuple origin,
+    const std::shared_ptr<RayTracerChallenge::Shape>& cylinder, RayTracerChallenge::Tuple origin,
     RayTracerChallenge::Tuple direction) {
   auto r = RayTracerChallenge::Ray(origin, direction);
-  return cone->localIntersect(r);
+  return cylinder->localIntersect(r);
 }
 TEST_CASE("Cylinders") {
   using namespace raytracerchallenge;
-  SUBCASE("A ray misses a cone") {
+  SUBCASE("A ray misses a cylinder") {
     auto cone = RayTracerChallenge::Cylinder::create();
     auto res1
         = getIntersectionsForCylinder(cone, RayTracerChallenge::Tuple(1.0, 0.0, 0.0, 1.0),
@@ -1652,7 +1652,7 @@ TEST_CASE("Cylinders") {
                                       RayTracerChallenge::Tuple(1.0, 1.0, 1.0, 0.0).normalize());
     CHECK(res3.size() == 0);
   }
-  SUBCASE("A ray strikes a cone") {
+  SUBCASE("A ray strikes a cylinder") {
     auto cone = RayTracerChallenge::Cylinder::create();
     auto res1
         = getIntersectionsForCylinder(cone, RayTracerChallenge::Tuple(1.0, 0.0, -5.0, 1.0),
@@ -1670,7 +1670,7 @@ TEST_CASE("Cylinders") {
     CHECK(abs(res3[0].t - 6.80798) < 0.0001);
     CHECK(abs(res3[1].t - 7.08872) < 0.0001);
   }
-  SUBCASE("Normal vector on a cone") {
+  SUBCASE("Normal vector on a cylinder") {
     auto cone = RayTracerChallenge::Cylinder::create();
     CHECK(cone->localNormalAt({1.0, 0.0, 0.0, 1.0}, {})
           == RayTracerChallenge::Tuple(1.0, 0.0, 0.0, 0.0));
@@ -1681,7 +1681,7 @@ TEST_CASE("Cylinders") {
     CHECK(cone->localNormalAt({-1.0, 1.0, 0.0, 1.0}, {})
           == RayTracerChallenge::Tuple(-1.0, 0.0, 0.0, 0.0));
   }
-  SUBCASE("Truncated cones") {
+  SUBCASE("Truncated cylinders") {
     auto cone = RayTracerChallenge::Cylinder::create(1.0, 2.0);
     auto res1
         = getIntersectionsForCylinder(cone, RayTracerChallenge::Tuple(0.0, 1.5, 0.0, 1.0),
@@ -1708,7 +1708,7 @@ TEST_CASE("Cylinders") {
                                       RayTracerChallenge::Tuple(0.0, 0.0, 1.0, 0.0).normalize());
     CHECK(res6.size() == 2);
   }
-  SUBCASE("Intersecting a cones and end caps") {
+  SUBCASE("Intersecting a cylinder's end caps") {
     auto cone = RayTracerChallenge::Cylinder::create(1.0, 2.0, true);
     auto res1
         = getIntersectionsForCylinder(cone, RayTracerChallenge::Tuple(0.0, 3.0, 0.0, 1.0),
@@ -1731,7 +1731,7 @@ TEST_CASE("Cylinders") {
                                       RayTracerChallenge::Tuple(0.0, 1.0, 1.0, 0.0).normalize());
     CHECK(res5.size() == 2);
   }
-  SUBCASE("The normal vector on a cone's end caps") {
+  SUBCASE("The normal vector on a cylinder's end caps") {
     auto cone = RayTracerChallenge::Cylinder::create(1.0, 2.0, true);
     CHECK(cone->localNormalAt({0.0, 1.0, 0.0, 1.0}, {})
           == RayTracerChallenge::Tuple(0.0, -1.0, 0.0, 0.0));

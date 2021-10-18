@@ -20,41 +20,30 @@ std::shared_ptr<RayTracerChallenge::Shape> makeSphere() {
                                   static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
   return s;
 }
+
 auto main() -> int {
   std::cout << "Starting rendering" << std::endl;
   std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
 
   RayTracerChallenge::World world;
 
-  RayTracerChallenge::Camera camera(300, 225, 1.047);
-  auto from = RayTracerChallenge::Tuple::point(0.0, 0.0, -15.0);
-  auto to = RayTracerChallenge::Tuple::point(0.5, 0.0, 0.0);
+  RayTracerChallenge::Camera camera(400, 400, 1.047);
+  auto from = RayTracerChallenge::Tuple::point(3.0, 3.0, -3.0);
+  auto to = RayTracerChallenge::Tuple::point(0.0, 1.0, 0.0);
   auto up = RayTracerChallenge::Tuple::vector(0.0, 1.0, 0.0);
   camera.transform = RayTracerChallenge::Matrix::view(from, to, up);
 
-  world.light = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(-9.0, 9.0, -9.0),
-                                               RayTracerChallenge::Color(0.8, 0.8, 0.8));
+  world.light = RayTracerChallenge::PointLight(RayTracerChallenge::Tuple::point(5.0, 10.0, -5.0),
+                                               RayTracerChallenge::Color(1.0, 1.0, 1.0));
 
-  std::cout << "Loading file" << std::endl;
-  std::ifstream file("teapot.obj");
-  if (file) {
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    file.close();
-    std::cout << "Read the file" << std::endl;
-    auto parser = ObjParser::parse(buffer);
-    auto objects = parser.getObjects();
-    objects->transform = objects->transform.rotatedX(-M_PI / 2.0);
-    objects->transform = objects->transform.rotatedY(M_PI / 2.0);
-    std::cout << "Parsed the file" << std::endl;
-    std::cout << "Found "
-              << std::dynamic_pointer_cast<RayTracerChallenge::Group>(objects)->objects.size()
-              << " objects" << std::endl;
-    ;
-    world.add(objects);
-  }
+  auto cube1 = RayTracerChallenge::Cylinder::create(1.0, 2.0, true);
+  cube1->transform = cube1->transform.rotatedX(M_PI / 2).rotatedZ(M_PI / 2).rotatedY(M_PI / 8);
 
-  std::cout << "Rendering objects" << std::endl;
+  auto cube2 = RayTracerChallenge::Cylinder::create(1.0, 2.0);
+  cube2->transform = cube2->transform.rotatedX(M_PI / 2).translated(0.0, 0.0, 5.0);
+
+  world.add(cube1);
+  world.add(cube2);
   // world.add(plane);
   auto image = camera.render(world);
 
