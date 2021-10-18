@@ -2287,8 +2287,8 @@ TEST_CASE("Constructive Solid Geometry") {
     auto c = RayTracerChallenge::CSG::create(s1, s2, RayTracerChallenge::CSG::Union);
     auto cc = std::dynamic_pointer_cast<RayTracerChallenge::CSG>(c);
     auto xs = RayTracerChallenge::Intersections(
-        {RayTracerChallenge::Intersection(1, s1), RayTracerChallenge::Intersection(2, s2),
-         RayTracerChallenge::Intersection(3, s1), RayTracerChallenge::Intersection(4, s2)});
+        {RayTracerChallenge::Intersection(1.0, s1), RayTracerChallenge::Intersection(2.0, s2),
+         RayTracerChallenge::Intersection(3.0, s1), RayTracerChallenge::Intersection(4.0, s2)});
     auto result = cc->filterIntersections(xs);
     CHECK(result.size() == 2);
     CHECK(result.intersections[0] == RayTracerChallenge::Intersection(1, s1));
@@ -2300,12 +2300,12 @@ TEST_CASE("Constructive Solid Geometry") {
     auto c = RayTracerChallenge::CSG::create(s1, s2, RayTracerChallenge::CSG::Intersection);
     auto cc = std::dynamic_pointer_cast<RayTracerChallenge::CSG>(c);
     auto xs = RayTracerChallenge::Intersections(
-        {RayTracerChallenge::Intersection(1, s1), RayTracerChallenge::Intersection(2, s2),
-         RayTracerChallenge::Intersection(3, s1), RayTracerChallenge::Intersection(4, s2)});
+        {RayTracerChallenge::Intersection(1.0, s1), RayTracerChallenge::Intersection(2.0, s2),
+         RayTracerChallenge::Intersection(3.0, s1), RayTracerChallenge::Intersection(4.0, s2)});
     auto result = cc->filterIntersections(xs);
     CHECK(result.size() == 2);
-    CHECK(result.intersections[0] == RayTracerChallenge::Intersection(2, s2));
-    CHECK(result.intersections[1] == RayTracerChallenge::Intersection(3, s1));
+    CHECK(result.intersections[0] == RayTracerChallenge::Intersection(2.0, s2));
+    CHECK(result.intersections[1] == RayTracerChallenge::Intersection(3.0, s1));
   }
   SUBCASE("Filtering intersections for a Difference") {
     auto s1 = RayTracerChallenge::Sphere::create();
@@ -2313,12 +2313,12 @@ TEST_CASE("Constructive Solid Geometry") {
     auto c = RayTracerChallenge::CSG::create(s1, s2, RayTracerChallenge::CSG::Difference);
     auto cc = std::dynamic_pointer_cast<RayTracerChallenge::CSG>(c);
     auto xs = RayTracerChallenge::Intersections(
-        {RayTracerChallenge::Intersection(1, s1), RayTracerChallenge::Intersection(2, s2),
-         RayTracerChallenge::Intersection(3, s1), RayTracerChallenge::Intersection(4, s2)});
+        {RayTracerChallenge::Intersection(1.0, s1), RayTracerChallenge::Intersection(2.0, s2),
+         RayTracerChallenge::Intersection(3.0, s1), RayTracerChallenge::Intersection(4.0, s2)});
     auto result = cc->filterIntersections(xs);
     CHECK(result.size() == 2);
-    CHECK(result.intersections[0] == RayTracerChallenge::Intersection(1, s1));
-    CHECK(result.intersections[1] == RayTracerChallenge::Intersection(2, s2));
+    CHECK(result.intersections[0] == RayTracerChallenge::Intersection(1.0, s1));
+    CHECK(result.intersections[1] == RayTracerChallenge::Intersection(2.0, s2));
   }
   SUBCASE("A ray misses a CSG object") {
     auto s1 = RayTracerChallenge::Sphere::create();
