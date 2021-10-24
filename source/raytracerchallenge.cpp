@@ -367,7 +367,9 @@ bool RayTracerChallenge::Shape::operator==(const Shape &object) const {
   return this->transform == object.transform && this->material == object.material;
 }
 bool RayTracerChallenge::Shape::includes(const Shape &object) const { return this->is(object); }
-bool RayTracerChallenge::Shape::is(const Shape &object) const { return this->sharedPtr == object.sharedPtr; }
+bool RayTracerChallenge::Shape::is(const Shape &object) const {
+  return this->sharedPtr == object.sharedPtr;
+}
 RayTracerChallenge::Intersection::Intersection(double t, std::shared_ptr<Shape> object) {
   this->t = t;
   this->object = std::move(object);
