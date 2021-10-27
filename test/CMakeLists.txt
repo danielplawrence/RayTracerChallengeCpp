@@ -25,7 +25,7 @@ CPMAddPackage(
   DOWNLOAD_ONLY YES
 )
 if(Eigen_ADDED)
-  add_library(Eigen INTERFACE IMPORTED)
+  add_library(Eigen INTERFACE IMPORTED source/raytracerchallenge/base/*)
   target_include_directories(Eigen INTERFACE ${Eigen_SOURCE_DIR})
 endif()
 if(TEST_INSTALLED_VERSION)
@@ -36,12 +36,10 @@ endif()
 
 # ---- Create binary ----
 
-file(GLOB sources CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
+file(GLOB_RECURSE sources CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
 add_executable(RayTracerChallengeTests ${sources})
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-pthread")
-target_link_libraries(
-  RayTracerChallengeTests doctest::doctest RayTracerChallenge::RayTracerChallenge
-)
+target_link_libraries(RayTracerChallengeTests doctest::doctest RayTracerChallenge)
 set_target_properties(RayTracerChallengeTests PROPERTIES CXX_STANDARD 17)
 
 # enable compiler warnings

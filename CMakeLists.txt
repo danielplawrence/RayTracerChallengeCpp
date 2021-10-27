@@ -41,7 +41,10 @@ CPMAddPackage(
 )
 
 if(Eigen_ADDED)
-  add_library(Eigen INTERFACE IMPORTED)
+  add_library(
+    Eigen INTERFACE IMPORTED include/raytracerchallenge/base/Material.h
+    include/raytracerchallenge/base/Intersections.h
+  )
   target_include_directories(Eigen INTERFACE ${Eigen_SOURCE_DIR})
 endif()
 
@@ -55,7 +58,10 @@ file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/
 # ---- Create library ----
 
 # Note: for header-only libraries change all PUBLIC flags to INTERFACE and create an interface
-add_library(RayTracerChallenge ${headers} ${sources})
+add_library(
+  RayTracerChallenge ${headers} ${sources} include/raytracerchallenge/base/BoundingBox.h
+                     source/raytracerchallenge/base/Intersections.cpp
+)
 
 set_target_properties(RayTracerChallenge PROPERTIES CXX_STANDARD 17)
 
