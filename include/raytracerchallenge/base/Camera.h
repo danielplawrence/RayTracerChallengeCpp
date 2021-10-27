@@ -39,4 +39,4 @@ namespace raytracerchallenge {
      */
     [[nodiscard]] Canvas render(World world) const;
   };
-};  // namespace raytracerchallenge
+}  // namespace raytracerchallenge

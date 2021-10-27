@@ -1,8 +1,9 @@
 #pragma once
 
-#include <vector>
+#include <raytracerchallenge/base/Color.h>
 
-#include "Color.h"
+#include <string>
+#include <vector>
 
 namespace raytracerchallenge {
   /**
