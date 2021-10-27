@@ -1,6 +1,9 @@
+#define _USE_MATH_DEFINES
 #include <doctest/doctest.h>
 #include <raytracerchallenge/base/BoundingBox.h>
 #include <raytracerchallenge/shapes/Sphere.h>
+
+#include <cmath>
 
 using namespace raytracerchallenge;
 

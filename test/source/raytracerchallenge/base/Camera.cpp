@@ -1,7 +1,8 @@
 #define _USE_MATH_DEFINES
-#include <cmath>
 #include <doctest/doctest.h>
 #include <raytracerchallenge/base/Camera.h>
+
+#include <cmath>
 
 using namespace raytracerchallenge;
 

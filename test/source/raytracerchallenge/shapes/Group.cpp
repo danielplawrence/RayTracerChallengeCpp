@@ -1,9 +1,10 @@
 #define _USE_MATH_DEFINES
-#include <cmath>
 #include <doctest/doctest.h>
 #include <raytracerchallenge/shapes/Cylinder.h>
 #include <raytracerchallenge/shapes/Group.h>
 #include <raytracerchallenge/shapes/Sphere.h>
+
+#include <cmath>
 
 using namespace raytracerchallenge;
 
