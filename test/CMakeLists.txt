@@ -25,7 +25,7 @@ CPMAddPackage(
   DOWNLOAD_ONLY YES
 )
 if(Eigen_ADDED)
-  add_library(Eigen INTERFACE IMPORTED source/raytracerchallenge/base/*)
+  add_library(Eigen INTERFACE IMPORTED)
   target_include_directories(Eigen INTERFACE ${Eigen_SOURCE_DIR})
 endif()
 if(TEST_INSTALLED_VERSION)
