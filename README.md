@@ -2,7 +2,6 @@
 [![Actions Status](https://github.com/danielplawrence/RayTracerChallengeCpp/workflows/Windows/badge.svg)](https://github.com/danielplawrence/RayTracerChallengeCpp/actions)
 [![Actions Status](https://github.com/danielplawrence/RayTracerChallengeCpp/workflows/Ubuntu/badge.svg)](https://github.com/danielplawrence/RayTracerChallengeCpp/actions)
 [![Actions Status](https://github.com/danielplawrence/RayTracerChallengeCpp/workflows/Style/badge.svg)](https://github.com/danielplawrence/RayTracerChallengeCpp/actions)
-[![Actions Status](https://github.com/danielplawrence/RayTracerChallengeCpp/workflows/Install/badge.svg)](https://github.com/danielplawrence/RayTracerChallengeCpp/actions)
 [![codecov](https://codecov.io/gh/TheLartians/ModernCppStarter/branch/master/graph/badge.svg)](https://codecov.io/gh/danielplawrence/RayTracerChallengeCpp)
 
 # RayTracerChallenge
