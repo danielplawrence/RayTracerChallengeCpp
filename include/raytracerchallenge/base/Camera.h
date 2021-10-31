@@ -31,12 +31,12 @@ namespace raytracerchallenge {
      * @param y Y positionim
      * @return Ray
      */
-    [[nodiscard]] Ray rayForPixel(int x, int y) const;
+    [[nodiscard]] Ray rayForPixel(int x, int y);
     /**
      * Render a world using this camera
      * @param world The World to render
      * @return a Canvas containing the rendered image
      */
-    [[nodiscard]] Canvas render(World world) const;
+    [[nodiscard]] Canvas render(World world);
   };
 }  // namespace raytracerchallenge

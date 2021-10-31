@@ -5,6 +5,7 @@
 #include <raytracerchallenge/base/Matrix.h>
 
 #include <cmath>
+#include <optional>
 #include <vector>
 
 namespace raytracerchallenge {
@@ -33,7 +34,13 @@ namespace raytracerchallenge {
 
   double Matrix::determinant() const { return this->m.determinant(); }
   bool Matrix::invertible() const { return determinant() != 0.0; }
-  Matrix Matrix::inverse() const { return Matrix(this->m.inverse()); }
+  Matrix Matrix::inverse() {
+    if (this->inv != nullptr) {
+      return *this->inv;
+    }
+    this->inv = std::shared_ptr<Matrix>(new Matrix(this->m.inverse()));
+    return *this->inv;
+  }
   Matrix Matrix::translation(double x, double y, double z) {
     Matrix res = Matrix::identity(4);
     res.m(0, 3) = x;

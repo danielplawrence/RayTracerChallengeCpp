@@ -5,7 +5,7 @@ namespace raytracerchallenge {
     this->a = a;
     this->b = b;
   }
-  Color StripePattern::colorAt(std::shared_ptr<Shape> shape, Tuple point) const {
+  Color StripePattern::colorAt(std::shared_ptr<Shape> shape, Tuple point) {
     auto objectPoint = shape->worldToObject(point);
     auto patternPoint = this->transform.inverse() * objectPoint;
     if (int(floor(patternPoint.x)) % 2 == 0) {

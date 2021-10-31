@@ -5,7 +5,7 @@ namespace raytracerchallenge {
     this->a = a;
     this->b = b;
   }
-  Color RingPattern::colorAt(std::shared_ptr<Shape> shape, Tuple point) const {
+  Color RingPattern::colorAt(std::shared_ptr<Shape> shape, Tuple point) {
     auto objectPoint = shape->transform.inverse() * point;
     auto patternPoint = this->transform.inverse() * objectPoint;
     auto xSquared = pow(patternPoint.x, 2);

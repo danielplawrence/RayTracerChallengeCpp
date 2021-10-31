@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <optional>
 #include <vector>
 
 #include "Tuple.h"
@@ -80,7 +81,7 @@ namespace raytracerchallenge {
      * @brief Return the inverse of this Matrix
      * @return the inverse of this Matrix
      */
-    [[nodiscard]] Matrix inverse() const;
+    [[nodiscard]] Matrix inverse();
     /**
      * @brief Translate this matrix using the provided x, y, z values
      * @param x value for x
@@ -180,5 +181,8 @@ namespace raytracerchallenge {
      * @return View transform
      */
     static Matrix view(Tuple from, Tuple to, Tuple up);
+
+  private:
+    std::shared_ptr<Matrix> inv = nullptr;
   };
 }  // namespace raytracerchallenge

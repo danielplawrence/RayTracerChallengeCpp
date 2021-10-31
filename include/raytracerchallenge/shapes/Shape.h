@@ -84,7 +84,7 @@ namespace raytracerchallenge {
      * @param point Point in world space
      * @return point in object space
      */
-    [[nodiscard]] Tuple worldToObject(Tuple point) const {
+    [[nodiscard]] Tuple worldToObject(Tuple point) {
       Tuple p = point;
       if (this->parent != nullptr) {
         p = this->parent->worldToObject(p);
@@ -97,7 +97,7 @@ namespace raytracerchallenge {
      * @param normal Normal vector in object space
      * @return Normal vector in world space
      */
-    [[nodiscard]] Tuple normalToWorld(Tuple normal) const {
+    [[nodiscard]] Tuple normalToWorld(Tuple normal) {
       normal = this->transform.inverse().transposed() * normal;
       normal.w = 0.0;
       normal = normal.normalize();

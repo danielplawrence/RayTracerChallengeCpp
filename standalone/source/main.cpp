@@ -15,7 +15,7 @@ auto main() -> int {
 
   World world;
 
-  Camera camera(600, 800, 1.047);
+  Camera camera(600, 250, 1.047);
   auto from = Tuple::point(0.0, 0.0, -15.0);
   auto to = Tuple::point(0.5, 0.0, 0.0);
   auto up = Tuple::vector(0.0, 1.0, 0.0);
@@ -34,7 +34,7 @@ auto main() -> int {
     auto objects = parser.getObjects();
     objects->divide(1);
 
-    objects->transform = objects->transform.scaled(6, 6, 6);
+    objects->transform = objects->transform.scaled(4, 4, 4);
     objects->transform = objects->transform.translated(0.0, -2.0, 0.0);
     objects->transform = objects->transform.rotatedX(-M_PI / 4);
 

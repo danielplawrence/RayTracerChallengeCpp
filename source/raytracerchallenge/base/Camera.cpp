@@ -21,7 +21,7 @@ namespace raytracerchallenge {
     }
     pixelSize = (halfWidth * 2.0) / double(hSize);
   }
-  Ray Camera::rayForPixel(int x, int y) const {
+  Ray Camera::rayForPixel(int x, int y) {
     auto xOffset = (x + 0.5) * pixelSize;
     auto yOffset = (y + 0.5) * pixelSize;
     auto worldX = double(halfWidth - xOffset);
@@ -31,7 +31,7 @@ namespace raytracerchallenge {
     auto direction = (pixel - origin).normalize();
     return {origin, direction};
   }
-  Canvas Camera::render(World world) const {
+  Canvas Camera::render(World world) {
     auto image = Canvas(hSize, vSize);
     parallelFor(vSize, [this, &world, &image](int s, int e) {
       for (int y = s; y < e; y++) {

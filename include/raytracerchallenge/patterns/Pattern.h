@@ -16,6 +16,6 @@ namespace raytracerchallenge {
      * @param point
      * @return Color
      */
-    [[nodiscard]] virtual Color colorAt(std::shared_ptr<Shape> shape, Tuple point) const = 0;
+    [[nodiscard]] virtual Color colorAt(std::shared_ptr<Shape> shape, Tuple point) = 0;
   };
 }  // namespace raytracerchallenge

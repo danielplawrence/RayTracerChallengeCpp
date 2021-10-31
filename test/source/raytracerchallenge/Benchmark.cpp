@@ -46,7 +46,7 @@ void renderScene() {
 
   world.light = PointLight(Tuple::point(-9.0, 9.0, -9.0), Color(1.0, 1.0, 1.0));
 
-  for (int i = 0; i < 5; ++i) {
+  for (int i = 0; i < 10; ++i) {
     world.add(makeSphere());
   }
 
@@ -59,9 +59,9 @@ void renderScene() {
   plane->material->refractiveIndex = 0.5;
 
   auto image = camera.render(world);
-  std::ofstream out("test_image.ppm");
-  out << image.toPortablePixmap();
-  out.close();
+  // std::ofstream out("test_image.ppm");
+  // out << image.toPortablePixmap();
+  // out.close();
 }
 TEST_CASE("Render speed") {
   auto dur = timeit(renderScene);

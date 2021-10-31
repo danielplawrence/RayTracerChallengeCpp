@@ -13,6 +13,6 @@ namespace raytracerchallenge {
 
   public:
     CheckersPattern(Color a, Color b);
-    [[nodiscard]] Color colorAt(std::shared_ptr<Shape> shape, Tuple point) const override;
+    [[nodiscard]] Color colorAt(std::shared_ptr<Shape> shape, Tuple point) override;
   };
 }  // namespace raytracerchallenge

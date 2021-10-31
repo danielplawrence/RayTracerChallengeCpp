@@ -219,7 +219,7 @@ TEST_CASE("Reflection") {
   SUBCASE("The refracted color with a refracted ray") {
     class TestPattern : public Pattern {
     public:
-      [[nodiscard]] Color colorAt(std::shared_ptr<Shape> shape, Tuple point) const override {
+      [[nodiscard]] Color colorAt(std::shared_ptr<Shape> shape, Tuple point) override {
         (void)shape;
         return {point.x, point.y, point.z};
       }
