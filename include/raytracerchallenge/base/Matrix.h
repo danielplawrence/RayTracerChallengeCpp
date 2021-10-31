@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 #include <optional>
 #include <vector>
+#include <memory>
 
 #include "Tuple.h"
 
