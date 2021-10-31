@@ -22,10 +22,15 @@ namespace raytracerchallenge {
      * @brief Add an object to the group
      * @param object pointer to target object
      */
-    void add(const std::shared_ptr<Shape> &object);
+    void add(const std::shared_ptr<Shape>& object);
+    void remove(std::shared_ptr<Shape> object);
     BoundingBox bounds() override;
     Tuple localNormalAt(Tuple point, Intersection hit) override;
     Intersections localIntersect(Ray ray) override;
-    [[nodiscard]] bool includes(const Shape &object) const override;
+    [[nodiscard]] bool includes(const Shape& object) const override;
+    std::vector<std::vector<std::shared_ptr<Shape>>> partitionChildren();
+    void makeSubgroup(const std::vector<std::shared_ptr<Shape>>& shapes);
+    void divide(unsigned int threshold) override;
+    void setMaterial(std::shared_ptr<Material>& newMaterial) override;
   };
 }  // namespace raytracerchallenge

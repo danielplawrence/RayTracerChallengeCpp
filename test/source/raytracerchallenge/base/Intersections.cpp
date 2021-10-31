@@ -172,10 +172,10 @@ TEST_CASE("Ray-sphere intersections") {
     a->transform = a->transform.scaled(2.0, 2.0, 2.0);
     auto b = GlassSphere::create();
     b->transform = b->transform.translated(0.0, 0.0, -0.25);
-    b->material.refractiveIndex = 2.0;
+    b->material->refractiveIndex = 2.0;
     auto c = GlassSphere::create();
     c->transform = c->transform.translated(0.0, 0.0, 0.25);
-    c->material.refractiveIndex = 2.5;
+    c->material->refractiveIndex = 2.5;
     auto r = Ray({0.0, 0.0, -4.0, 1.0}, {0.0, 0.0, 1.0, 0.0});
     auto xs = Intersections({
         {2.0, a},

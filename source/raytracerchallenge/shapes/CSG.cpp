@@ -55,4 +55,8 @@ namespace raytracerchallenge {
   bool CSG::includes(const Shape &object) const {
     return this->left->includes(object) || this->right->includes(object);
   }
+  void CSG::divide(unsigned int threshold) {
+    this->left->divide(threshold);
+    this->right->divide(threshold);
+  }
 }  // namespace raytracerchallenge

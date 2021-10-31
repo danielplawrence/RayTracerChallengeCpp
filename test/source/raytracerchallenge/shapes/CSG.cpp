@@ -2,6 +2,7 @@
 #include <raytracerchallenge/base/Intersections.h>
 #include <raytracerchallenge/shapes/CSG.h>
 #include <raytracerchallenge/shapes/Cube.h>
+#include <raytracerchallenge/shapes/Group.h>
 #include <raytracerchallenge/shapes/Sphere.h>
 
 using namespace raytracerchallenge;
@@ -83,5 +84,27 @@ TEST_CASE("Constructive Solid Geometry") {
     auto box = shape->bounds();
     CHECK(box.min == Tuple::point(-1.0, -1.0, -1.0));
     CHECK(box.max == Tuple::point(3.0, 4.0, 5.0));
+  }
+  SUBCASE("Subdividing a CSG shape subdivides its children") {
+    auto s1 = Sphere::create();
+    s1->transform = s1->transform.translated(-1.5, 0.0, 0.0);
+    auto s2 = Sphere::create();
+    s2->transform = s2->transform.translated(1.5, 0.0, 0.0);
+    auto left = Group();
+    left.add(s1);
+    left.add(s2);
+    auto s3 = Sphere::create();
+    s3->transform = s3->transform.translated(0.0, 0.0, -1.5);
+    auto s4 = Sphere::create();
+    s4->transform = s4->transform.translated(0.0, 0.0, 1.5);
+    auto right = Group();
+    right.add(s3);
+    right.add(s4);
+    auto shape = CSG::create(left.sharedPtr, right.sharedPtr, CSG::Difference);
+    shape->divide(1);
+    CHECK(left.objects[0]->includes(*s1));
+    CHECK(left.objects[1]->includes(*s2));
+    CHECK(right.objects[0]->includes(*s3));
+    CHECK(right.objects[1]->includes(*s4));
   }
 }

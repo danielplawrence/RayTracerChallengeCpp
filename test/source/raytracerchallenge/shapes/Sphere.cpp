@@ -10,12 +10,12 @@ TEST_CASE("Spheres") {
   SUBCASE("A Sphere has a default material") {
     auto sphere = Sphere::create();
     Material material;
-    CHECK(sphere->material == material);
+    CHECK(*sphere->material == material);
   }
   SUBCASE("A Sphere may be assigned a material") {
     auto sphere = Sphere::create();
-    Material material;
-    material.ambient = 1.0;
+    auto material = std::shared_ptr<Material>(new Material());
+    material->ambient = 1.0;
     sphere->material = material;
     CHECK(sphere->material == material);
   }

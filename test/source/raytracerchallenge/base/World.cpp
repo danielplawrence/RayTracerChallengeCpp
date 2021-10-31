@@ -15,9 +15,9 @@ TEST_CASE("World") {
   SUBCASE("The default world") {
     auto world = World::defaultWorld();
     auto sphere1 = Sphere::create();
-    sphere1->material.color = Color(0.8, 1.0, 0.6);
-    sphere1->material.diffuse = 0.7;
-    sphere1->material.specular = 0.2;
+    sphere1->material->color = Color(0.8, 1.0, 0.6);
+    sphere1->material->diffuse = 0.7;
+    sphere1->material->specular = 0.2;
     auto sphere2 = Sphere::create();
     sphere2->transform = Matrix::scaling(0.5, 0.5, 0.5);
     CHECK(world.light->position == Tuple::point(-10.0, 10.0, -10.0));
@@ -82,11 +82,11 @@ TEST_CASE("World") {
   }
   SUBCASE("The color with an intersection behind the ray") {
     auto world = World::defaultWorld();
-    world.objects[0]->material.ambient = 1.0;
-    world.objects[1]->material.ambient = 1.0;
+    world.objects[0]->material->ambient = 1.0;
+    world.objects[1]->material->ambient = 1.0;
     auto ray = Ray(Tuple::point(0.0, 0.0, 0.75), Tuple::vector(0.0, 0.0, -1.0));
     auto color = world.colorAt(ray, 4);
-    CHECK(color == world.objects[1]->material.color);
+    CHECK(color == world.objects[1]->material->color);
   }
   SUBCASE("There is no shadow when nothing is collinear with the point and light") {
     auto world = World::defaultWorld();
@@ -110,7 +110,7 @@ TEST_CASE("World") {
   }
   SUBCASE("There is no shadow when the object does not cast shadows") {
     auto world = World::defaultWorld();
-    world.objects[0]->material.castShadow = false;
+    world.objects[0]->material->castShadow = false;
     auto point = Tuple::point(10.0, -10.0, 10.0);
     CHECK(world.isShadowed(point) == false);
   }
@@ -132,7 +132,7 @@ TEST_CASE("Reflection") {
     auto w = World::defaultWorld();
     auto r = Ray({0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 1.0, 0.0});
     auto shape = w.objects[1];
-    shape->material.ambient = 1.0;
+    shape->material->ambient = 1.0;
     auto i = Intersection(1.0, shape);
     auto comps = i.prepareComputations(r);
     auto color = w.reflectedColorAt(comps, 4);
@@ -141,7 +141,7 @@ TEST_CASE("Reflection") {
   SUBCASE("The reflected color for a reflective material") {
     auto w = World::defaultWorld();
     auto shape = Plane::create();
-    shape->material.reflective = 0.5;
+    shape->material->reflective = 0.5;
     shape->transform = shape->transform.translated(0.0, -1.0, 0.0);
     w.add(shape);
     auto r = Ray({0.0, 0.0, -3.0, 1.0}, {0.0, -sqrt(2.0) / 2.0, sqrt(2.0) / 2.0, 0.0});
@@ -153,7 +153,7 @@ TEST_CASE("Reflection") {
   SUBCASE("Shading a hit for a reflective material") {
     auto w = World::defaultWorld();
     auto shape = Plane::create();
-    shape->material.reflective = 0.5;
+    shape->material->reflective = 0.5;
     shape->transform = shape->transform.translated(0.0, -1.0, 0.0);
     w.add(shape);
     auto r = Ray({0.0, 0.0, -3.0, 1.0}, {0.0, -sqrt(2.0) / 2.0, sqrt(2.0) / 2.0, 0.0});
@@ -166,11 +166,11 @@ TEST_CASE("Reflection") {
     auto w = World::defaultWorld();
     w.light = PointLight({0.0, 0.0, 0.0, 1.0}, {1.0, 1.0, 1.0});
     auto lower = Plane::create();
-    lower->material.reflective = 1.0;
+    lower->material->reflective = 1.0;
     lower->transform = lower->transform.translated(0.0, -1.0, 0.0);
     w.add(lower);
     auto upper = Plane::create();
-    upper->material.reflective = 1.0;
+    upper->material->reflective = 1.0;
     upper->transform = upper->transform.translated(0.0, 1.0, 0.0);
     w.add(upper);
     auto r = Ray({0.0, 0.0, 0.0, 1.0}, {0.0, 1.0, 0.0, 0.0});
@@ -179,7 +179,7 @@ TEST_CASE("Reflection") {
   SUBCASE("The reflected color for a reflective material at maximum recursion depth") {
     auto w = World::defaultWorld();
     auto shape = Plane::create();
-    shape->material.reflective = 0.5;
+    shape->material->reflective = 0.5;
     shape->transform = shape->transform.translated(0.0, -1.0, 0.0);
     w.add(shape);
     auto r = Ray({0.0, 0.0, -3.0, 1.0}, {0.0, -sqrt(2.0) / 2.0, sqrt(2.0) / 2.0, 0.0});
@@ -199,8 +199,8 @@ TEST_CASE("Reflection") {
   SUBCASE("The refracted color at the maximum recursive depth") {
     auto w = World::defaultWorld();
     auto shape = w.objects[0];
-    shape->material.refractiveIndex = 1.5;
-    shape->material.transparency = 1.0;
+    shape->material->refractiveIndex = 1.5;
+    shape->material->transparency = 1.0;
     auto r = Ray({0.0, 0.0, -5.0, 1.0}, {0.0, 0.0, 1.0, 0.0});
     auto xs = Intersections({{4.0, shape}, {6.0, shape}});
     auto comps = xs[0].prepareComputations(r, xs);
@@ -209,8 +209,8 @@ TEST_CASE("Reflection") {
   SUBCASE("The refracted color under total internal reflection") {
     auto w = World::defaultWorld();
     auto shape = w.objects[0];
-    shape->material.refractiveIndex = 1.5;
-    shape->material.transparency = 1.0;
+    shape->material->refractiveIndex = 1.5;
+    shape->material->transparency = 1.0;
     auto r = Ray({0.0, 0.0, sqrt(2.0 / 2.0), 1.0}, {0.0, 1.0, 0.0, 0.0});
     auto xs = Intersections({{-sqrt(2.0) / 2.0, shape}, {sqrt(2.0) / 2.0, shape}});
     auto comps = xs[1].prepareComputations(r, xs);
@@ -226,12 +226,12 @@ TEST_CASE("Reflection") {
     };
     auto w = World::defaultWorld();
     auto a = w.objects[0];
-    a->material.ambient = 1.0;
+    a->material->ambient = 1.0;
     auto pattern = TestPattern();
-    a->material.pattern = &pattern;
+    a->material->pattern = &pattern;
     auto b = w.objects[1];
-    b->material.transparency = 1.0;
-    b->material.refractiveIndex = 1.5;
+    b->material->transparency = 1.0;
+    b->material->refractiveIndex = 1.5;
     auto r = Ray({0.0, 0.0, 0.1, 1.0}, {0.0, 1.0, 0.0, 0.0});
     auto xs = Intersections({
         {-0.9899, a},
@@ -246,12 +246,12 @@ TEST_CASE("Reflection") {
     auto w = World::defaultWorld();
     auto floor = Plane::create();
     floor->transform = Matrix::translation(0.0, -1.0, 0.0);
-    floor->material.refractiveIndex = 1.5;
-    floor->material.transparency = 0.5;
+    floor->material->refractiveIndex = 1.5;
+    floor->material->transparency = 0.5;
     w.add(floor);
     auto ball = Sphere::create();
-    ball->material.color = Color(1.0, 0.0, 0.0);
-    ball->material.ambient = 0.5;
+    ball->material->color = Color(1.0, 0.0, 0.0);
+    ball->material->ambient = 0.5;
     ball->transform = Matrix::translation(0.0, -3.5, -0.5);
     w.add(ball);
     auto r = Ray({0.0, 0.0, -3.0, 1.0}, {0.0, -sqrt(2.0) / 2, sqrt(2.0) / 2, 0.0});
@@ -264,13 +264,13 @@ TEST_CASE("Reflection") {
     auto w = World::defaultWorld();
     auto floor = Plane::create();
     floor->transform = Matrix::translation(0.0, -1.0, 0.0);
-    floor->material.refractiveIndex = 1.5;
-    floor->material.reflective = 0.5;
-    floor->material.transparency = 0.5;
+    floor->material->refractiveIndex = 1.5;
+    floor->material->reflective = 0.5;
+    floor->material->transparency = 0.5;
     w.add(floor);
     auto ball = Sphere::create();
-    ball->material.color = Color(1.0, 0.0, 0.0);
-    ball->material.ambient = 0.5;
+    ball->material->color = Color(1.0, 0.0, 0.0);
+    ball->material->ambient = 0.5;
     ball->transform = Matrix::translation(0.0, -3.5, -0.5);
     w.add(ball);
     auto r = Ray({0.0, 0.0, -3.0, 1.0}, {0.0, -sqrt(2.0) / 2, sqrt(2.0) / 2, 0.0});

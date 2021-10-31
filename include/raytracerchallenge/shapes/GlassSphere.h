@@ -9,8 +9,8 @@ namespace raytracerchallenge {
   class GlassSphere : public Sphere {
   public:
     GlassSphere() {
-      this->material.transparency = 1.0;
-      this->material.refractiveIndex = 1.5;
+      this->material->transparency = 1.0;
+      this->material->refractiveIndex = 1.5;
     }
     static std::shared_ptr<Shape> create() {
       auto shape = new GlassSphere();

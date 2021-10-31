@@ -64,5 +64,11 @@ namespace raytracerchallenge {
      * @return True if ray intersects this box
      */
     [[nodiscard]] bool intersects(Ray ray) const;
+    /**
+     * Split this box in two
+     * @return A vector, where the first element is the
+     * left-hand box and the second is the right-hand box
+     */
+    std::vector<BoundingBox> split();
   };
 }  // namespace raytracerchallenge

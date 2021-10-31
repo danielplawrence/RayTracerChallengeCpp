@@ -92,4 +92,54 @@ TEST_CASE("Bounding boxes") {
     CHECK(!box.intersects({{8.0, 6.0, -1.0, 1.0}, {0.0, -1.0, 0.0, 0.0}}));
     CHECK(!box.intersects({{12.0, 5.0, 4.0, 1.0}, {-1.0, 0.0, 0.0, 0.0}}));
   }
+  SUBCASE("Splitting a perfect cube") {
+    auto box = BoundingBox({-1.0, -4.0, -5.0, 1.0}, {9.0, 6.0, 5.0, 1.0});
+    auto boxes = box.split();
+    auto left = boxes[0];
+    auto right = boxes[1];
+    CHECK(left.min == Tuple(-1.0, -4.0, -5.0, 1.0));
+    CHECK(left.max == Tuple(4.0, 6.0, 5.0, 1.0));
+    CHECK(right.min == Tuple(4.0, -4.0, -5.0, 1.0));
+    CHECK(right.max == Tuple(9.0, 6.0, 5.0, 1.0));
+  }
+  SUBCASE("Splitting an x-wide box") {
+    auto box = BoundingBox({-1.0, -2.0, -3.0, 1.0}, {9.0, 5.5, 3.0, 1.0});
+    auto boxes = box.split();
+    auto left = boxes[0];
+    auto right = boxes[1];
+    CHECK(left.min == Tuple(-1.0, -2.0, -3.0, 1.0));
+    CHECK(left.max == Tuple(4.0, 5.5, 3.0, 1.0));
+    CHECK(right.min == Tuple(4.0, -2.0, -3.0, 1.0));
+    CHECK(right.max == Tuple(9.0, 5.5, 3.0, 1.0));
+  }
+  SUBCASE("Splitting an y-wide box") {
+    auto box = BoundingBox({-1.0, -2.0, -3.0, 1.0}, {5.0, 8.0, 3.0, 1.0});
+    auto boxes = box.split();
+    auto left = boxes[0];
+    auto right = boxes[1];
+    CHECK(left.min == Tuple(-1.0, -2.0, -3.0, 1.0));
+    CHECK(left.max == Tuple(5.0, 3.0, 3.0, 1.0));
+    CHECK(right.min == Tuple(-1.0, 3.0, -3.0, 1.0));
+    CHECK(right.max == Tuple(5.0, 8.0, 3.0, 1.0));
+  }
+  SUBCASE("Splitting an y-wide box") {
+    auto box = BoundingBox({-1.0, -2.0, -3.0, 1.0}, {5.0, 8.0, 3.0, 1.0});
+    auto boxes = box.split();
+    auto left = boxes[0];
+    auto right = boxes[1];
+    CHECK(left.min == Tuple(-1.0, -2.0, -3.0, 1.0));
+    CHECK(left.max == Tuple(5.0, 3.0, 3.0, 1.0));
+    CHECK(right.min == Tuple(-1.0, 3.0, -3.0, 1.0));
+    CHECK(right.max == Tuple(5.0, 8.0, 3.0, 1.0));
+  }
+  SUBCASE("Splitting an z-wide box") {
+    auto box = BoundingBox({-1.0, -2.0, -3.0, 1.0}, {5.0, 3.0, 7.0, 1.0});
+    auto boxes = box.split();
+    auto left = boxes[0];
+    auto right = boxes[1];
+    CHECK(left.min == Tuple(-1.0, -2.0, -3.0, 1.0));
+    CHECK(left.max == Tuple(5.0, 3.0, 2.0, 1.0));
+    CHECK(right.min == Tuple(-1.0, -2.0, 2.0, 1.0));
+    CHECK(right.max == Tuple(5.0, 3.0, 7.0, 1.0));
+  }
 }

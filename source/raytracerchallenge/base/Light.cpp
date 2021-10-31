@@ -8,14 +8,14 @@ namespace raytracerchallenge {
     Color specular;
     Color ambient;
     Color color;
-    if (shape->material.pattern != nullptr) {
-      color = shape->material.pattern->colorAt(shape, position);
+    if (shape->material->pattern != nullptr) {
+      color = shape->material->pattern->colorAt(shape, position);
     } else {
-      color = shape->material.color;
+      color = shape->material->color;
     }
     auto effectiveColor = color * light.intensity;
     auto lightVector = (light.position - position).normalize();
-    ambient = effectiveColor * shape->material.ambient;
+    ambient = effectiveColor * shape->material->ambient;
     if (inShadow) {
       return ambient;
     }
@@ -24,14 +24,14 @@ namespace raytracerchallenge {
       diffuse = Color(0.0, 0.0, 0.0);
       specular = Color(0.0, 0.0, 0.0);
     } else {
-      diffuse = effectiveColor * shape->material.diffuse * lightDotNormal;
+      diffuse = effectiveColor * shape->material->diffuse * lightDotNormal;
       auto reflectVector = (-lightVector).reflect(normalVector);
       auto reflectDotEye = reflectVector.dot(eyeVector);
       if (reflectDotEye <= 0.0) {
         specular = Color(0.0, 0.0, 0.0);
       } else {
-        auto factor = pow(reflectDotEye, shape->material.shininess);
-        specular = light.intensity * shape->material.specular * factor;
+        auto factor = pow(reflectDotEye, shape->material->shininess);
+        specular = light.intensity * shape->material->specular * factor;
       }
     }
     return ambient + diffuse + specular;

@@ -41,7 +41,7 @@ namespace raytracerchallenge {
         if (containers.empty()) {
           computations.n1 = 1.0;
         } else {
-          computations.n1 = containers.back()->material.refractiveIndex;
+          computations.n1 = containers.back()->material->refractiveIndex;
         }
       }
       auto position = std::find(containers.begin(), containers.end(), i.object);
@@ -54,7 +54,7 @@ namespace raytracerchallenge {
         if (containers.empty()) {
           computations.n2 = 1.0;
         } else {
-          computations.n2 = containers.back()->material.refractiveIndex;
+          computations.n2 = containers.back()->material->refractiveIndex;
         }
         break;
       }

@@ -80,4 +80,31 @@ namespace raytracerchallenge {
     }
     return false;
   }
+  std::vector<BoundingBox> BoundingBox::split() {
+    auto dx = abs(this->max.x - this->min.x);
+    auto dy = abs(this->max.y - this->min.y);
+    auto dz = abs(this->max.z - this->min.z);
+    auto greatest = std::max({dx, dy, dz});
+    auto x0 = this->min.x;
+    auto y0 = this->min.y;
+    auto z0 = this->min.z;
+    auto x1 = this->max.x;
+    auto y1 = this->max.y;
+    auto z1 = this->max.z;
+    if (greatest == dx) {
+      x0 = x0 + dx / 2.0;
+      x1 = x0;
+    } else if (greatest == dy) {
+      y0 = y0 + dy / 2.0;
+      y1 = y0;
+    } else {
+      z0 = z0 + dz / 2.0;
+      z1 = z0;
+    }
+    auto midMin = Tuple(x0, y0, z0, 1.0);
+    auto midMax = Tuple(x1, y1, z1, 1.0);
+    auto left = BoundingBox(this->min, midMax);
+    auto right = BoundingBox(midMin, this->max);
+    return {left, right};
+  }
 }  // namespace raytracerchallenge

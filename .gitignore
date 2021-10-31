@@ -6,3 +6,4 @@
 test/cmake-build-debug
 .history
 .idea
+/standalone/cmake-build-debug/*

@@ -6,6 +6,8 @@
 #include <raytracerchallenge/base/Matrix.h>
 #include <raytracerchallenge/base/Ray.h>
 
+#include <utility>
+
 namespace raytracerchallenge {
   /**
    * @brief Base class for objects
@@ -26,7 +28,7 @@ namespace raytracerchallenge {
     /**
      * @brief Material for this object
      */
-    Material material;
+    std::shared_ptr<Material> material = std::shared_ptr<Material>(new Material());
     /**
      * @brief The parent of this object
      */
@@ -110,7 +112,7 @@ namespace raytracerchallenge {
      * @return true if the objects share the same properties
      */
     bool operator==(const Shape &object) const {
-      return this->transform == object.transform && this->material == object.material;
+      return this->transform == object.transform && *this->material == *object.material;
     }
     /**
      * @brief Less than operator; just uses the ID
@@ -132,6 +134,10 @@ namespace raytracerchallenge {
      * @return true if this shape includes the target.
      */
     [[nodiscard]] virtual bool includes(const Shape &object) const { return this->is(object); }
+    virtual void divide(unsigned int threshold) { (void)threshold; }
+    virtual void setMaterial(std::shared_ptr<Material> &newMaterial) {
+      this->material = newMaterial;
+    }
     virtual ~Shape() = default;
     std::shared_ptr<Shape> sharedPtr;
   };

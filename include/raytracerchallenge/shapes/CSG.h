@@ -31,5 +31,6 @@ namespace raytracerchallenge {
     [[nodiscard]] Intersections filterIntersections(const Intersections &intersections) const;
     [[nodiscard]] bool includes(const Shape &object) const override;
     static bool intersectionAllowed(Operation op, bool leftHit, bool inLeft, bool inRight);
+    void divide(unsigned int threshold) override;
   };
 }  // namespace raytracerchallenge

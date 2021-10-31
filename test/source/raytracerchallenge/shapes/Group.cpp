@@ -102,4 +102,88 @@ TEST_CASE("Groups") {
     CHECK(box.min == Tuple(-4.5, -3.0, -5.0, 1.0));
     CHECK(box.max == Tuple(4.0, 7.0, 4.5, 1.0));
   }
+  SUBCASE("Partitioning a group's children") {
+    auto s1 = Sphere::create();
+    s1->transform = s1->transform.translated(-2.0, 0.0, 0.0);
+    auto s2 = Sphere::create();
+    s2->transform = s2->transform.translated(2.0, 0.0, 0.0);
+    auto s3 = Sphere::create();
+    auto g = Group();
+    g.add(s1);
+    g.add(s2);
+    g.add(s3);
+    auto partitions = g.partitionChildren();
+    CHECK(!g.includes(*s1));
+    CHECK(!g.includes(*s2));
+    CHECK(partitions[0][0] == s1);
+    CHECK(partitions[1][0] == s2);
+  }
+  SUBCASE("Creating a subgroup from a list of children") {
+    auto s1 = Sphere::create();
+    auto s2 = Sphere::create();
+    auto g = Group();
+    g.makeSubgroup({s1, s2});
+    auto sub = g.objects[0];
+    CHECK(sub->includes(*s1));
+    CHECK(sub->includes(*s2));
+  }
+  SUBCASE("Subdividing a group partitions its children") {
+    auto s1 = Sphere::create();
+    s1->transform = s1->transform.translated(-2.0, -2.0, 0.0);
+    auto s2 = Sphere::create();
+    s2->transform = s2->transform.translated(-2.0, 2.0, 0.0);
+    auto s3 = Sphere::create();
+    s3->transform = s3->transform.scaled(4.0, 4.0, 4.0);
+    auto g = Group();
+    g.add(s1);
+    g.add(s2);
+    g.add(s3);
+    g.divide(1);
+    CHECK(g.objects[0] == s3);
+    auto subGroup = std::dynamic_pointer_cast<Group>(g.objects[1]);
+    CHECK(subGroup->objects.size() == 2.0);
+    CHECK(subGroup->objects[0]->includes(*s1));
+    CHECK(subGroup->objects[1]->includes(*s2));
+  }
+  SUBCASE("Subdividing a group with too few children") {
+    auto s1 = Sphere::create();
+    s1->transform = s1->transform.translated(-2.0, 0.0, 0.0);
+    auto s2 = Sphere::create();
+    s2->transform = s2->transform.translated(2.0, 1.0, 0.0);
+    auto s3 = Sphere::create();
+    s3->transform = s3->transform.translated(2.0, -1.0, 0.0);
+    auto subGroup = Group();
+    subGroup.add(s1);
+    subGroup.add(s2);
+    subGroup.add(s3);
+    auto s4 = Sphere::create();
+    auto g = Group();
+    g.add(subGroup.sharedPtr);
+    g.add(s4);
+    g.divide(3);
+    CHECK(g.objects[0] == subGroup.sharedPtr);
+    CHECK(g.objects[1] == s4);
+    CHECK(subGroup.objects.size() == 2);
+    CHECK(subGroup.objects[0]->includes(*s1));
+    CHECK(subGroup.objects[1]->includes(*s2));
+    CHECK(subGroup.objects[1]->includes(*s3));
+  }
+  SUBCASE("Child objects inherit their material from their group") {
+    auto s1 = Sphere::create();
+    auto s2 = Sphere::create();
+    auto s3 = Sphere::create();
+    auto s4 = Sphere::create();
+    auto g1 = Group();
+    g1.add(s1);
+    g1.add(s2);
+    g1.add(s3);
+    auto g2 = Group();
+    g2.add(s4);
+    g2.add(g1.sharedPtr);
+    g2.material->color = Color(1.0, 0.0, 0.0);
+    CHECK(s1->material == g2.material);
+    CHECK(s2->material == g2.material);
+    CHECK(s3->material == g2.material);
+    CHECK(s4->material == g2.material);
+  }
 }

@@ -64,10 +64,10 @@ TEST_CASE("Lighting") {
   SUBCASE("Lighting with a pattern applied") {
     auto s = Sphere::create();
     auto pattern = StripePattern(WHITE, BLACK);
-    s->material.pattern = &pattern;
-    s->material.ambient = 1.0;
-    s->material.diffuse = 0.0;
-    s->material.specular = 0.0;
+    s->material->pattern = &pattern;
+    s->material->ambient = 1.0;
+    s->material->diffuse = 0.0;
+    s->material->specular = 0.0;
     auto eyeVector = Tuple::vector(0.0, 0.0, -1.0);
     auto normalVector = Tuple::vector(0.0, 0.0, -1.0);
     auto light = PointLight(Tuple::point(0.0, 0.0, -10.0), Color(1.0, 1.0, 1.0));

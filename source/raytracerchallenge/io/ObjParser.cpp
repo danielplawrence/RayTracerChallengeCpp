@@ -106,10 +106,10 @@ namespace raytracerchallenge {
     return parser;
   }
   std::shared_ptr<Shape> ObjParser::getObjects() {
-    auto group = Group::create();
+    auto group = new Group();
     for (auto const &item : this->groups) {
-      std::dynamic_pointer_cast<Group>(group)->add(item.second);
+      group->add(item.second);
     }
-    return group;
+    return group->sharedPtr;
   }
 }  // namespace raytracerchallenge
