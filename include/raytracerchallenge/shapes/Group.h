@@ -32,5 +32,8 @@ namespace raytracerchallenge {
     void makeSubgroup(const std::vector<std::shared_ptr<Shape>>& shapes);
     void divide(unsigned int threshold) override;
     void setMaterial(std::shared_ptr<Material>& newMaterial) override;
+
+  private:
+    BoundingBox currentBounds;
   };
 }  // namespace raytracerchallenge

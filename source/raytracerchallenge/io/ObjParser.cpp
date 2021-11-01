@@ -52,6 +52,19 @@ namespace raytracerchallenge {
         auto n3 = std::stod(subMatch.str(6));
         parser.normals.push_back(Tuple::vector(n1, n2, n3));
       } else if (std::regex_match(oneLine, subMatch, faceLinePattern)) {
+        auto bounds = BoundingBox();
+        for (auto vert : parser.vertices) {
+          bounds.add(vert);
+        }
+        auto sx = bounds.max.x - bounds.min.x;
+        auto sy = bounds.max.y - bounds.min.y;
+        auto sz = bounds.max.z - bounds.min.z;
+        auto scale = std::max({sx, sy, sz}) / 2;
+        for (auto vert : parser.vertices) {
+          vert.x = (vert.x - (bounds.min.x + sx / 2)) / scale;
+          vert.y = (vert.y - (bounds.min.y + sy / 2)) / scale;
+          vert.z = (vert.z - (bounds.min.z + sz / 2)) / scale;
+        }
         auto indices = subMatch.str(2);
         std::stringstream ss(indices);
         std::string s;

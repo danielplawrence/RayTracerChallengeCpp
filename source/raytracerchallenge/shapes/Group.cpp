@@ -6,6 +6,8 @@ namespace raytracerchallenge {
     object->parent = this->sharedPtr;
     object->setMaterial(material);
     this->objects.push_back(object);
+    auto cbox = object->parentSpaceBounds();
+    this->currentBounds.add(cbox);
   }
   void Group::setMaterial(std::shared_ptr<Material>& newMaterial) {
     this->material = newMaterial;
@@ -33,14 +35,7 @@ namespace raytracerchallenge {
     xs.sort();
     return xs;
   }
-  BoundingBox Group::bounds() {
-    auto box = BoundingBox();
-    for (auto& object : this->objects) {
-      auto cbox = object->parentSpaceBounds();
-      box.add(cbox);
-    }
-    return box;
-  }
+  BoundingBox Group::bounds() { return currentBounds; }
   bool Group::includes(const Shape& object) const {
     return std::any_of(this->objects.cbegin(), this->objects.cend(),
                        [&object](auto target) { return target->includes(object); });

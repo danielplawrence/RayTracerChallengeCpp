@@ -11,18 +11,18 @@ namespace raytracerchallenge {
   Intersections Triangle::localIntersect(Ray ray) {
     auto dirCrossE2 = ray.direction.cross(this->e2);
     auto det = this->e1.dot(dirCrossE2);
-    if (abs(det) < EPS) {
+    if (abs(det) < 0.0) {
       return {};
     }
     auto f = 1.0 / det;
     auto p1ToOrigin = ray.origin - this->p1;
     auto u = f * p1ToOrigin.dot(dirCrossE2);
-    if (u <= EPS || u > 1.0) {
+    if (u <= 0.0 || u > 1.0) {
       return {};
     }
     auto originCrossE1 = p1ToOrigin.cross(this->e1);
     auto v = f * ray.direction.dot(originCrossE1);
-    if (v <= EPS || (u + v) > 1.0) {
+    if (v <= 0.0 || (u + v) > 1.0) {
       return {};
     }
     auto t = f * this->e2.dot(originCrossE1);

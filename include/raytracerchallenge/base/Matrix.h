@@ -1,9 +1,9 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <memory>
 #include <optional>
 #include <vector>
-#include <memory>
 
 #include "Tuple.h"
 
