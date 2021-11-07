@@ -38,6 +38,7 @@ namespace raytracerchallenge {
     if (this->inv != nullptr) {
       return *this->inv;
     }
+    std::lock_guard<std::mutex> lock(this->mx);
     this->inv = std::shared_ptr<Matrix>(new Matrix(this->m.inverse()));
     return *this->inv;
   }
@@ -125,5 +126,11 @@ namespace raytracerchallenge {
                         {-forward.x, -forward.y, -forward.z, 0.0},
                         {0.0, 0.0, 0.0, 1.0}});
     return orientation * translation(-from.x, -from.y, -from.z);
+  }
+  Matrix::Matrix(Matrix &m) { this->m = m.m; }
+  Matrix &Matrix::operator=(const Matrix &mat) {
+    if (this == &mat) return *this;
+    this->m = mat.m;
+    return *this;
   }
 }  // namespace raytracerchallenge

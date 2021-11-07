@@ -59,12 +59,12 @@ void renderScene() {
   plane->material->refractiveIndex = 0.5;
 
   auto image = camera.render(world);
-   std::ofstream out("test_image.ppm");
-   out << image.toPortablePixmap();
-   out.close();
+  std::ofstream out("test_image.ppm");
+  out << image.toPortablePixmap();
+  out.close();
 }
 TEST_CASE("Render speed") {
   auto dur = timeit(renderScene);
   std::cout << "Render complete in " << dur << " ms.";
-  //CHECK(dur < 1000);
+  // CHECK(dur < 1000);
 }

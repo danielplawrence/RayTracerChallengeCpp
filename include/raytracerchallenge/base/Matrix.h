@@ -22,6 +22,10 @@ namespace raytracerchallenge {
      */
     Matrix();
     /**
+     * @brief Copy constructor from a Matrix
+     */
+    Matrix(Matrix &m);
+    /**
      * Copy constructor from MatrixXd
      * @param m base MatrixXd
      */
@@ -33,6 +37,12 @@ namespace raytracerchallenge {
      * @param m a 2D vector providing initial values for the Matrix
      */
     Matrix(unsigned int x, unsigned int y, std::vector<std::vector<double>> m);
+    /**
+     * @brief Copy assignment operator
+     * @param m object to assign
+     * @return assignment
+     */
+    Matrix &operator=(Matrix const &m);
     /**
      * @brief Matrix equality operator
      * @param matrix Matrix for comparison
@@ -184,6 +194,7 @@ namespace raytracerchallenge {
     static Matrix view(Tuple from, Tuple to, Tuple up);
 
   private:
+    std::mutex mx;
     std::shared_ptr<Matrix> inv = nullptr;
   };
 }  // namespace raytracerchallenge
