@@ -2,9 +2,9 @@
 
 #include <Eigen/Dense>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <vector>
-#include <mutex>
 
 #include "Tuple.h"
 
