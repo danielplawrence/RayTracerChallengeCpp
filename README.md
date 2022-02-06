@@ -9,11 +9,69 @@
 A 3D renderer written in C++.
 Based on: https://pragprog.com/titles/jbtracer/the-ray-tracer-challenge/
 
+Sample images:
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/danielplawrence/RayTracerChallengeCpp/master/.github/images/dragon.png" height="400" width="auto" />
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/danielplawrence/RayTracerChallengeCpp/master/.github/images/bauble.png" height="400" width="auto" />
+</p>
+
+
 ## Usage
+
+To use the ray tracer, create a world, camera and light as follows:
+
+```c++
+    World world;
+    Camera camera(600, 600, 1.047);
+    auto from = Tuple::point(1.0, 1.0, -4.0);
+    auto to = Tuple::point(0.0, 0.0, 0.0);
+    auto up = Tuple::vector(0.0, 1.0, 0.0);
+    camera.transform = Matrix::view(from, to, up);
+    world.light.emplace_back(
+      PointLight(Tuple::point(-10.0, 10.0, -10.0), Color(0.6, 0.6, 0.6)));
+```
+You can then add shapes to the world like this:
+```c++
+    auto sphere1 = Sphere::create();
+    sphere1->material->castShadow = false;
+    sphere1->transform = sphere1->transform.scaled(1.5, 1.5, 1.5);
+    sphere1->transform = sphere1->transform.translated(-10, 10, -10);
+    sphere1->material->color = {1.0, 1, 1};
+    sphere1->material->ambient = 0.6;
+    sphere1->material->diffuse = 0;
+    sphere1->material->specular = 0;
+    world.add(sphere1);
+ ```
+To render the image and save it, use the `Camera::render()` method, then call `.toPortablePixmap()` on the returned image.
+You can then write the image to a file as follows:
+```c++
+    auto image = camera.render(world);
+    std::ofstream out("output_lo_res_test.ppm");
+    out << image.toPortablePixmap();
+    out.close();
+```
+To see the available shapes, lights, materials and patterns take a look at the header files under `/include/raytracerchalenge/`.
+Shapes can also be loaded from .obj files using the `ObjParser` class. This will return `Shape` instances
+which can be added to a `World`.
+
+```c++
+  std::ifstream file("dragon.obj");
+  std::stringstream buffer;
+  buffer << file.rdbuf();
+  file.close();
+  auto parser = ObjParser::parse(buffer);
+  auto objects = parser.getObjects();
+  world.add(objects);
+```
 
 ### Build and run the standalone target
 
-Use the following command to build and run the executable target.
+`standalone/source.main.cpp` contains an entrypoint where you can experiment with the ray tracer. 
+To use it, load the CMakeLists.txt file under `standalone/` and run the main() method in your IDE; alternatively, you can run the command below.
 
 ```bash
 cmake -S standalone -B build/standalone
